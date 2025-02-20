@@ -24,7 +24,10 @@
                         </x-nav-link>
                         <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">
                             Componentes
-                        </x-nav-link>                                      
+                        </x-nav-link>
+                        <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">
+                            Revisiones
+                        </x-nav-link>                                                          
                     @endif
                 </div>
             </div>

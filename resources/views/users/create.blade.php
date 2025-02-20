@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+<x-breadcrumbs :items="[
+    ['name' => 'Inicio', 'url' => route('dashboard')],
+    ['name' => 'Usuarios', 'url' => route('users.index')],
+    ['name' => 'Crear Componente']
+]" />
 <div class="container mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 mt-8 bg-white shadow-md rounded-lg p-6">
     <h1 class="text-2xl font-bold text-center mb-6">Crear Nuevo Usuario</h1>
 

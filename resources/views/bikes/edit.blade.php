@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+<x-breadcrumbs :items="[
+    ['name' => 'Inicio', 'url' => route('dashboard')],
+    ['name' => 'Bicicletas', 'url' => route('bikes.index')],
+    ['name' => 'Editar Componente']
+]" />
 <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Editar Bicicleta</h1>
 

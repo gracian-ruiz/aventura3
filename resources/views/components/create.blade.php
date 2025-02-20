@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+<x-breadcrumbs :items="[
+    ['name' => 'Inicio', 'url' => route('dashboard')],
+    ['name' => 'Componentes', 'url' => route('components.index')],
+    ['name' => 'Crear Componente']
+]" />
 <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Nuevo Componente</h1>
 

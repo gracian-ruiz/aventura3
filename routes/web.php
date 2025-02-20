@@ -58,29 +58,27 @@ Route::get('/usuarios-datatable', function () {
 Route::get('/usuarios/data', [UserController::class, 'getUsers'])->name('users.data');
 
 
-Route::middleware(['auth'])->group(function () {
-    // Bicicletas
+// Rutas protegidas por autenticación
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    // ✅ Bicicletas
     Route::resource('bikes', BikeController::class);
 
-    // Revisiones por bicicleta
-    Route::get('bikes/{bike}/revisions', [RevisionController::class, 'index'])->name('bikes.revisions.index');
-    Route::get('bikes/{bike}/revisions/create', [RevisionController::class, 'create'])->name('bikes.revisions.create');
-    Route::post('bikes/{bike}/revisions', [RevisionController::class, 'store'])->name('bikes.revisions.store');
-    Route::delete('revisions/{revision}', [RevisionController::class, 'destroy'])->name('revisions.destroy');
-
+    // ✅ Revisiones en general (todas las revisiones)
     Route::get('/revisions', [RevisionController::class, 'allRevisions'])->name('revisions.index');
 
-    // Componentes
-    Route::resource('components', ComponentController::class);
-});
+    // ✅ Revisiones específicas por bicicleta
+    Route::prefix('bikes/{bike}/revisions')->group(function () {
+        Route::get('/', [RevisionController::class, 'index'])->name('bikes.revisions.index');
+        Route::get('/create', [RevisionController::class, 'create'])->name('bikes.revisions.create');
+        Route::post('/', [RevisionController::class, 'store'])->name('bikes.revisions.store');
+        Route::get('/{revision}/edit', [RevisionController::class, 'edit'])->name('bikes.revisions.edit');
+        Route::put('/{revision}', [RevisionController::class, 'update'])->name('bikes.revisions.update');
+        Route::delete('/{revision}', [RevisionController::class, 'destroy'])->name('bikes.revisions.destroy');
+    });
 
-Route::prefix('bikes/{bike}/revisions')->middleware('auth')->group(function () {
-    Route::get('/', [RevisionController::class, 'index'])->name('bikes.revisions.index');
-    Route::get('/create', [RevisionController::class, 'create'])->name('bikes.revisions.create');
-    Route::post('/', [RevisionController::class, 'store'])->name('bikes.revisions.store');
-    Route::get('/{revision}/edit', [RevisionController::class, 'edit'])->name('bikes.revisions.edit');
-    Route::put('/{revision}', [RevisionController::class, 'update'])->name('bikes.revisions.update');
-    Route::delete('/{revision}', [RevisionController::class, 'destroy'])->name('bikes.revisions.destroy');
+    // ✅ Componentes
+    Route::resource('components', ComponentController::class);
 });
 
 require __DIR__.'/auth.php';
