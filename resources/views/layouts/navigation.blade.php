@@ -19,6 +19,12 @@
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('usuarios')">
                             Usuarios
                         </x-nav-link>
+                        <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.*')">
+                            Bicicletas
+                        </x-nav-link>
+                        <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">
+                            Componentes
+                        </x-nav-link>                                      
                     @endif
                 </div>
             </div>
