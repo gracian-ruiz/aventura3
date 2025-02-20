@@ -47,6 +47,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/usuarios/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
+Route::get('/usuarios-datatable', function () {
+    return view('users.datatables');
+})->name('users.datatable');
+Route::get('/usuarios/data', [UserController::class, 'getUsers'])->name('users.data');
+
+
+
 
 
 require __DIR__.'/auth.php';

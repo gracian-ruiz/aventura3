@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Yajra\DataTables\DataTables;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -8,7 +9,16 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserRequest;
 
 class UserController extends Controller
-{
+{    public function getUsers(Request $request)
+    {
+        if ($request->ajax()) {
+            $users = User::query();
+            return DataTables::of($users)->make(true);
+        }
+
+        return response()->json(['error' => 'No autorizado'], 403);
+    }
+
     public function index()
     {
         $users = User::all();
