@@ -19,11 +19,19 @@ class UserController extends Controller
         return response()->json(['error' => 'No autorizado'], 403);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
-        return view('users.index', compact('users'));
+        $search = $request->input('search'); // Obtiene el valor del buscador
+    
+        // Filtra por nombre o email si se ingresó un término de búsqueda
+        $users = User::when($search, function ($query) use ($search) {
+            return $query->where('name', 'LIKE', "%{$search}%")
+                         ->orWhere('email', 'LIKE', "%{$search}%");
+        })->paginate(5); // Cambia el número de registros por página según lo que prefieras
+    
+        return view('users.index', compact('users', 'search'));
     }
+    
 
     public function create()
     {
