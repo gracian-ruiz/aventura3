@@ -7,7 +7,7 @@ use App\Http\Controllers\BikeController;
 use App\Http\Controllers\RevisionController;
 use App\Http\Controllers\ComponentController;
 use App\Http\Controllers\RecordatorioController;
-
+use App\Http\Controllers\AvisoEnviadoController;
 
 
 
@@ -82,7 +82,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('components', ComponentController::class);
 });
 
-Route::get('/enviar-recordatorios', [RecordatorioController::class, 'enviarRecordatorios'])->name('enviar.recordatorios');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/avisos-enviados', [AvisoEnviadoController::class, 'index'])->name('avisos.index');
+    Route::get('/enviar-recordatorios', [RecordatorioController::class, 'enviarRecordatorios'])->name('enviar.recordatorios');
+});
+
+
+
 
 
 require __DIR__.'/auth.php';

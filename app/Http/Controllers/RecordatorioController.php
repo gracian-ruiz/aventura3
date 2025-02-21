@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AvisoEnviado;
 use App\Models\Revision;
 use App\Models\Component;
 use Illuminate\Http\Request;
@@ -39,6 +40,7 @@ class RecordatorioController extends Controller
         // Obtener información de la bicicleta y del componente
         $bike = $revision->bike;
         $componente = $revision->componente;
+        $user = $bike->user; // Obtener el dueño de la bicicleta
     
         // Verificar que existan datos
         if (!$bike || !$componente) {
@@ -50,11 +52,11 @@ class RecordatorioController extends Controller
         $token  = Config::get('services.twilio.token');
         $twilio = new Client($sid, $token);
     
-        // 📩 Mensaje con información detallada
-        $mensaje = "🚴 ¡Hola! Recuerda que tienes una revisión programada para el {$revision->proxima_revision}.\n\n"
+        // 📩 Mensaje
+        $mensaje = "🚴 ¡Hola {$user->name}! Recuerda que tienes una revisión programada para el {$revision->proxima_revision}.\n\n"
                  . "🔧 Componente a revisar: *{$componente->nombre}*\n"
                  . "🚲 Bicicleta: *{$bike->nombre}* ({$bike->marca} - {$bike->anio_modelo})\n\n"
-                 . "¡No olvides acudir a tu revisión! 📆";
+                 . "¡No olvides acudir a tu revisión! 📆";       
     
         // Enviar el mensaje por WhatsApp
         $message = $twilio->messages->create(
@@ -64,6 +66,17 @@ class RecordatorioController extends Controller
                 "body" => $mensaje
             ]
         );
+
+        // Guardar en la base de datos
+        AvisoEnviado::create([
+            'user_id' => $user->id,
+            'bike_id' => $bike->id,
+            'revision_id' => $revision->id,
+            'componente_id' => $componente->id,
+            'telefono' => $user->telefono,
+            'mensaje' => $mensaje,
+            'enviado_en' => now(),
+        ]);
     
         return $message->sid;
     }    

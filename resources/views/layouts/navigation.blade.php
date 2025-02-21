@@ -27,7 +27,10 @@
                         </x-nav-link>
                         <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">
                             Revisiones
-                        </x-nav-link>                                                          
+                        </x-nav-link>
+                        <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">
+                            Mensajes
+                        </x-nav-link>                                                            
                     @endif
                 </div>
             </div>
