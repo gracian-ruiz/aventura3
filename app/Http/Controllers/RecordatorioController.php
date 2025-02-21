@@ -66,7 +66,5 @@ class RecordatorioController extends Controller
         );
     
         return $message->sid;
-    }
-    
-    
+    }    
 }
