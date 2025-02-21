@@ -40,6 +40,7 @@
                     <th class="py-2 px-4 text-left">ID</th>
                     <th class="py-2 px-4 text-left">Nombre</th>
                     <th class="py-2 px-4 text-left">Email</th>
+                    <th class="py-2 px-4 text-left">Telefono</th>
                     <th class="py-2 px-4 text-left">Rol</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
@@ -50,6 +51,7 @@
                         <td class="py-2 px-4">{{ $user->id }}</td>
                         <td class="py-2 px-4">{{ $user->name }}</td>
                         <td class="py-2 px-4">{{ $user->email }}</td>
+                        <td class="py-2 px-4">{{ $user->telefono }}</td>
                         <td class="py-2 px-4">
                             <span class="px-2 py-1 rounded-full text-xs font-bold 
                                 {{ $user->role == 'admin' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white' }}">

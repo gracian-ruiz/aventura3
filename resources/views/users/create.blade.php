@@ -23,7 +23,11 @@
             <label for="email" class="block text-gray-700 font-semibold mb-2">Correo Electrónico</label>
             <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
         </div>
-
+        <div class="mb-4">
+            <label for="telefono" class="block text-gray-700">Número de Teléfono</label>
+            <input type="text" name="telefono" id="telefono" value="{{ old('telefono', $user->telefono ?? '') }}"
+                   class="w-full border px-4 py-2 rounded-md" placeholder="Ejemplo: +34612345678" required>
+        </div>
         <!-- Contraseña -->
         <div class="mb-4">
             <label for="password" class="block text-gray-700 font-semibold mb-2">Contraseña</label>

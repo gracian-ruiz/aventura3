@@ -28,6 +28,7 @@ class UserRequest extends FormRequest
             'email' => "required|string|email|max:255|unique:users,email,$userId",
             'password' => $this->isMethod('post') ? 'required|string|min:6|confirmed' : 'nullable|string|min:6|confirmed',
             'role' => 'required|in:admin,user',
+            'telefono' => 'nullable|string|max:20',
         ];
     }
 
@@ -36,6 +37,7 @@ class UserRequest extends FormRequest
         return [
             'name.required' => 'El nombre es obligatorio.',
             'email.required' => 'El correo electrónico es obligatorio.',
+            'telefono.required' => 'El telefono es obligatorio.',
             'email.email' => 'Debes ingresar un correo válido.',
             'email.unique' => 'Este correo ya está registrado.',
             'password.required' => 'La contraseña es obligatoria.',
