@@ -36,42 +36,37 @@ class RecordatorioController extends Controller
 
     private function enviarMensajeWhatsApp($revision)
     {
-        try {
-            // Obtener credenciales de Twilio desde el .env
-            $sid    = Config::get('services.twilio.sid');
-            $token  = Config::get('services.twilio.token');
-            $twilio = new Client($sid, $token);
+        // Obtener información de la bicicleta y del componente
+        $bike = $revision->bike;
+        $componente = $revision->componente;
     
-            // Verificar que el usuario tiene teléfono
-            if (!$revision->bike->user->telefono) {
-                throw new \Exception("El usuario no tiene número de teléfono registrado.");
-            }
-    
-            // Construir número de WhatsApp
-            $numeroDestino = "whatsapp:+34" . $revision->bike->user->telefono;
-    
-            // Mensaje
-            $mensaje = "📅 Recuerda que tienes una revisión programada para el {$revision->proxima_revision}. ¡No olvides pasar a realizarla! 🚴";
-    
-            // Enviar mensaje de WhatsApp
-            $message = $twilio->messages->create(
-                $numeroDestino, // 📩 Número del cliente
-                [
-                    "from" => Config::get('services.twilio.whatsapp_from'),
-                    "body" => $mensaje
-                ]
-            );
-    
-            return response()->json([
-                'message' => 'Mensaje enviado correctamente',
-                'twilio_response' => $message->sid
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error al enviar mensaje',
-                'details' => $e->getMessage()
-            ]);
+        // Verificar que existan datos
+        if (!$bike || !$componente) {
+            return;
         }
+    
+        // Configuración de Twilio desde .env
+        $sid    = Config::get('services.twilio.sid');
+        $token  = Config::get('services.twilio.token');
+        $twilio = new Client($sid, $token);
+    
+        // 📩 Mensaje con información detallada
+        $mensaje = "🚴 ¡Hola! Recuerda que tienes una revisión programada para el {$revision->proxima_revision}.\n\n"
+                 . "🔧 Componente a revisar: *{$componente->nombre}*\n"
+                 . "🚲 Bicicleta: *{$bike->nombre}* ({$bike->marca} - {$bike->anio_modelo})\n\n"
+                 . "¡No olvides acudir a tu revisión! 📆";
+    
+        // Enviar el mensaje por WhatsApp
+        $message = $twilio->messages->create(
+            "whatsapp:+34637319765", // ⚠ Aquí debes cambiarlo por el número del usuario
+            [
+                "from" => Config::get('services.twilio.whatsapp_from'),
+                "body" => $mensaje
+            ]
+        );
+    
+        return $message->sid;
     }
+    
     
 }
