@@ -7,10 +7,16 @@ use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $components = Component::paginate(10);
-        return view('components.index', compact('components'));
+        $search = $request->input('search'); // Obtiene el valor del buscador
+    
+        // Filtra por nombre si se ingresó un término de búsqueda
+        $components = Component::when($search, function ($query) use ($search) {
+            return $query->where('nombre', 'LIKE', "%{$search}%");
+        })->paginate(10); // Puedes cambiar el número de registros por página
+
+        return view('components.index', compact('components', 'search'));
     }
 
     public function create()

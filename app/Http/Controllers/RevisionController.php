@@ -12,19 +12,34 @@ class RevisionController extends Controller
     /**
      * ✅ Mostrar todas las revisiones en general
      */
-    public function allRevisions()
+    public function allRevisions(Request $request)
     {
-        $revisions = Revision::with('bike', 'componente')->paginate(10);
-        return view('revisions.index', compact('revisions'));
+        $search = $request->input('search');
+
+        $revisions = Revision::with('bike', 'componente')
+            ->when($search, function ($query) use ($search) {
+                return $query->where('descripcion', 'LIKE', "%{$search}%");
+            })
+            ->paginate(10);
+
+        return view('revisions.index', compact('revisions', 'search'));
     }
 
     /**
-     * ✅ Mostrar todas las revisiones de una bicicleta en particular
+     * ✅ Mostrar todas las revisiones de una bicicleta en particular con búsqueda
      */
-    public function index(Bike $bike)
+    public function index(Request $request, Bike $bike)
     {
-        $revisions = $bike->revisions()->with('componente')->paginate(10);
-        return view('revisions.index', compact('bike', 'revisions'));
+        $search = $request->input('search');
+
+        $revisions = $bike->revisions()
+            ->with('componente')
+            ->when($search, function ($query) use ($search) {
+                return $query->where('descripcion', 'LIKE', "%{$search}%");
+            })
+            ->paginate(10);
+
+        return view('revisions.index', compact('bike', 'revisions', 'search'));
     }
 
     /**

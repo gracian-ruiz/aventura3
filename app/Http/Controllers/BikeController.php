@@ -12,10 +12,16 @@ class BikeController extends Controller
     /**
      * Mostrar lista de bicicletas.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $bikes = Bike::with('user')->paginate(10); // Paginación agregada
-        return view('bikes.index', compact('bikes'));
+        $search = $request->input('search');
+
+        $bikes = Bike::when($search, function ($query) use ($search) {
+            return $query->where('nombre', 'LIKE', "%{$search}%")
+                         ->orWhere('marca', 'LIKE', "%{$search}%");
+        })->paginate(5);
+
+        return view('bikes.index', compact('bikes', 'search'));
     }
 
     /**
