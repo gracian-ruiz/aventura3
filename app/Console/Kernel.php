@@ -14,7 +14,7 @@ class Kernel extends ConsoleKernel
     {
         //van con una hora de retraso mirar el comando php artisan schedule:list
         if (env('APP_ENV') === 'local') {
-            $schedule->command('recordatorios:enviar')->dailyAt('11:15');
+            $schedule->command('recordatorios:enviar')->dailyAt('11:20');
         } else { 
             $schedule->command('recordatorios:enviar')->everyMinute();
         }// Se ejecutará todos los días a las 8:00 AM

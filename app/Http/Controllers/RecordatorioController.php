@@ -60,7 +60,7 @@ class RecordatorioController extends Controller
     
         // Enviar el mensaje por WhatsApp
         $message = $twilio->messages->create(
-            "whatsapp:+34637319765", // ⚠ Aquí debes cambiarlo por el número del usuario
+            "whatsapp:+34{$user->telefono}", // ⚠ Aquí debes cambiarlo por el número del usuario
             [
                 "from" => Config::get('services.twilio.whatsapp_from'),
                 "body" => $mensaje
