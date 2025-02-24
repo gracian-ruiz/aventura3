@@ -11,7 +11,7 @@ class EnviarRecordatorios extends Command
     protected $signature = 'recordatorios:enviar';
 
     // Descripción del comando
-    protected $description = 'Envía recordatorios de revisiones por WhatsApp';
+    protected $description = 'Envia recordatorios de revisiones por WhatsApp';
 
     public function __construct()
     {
@@ -24,6 +24,6 @@ class EnviarRecordatorios extends Command
         $recordatorioController = new RecordatorioController();
         $recordatorioController->enviarRecordatorios();
 
-        $this->info('Los recordatorios de revisión se han enviado correctamente.');
+        $this->info('Los recordatorios de revision se han enviado correctamente.');
     }
 }

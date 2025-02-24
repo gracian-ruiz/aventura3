@@ -13,7 +13,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         //van con una hora de retraso mirar el comando php artisan schedule:list
-        $schedule->command('recordatorios:enviar')->dailyAt('8:15'); // Se ejecutará todos los días a las 8:00 AM
+        if (env('APP_ENV') === 'local') {
+            $schedule->command('recordatorios:enviar')->dailyAt('11:15');
+        } else { 
+            $schedule->command('recordatorios:enviar')->everyMinute();
+        }// Se ejecutará todos los días a las 8:00 AM
     }
 
     /**
