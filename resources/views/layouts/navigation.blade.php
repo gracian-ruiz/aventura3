@@ -16,10 +16,10 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     @if(Auth::user()->role === 'admin')
-                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('usuarios')">
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
                             Usuarios
                         </x-nav-link>
-                        <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.*')">
+                        <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">
                             Bicicletas
                         </x-nav-link>
                         <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">
