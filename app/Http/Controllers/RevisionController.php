@@ -6,6 +6,8 @@ use App\Models\Bike;
 use App\Models\Revision;
 use App\Models\Component;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 class RevisionController extends Controller
 {
@@ -60,15 +62,23 @@ class RevisionController extends Controller
             'componente_id' => 'required|exists:components,id',
             'fecha_revision' => 'required|date',
             'descripcion' => 'required|string',
+            'tipo_fecha' => 'required|string|in:fija,opcional',
             'proxima_revision' => 'nullable|date',
         ]);
-
+    
+        if ($request->tipo_fecha === 'fija') {
+            $componente = Component::findOrFail($request->componente_id);
+            if ($componente->fecha_revision) {
+                $validated['proxima_revision'] = Carbon::parse($request->fecha_revision)->addMonths($componente->fecha_revision);
+            }
+        }
+    
         $bike->revisions()->create($validated);
-
+    
         return redirect()->route('bikes.revisions.index', $bike->id)
             ->with('success', '✅ Revisión añadida correctamente.');
     }
-
+    
     /**
      * ✅ Mostrar formulario de edición de una revisión
      */

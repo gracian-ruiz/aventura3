@@ -26,13 +26,13 @@ class ComponentController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|string|max:255',
-            'fecha_preaviso' => 'nullable|integer',
+            'fecha_revision' => 'required|integer|min:1',
         ]);
-
-        Component::create($request->all());
-
+    
+        Component::create($validated);
+    
         return redirect()->route('components.index')->with('success', '✅ Componente creado correctamente.');
     }
 
@@ -43,13 +43,13 @@ class ComponentController extends Controller
 
     public function update(Request $request, Component $component)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|string|max:255',
-            'fecha_preaviso' => 'nullable|integer',
+            'fecha_revision' => 'required|integer|min:1',
         ]);
-
-        $component->update($request->all());
-
+    
+        $component->update($validated);
+    
         return redirect()->route('components.index')->with('success', '✅ Componente actualizado correctamente.');
     }
 
