@@ -19,7 +19,7 @@ class Revision extends Model
 
     public function componente()
     {
-        return $this->belongsTo(Component::class, 'componente_id');
+        return $this->belongsTo(Component::class, 'componente_id'); // 🔥 Asegurar clave foránea
     }
 }
 

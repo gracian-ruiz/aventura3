@@ -13,7 +13,7 @@ class Component extends Model // <-- Aquí debe ser el nombre correcto
 
     public function revisiones()
     {
-        return $this->hasMany(Revision::class);
+        return $this->hasMany(Revision::class, 'componente_id'); // 🔥 Asegúrate de especificar la clave foránea correcta
     }
 }
 
