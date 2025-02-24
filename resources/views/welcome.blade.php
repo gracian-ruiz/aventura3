@@ -15,7 +15,7 @@
         @if (Route::has('login'))
             <div class="sm:fixed sm:top-0 sm:right-0 p-6 text-right z-10">
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="font-semibold text-gray-600 hover:text-gray-900">Dashboard</a>
+                    <a href="{{ route('dashboard') }}" class="font-semibold text-gray-600 hover:text-gray-900">Dashboard</a>
                 @else
                     <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900">Iniciar sesión</a>
                     @if (Route::has('register'))
@@ -29,13 +29,13 @@
         <div class="w-full flex flex-col items-center">
             <!-- Logo del taller -->
             <div class="mt-6">
-                <img src="/images/logo_taller.jpeg" alt="Logo Taller" class="h-24 w-auto">
+                <img src="{{ asset('images/logo_taller.jpeg') }}" alt="Logo Taller" class="h-24 w-auto">
             </div>
 
             <!-- Imagen de fondo con enlace -->
-            <a href="{{ auth()->check() ? url('/dashboard') : route('login') }}" 
+            <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" 
                class="w-full max-w-7xl h-[500px] sm:h-[600px] lg:h-[700px] bg-cover bg-center shadow-lg transition-transform hover:scale-105"
-               style="background-image: url('/images/taller-fondo.jpg');">
+               style="background-image: url('{{ asset('images/taller-fondo.jpg') }}');">
             </a>
 
             <!-- Pie de página -->
