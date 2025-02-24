@@ -1,8 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
+@if (session('success'))
+    <div class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+        {{ session('success') }}
+    </div>
+@endif
+
 <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Historial de Avisos Enviados</h1>
+
+    <!-- Botón para Enviar Mensajes -->
+    <div class="flex justify-end mb-4">
+        <a href="{{ route('enviar.recordatorios') }}" class="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600">
+            📩 Enviar Mensajes
+        </a>
+    </div>
 
     <!-- Formulario de Búsqueda -->
     <form method="GET" action="{{ route('avisos.index') }}" class="mb-4">

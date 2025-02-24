@@ -30,9 +30,11 @@ class RecordatorioController extends Controller
             }
         }
 
-        return response()->json([
-            'message' => 'Los recordatorios de revisión se han enviado correctamente.'
-        ]);
+        if (app()->runningInConsole()) {
+            return response()->json(['message' => 'Los recordatorios se han enviado correctamente.']);
+        }
+
+        return redirect()->route('avisos.index')->with('success', '📩 Los recordatorios de revisión se han enviado correctamente.');
     }
 
     private function enviarMensajeWhatsApp($revision)
