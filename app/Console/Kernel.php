@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        //van con una hora de retraso mirar el comando php artisan schedule:list
+        $schedule->command('recordatorios:enviar')->dailyAt('8:15'); // Se ejecutará todos los días a las 8:00 AM
     }
 
     /**
