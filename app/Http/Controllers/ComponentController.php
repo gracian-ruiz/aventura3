@@ -28,6 +28,7 @@ class ComponentController extends Controller
     {
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
+            'fecha_preaviso' => 'nullable|integer|min:0', // Agregar esta línea
             'fecha_revision' => 'required|integer|min:1',
         ]);
     
@@ -35,6 +36,7 @@ class ComponentController extends Controller
     
         return redirect()->route('components.index')->with('success', '✅ Componente creado correctamente.');
     }
+    
 
     public function edit(Component $component)
     {
