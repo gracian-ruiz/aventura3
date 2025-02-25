@@ -39,7 +39,7 @@
                     <th class="py-2 px-4 text-left">Fecha Creación</th>
                     <th class="py-2 px-4 text-left">Fecha Asignada</th>
                     <th class="py-2 px-4 text-left">Descripción Problema</th>
-                    <th class="py-2 px-4 text-left">Estimación Reparación</th>
+                    {{-- <th class="py-2 px-4 text-left">Estimación Reparación</th> --}}
                     <th class="py-2 px-4 text-left">Estado</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
@@ -63,7 +63,7 @@
                             {{ $appointment->fecha_asignada ? \Carbon\Carbon::parse($appointment->fecha_asignada)->format('d/m/Y') : 'Pendiente' }}
                         </td>
                         <td class="py-2 px-4">{{ $appointment->descripcion_problema ?? 'N/A' }}</td>
-                        <td class="py-2 px-4">{{ $appointment->estimacion_reparacion ?? 'N/A' }}</td>
+                        {{-- <td class="py-2 px-4">{{ $appointment->estimacion_reparacion ?? 'N/A' }}</td> --}}
                         <td class="py-2 px-4">{{ ucfirst($appointment->estado) }}</td>
                         <td class="py-2 px-4 text-center">
                             @if($appointment->estado == 'pendiente')
