@@ -51,6 +51,28 @@ class AppointmentController extends Controller
     
         return redirect()->route('appointments.index')->with('success', 'Cita registrada correctamente.');
     }
+
+    public function update(Request $request, Appointment $appointment)
+    {
+        $validated = $request->validate([
+            'bike_id' => 'required|exists:bikes,id',
+            'componente_id' => 'nullable|exists:components,id',
+            'prioridad' => 'required|in:normal,urgente',
+            'tiempo_estimado' => 'nullable|string',
+        ]);
+
+        $appointment->update($validated);
+
+        return redirect()->route('appointments.index')->with('success', '✅ Cita actualizada correctamente.');
+    }
+
+    public function edit(Appointment $appointment)
+    {
+        $bikes = Bike::all();
+        $componentes = Component::all();
+        return view('appointments.edit', compact('appointment', 'bikes', 'componentes'));
+    }
+
     
 
     public function updateEstado(Appointment $appointment)

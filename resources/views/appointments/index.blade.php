@@ -62,6 +62,12 @@
                                 </form>
                             @endif
 
+                            <!-- Botón para editar -->
+                            <a href="{{ route('appointments.edit', $appointment->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                                Editar
+                            </a>
+
+                            <!-- Botón para eliminar -->
                             <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
