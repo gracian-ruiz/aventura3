@@ -8,6 +8,7 @@ use App\Http\Controllers\RevisionController;
 use App\Http\Controllers\ComponentController;
 use App\Http\Controllers\RecordatorioController;
 use App\Http\Controllers\AvisoEnviadoController;
+use App\Http\Controllers\AppointmentController;
 
 
 
@@ -80,12 +81,23 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // ✅ Componentes
     Route::resource('components', ComponentController::class);
-});
 
-Route::middleware(['auth'])->group(function () {
     Route::get('/avisos-enviados', [AvisoEnviadoController::class, 'index'])->name('avisos.index');
     Route::get('/enviar-recordatorios', [RecordatorioController::class, 'enviarRecordatorios'])->name('enviar.recordatorios');
+
+
+    
+    // Rutas de citas
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index'); // Ver citas pendientes
+    Route::get('/appointments/historico', [AppointmentController::class, 'historico'])->name('appointments.historico'); // Ver citas completadas
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store'); // Registrar nueva cita
+    Route::put('/appointments/{appointment}/updateEstado', [AppointmentController::class, 'updateEstado'])->name('appointments.updateEstado'); // Completar cita
+    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy'); // Eliminar cita
+
+    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
+
 });
+
 
 
 

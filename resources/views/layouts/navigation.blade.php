@@ -30,7 +30,13 @@
                         </x-nav-link>
                         <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">
                             Mensajes
-                        </x-nav-link>                                                            
+                        </x-nav-link>
+                        <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
+                            Citas
+                        </x-nav-link>
+                        <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">
+                            Historico Citas
+                        </x-nav-link>                                                                   
                     @endif
                 </div>
             </div>
