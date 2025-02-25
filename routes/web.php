@@ -89,7 +89,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     
     // Rutas de citas
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index'); // Ver citas pendientes
-    Route::get('/appointments/historico', [AppointmentController::class, 'historico'])->name('appointments.historico'); // Ver citas completadas
+    Route::get('/appointments/historico', [AppointmentController::class, 'historico'])->name('appointments.historico');
+ // Ver citas completadas
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store'); // Registrar nueva cita
     Route::put('/appointments/{appointment}/updateEstado', [AppointmentController::class, 'updateEstado'])->name('appointments.updateEstado'); // Completar cita
     Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy'); // Eliminar cita

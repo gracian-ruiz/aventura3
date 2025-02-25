@@ -4,10 +4,18 @@
 <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Citas Pendientes</h1>
 
+    <!-- Buscador -->
+    <form action="{{ route('appointments.index') }}" method="GET" class="mb-4">
+        <input type="text" name="search" placeholder="Buscar por bicicleta, usuario o componente..." 
+               class="border px-4 py-2 rounded-md w-1/2" value="{{ request('search') }}">
+        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+            Buscar
+        </button>
+    </form>
+
     <!-- Botón para Añadir Nueva Cita -->
     <div class="flex justify-end mb-4">
-        <a href="{{ route('appointments.create') }}" 
-           class="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600">
+        <a href="{{ route('appointments.create') }}" class="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600">
             + Nueva Cita
         </a>
     </div>
@@ -47,9 +55,7 @@
                             </span>
                         </td>
                         <td class="py-2 px-4">{{ $appointment->tiempo_estimado ?? 'N/A' }}</td>
-                        <td class="py-2 px-4">
-                            {{ \Carbon\Carbon::parse($appointment->created_at)->format('d/m/Y H:i') }}
-                        </td>
+                        <td class="py-2 px-4">{{ \Carbon\Carbon::parse($appointment->created_at)->format('d/m/Y H:i') }}</td>
                         <td class="py-2 px-4">{{ ucfirst($appointment->estado) }}</td>
                         <td class="py-2 px-4 text-center">
                             @if($appointment->estado == 'pendiente')
@@ -62,12 +68,6 @@
                                 </form>
                             @endif
 
-                            <!-- Botón para editar -->
-                            <a href="{{ route('appointments.edit', $appointment->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
-                                Editar
-                            </a>
-
-                            <!-- Botón para eliminar -->
                             <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
@@ -84,7 +84,7 @@
 
     <!-- Paginación -->
     <div class="mt-6">
-        {{ $appointments->links() }}
+        {{ $appointments->appends(['search' => request('search')])->links() }}
     </div>
 </div>
 @endsection
