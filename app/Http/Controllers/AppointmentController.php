@@ -56,9 +56,10 @@ class AppointmentController extends Controller
     
         $fecha_asignada = $this->calcularFechaAsignada($request->tiempo_estimado);
     
+        // Guardar la cita con un único componente
         $appointment = Appointment::create([
             'bike_id' => $request->bike_id,
-            'componente_id' => $request->componente_id,
+            'componente_id' => $request->componente_id, // ✅ Solo un componente
             'prioridad' => $request->prioridad,
             'descripcion_problema' => $request->descripcion_problema,
             'estimacion_reparacion' => $request->estimacion_reparacion,
@@ -69,8 +70,7 @@ class AppointmentController extends Controller
     
         return redirect()->route('appointments.index')->with('success', 'Cita registrada correctamente.');
     }
-    
-    
+        
         
     /**
      * Calcula la fecha en la que se podrá realizar la reparación

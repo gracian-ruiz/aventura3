@@ -7,20 +7,22 @@
     <form action="{{ route('appointments.store') }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
         @csrf
 
-        <!-- Selección de Bicicleta (Múltiple) -->
+        <!-- Selección de Bicicleta -->
         <div class="mb-4">
-            <label for="bike_id" class="block text-gray-700">Bicicleta(s)</label>
-            <select name="bike_id[]" id="bike_id" class="w-full border px-4 py-2 rounded-md" multiple required>
+            <label for="bike_id" class="block text-gray-700">Bicicleta</label>
+            <select name="bike_id" id="bike_id" class="w-full border px-4 py-2 rounded-md" required>
+                <option value="">Selecciona una bicicleta</option>
                 @foreach($bikes as $bike)
                     <option value="{{ $bike->id }}">{{ $bike->nombre }} - {{ $bike->user->name }}</option>
                 @endforeach
             </select>
         </div>
 
-        <!-- Selección de Componente (Múltiple) -->
+        <!-- Selección de Componente -->
         <div class="mb-4">
-            <label for="componente_id" class="block text-gray-700">Componente(s) (Opcional)</label>
-            <select name="componente_id[]" id="componente_id" class="w-full border px-4 py-2 rounded-md" multiple>
+            <label for="componente_id" class="block text-gray-700">Componente (Opcional)</label>
+            <select name="componente_id" id="componente_id" class="w-full border px-4 py-2 rounded-md">
+                <option value="">Sin Componente</option>
                 @foreach($componentes as $componente)
                     <option value="{{ $componente->id }}">{{ $componente->nombre }}</option>
                 @endforeach
@@ -62,15 +64,17 @@
     </form>
 </div>
 
-<!-- Agregar Select2 para búsqueda en los selects múltiples -->
+<!-- Agregar Select2 para búsqueda en los selects -->
+@section('scripts')
 <script>
     $(document).ready(function() {
         $('#bike_id, #componente_id').select2({
-            placeholder: "Selecciona una o más opciones...",
+            placeholder: "Selecciona una opción...",
             allowClear: true,
             width: '100%'
         });
     });
 </script>
+@endsection
 
 @endsection
