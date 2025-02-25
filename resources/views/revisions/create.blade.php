@@ -12,16 +12,26 @@
     <form action="{{ route('bikes.revisions.store', $bike->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
         @csrf
 
+        <!-- Selección de Componente -->
         <div class="mb-4">
-            <label for="componente_id" class="block text-gray-700">Componente</label>
-            <select name="componente_id" id="componente_id" class="w-full border px-4 py-2 rounded-md" required>
+            <label for="componente_id" class="block text-gray-700">Componente (Opcional)</label>
+            <select name="componente_id" id="componente_id" class="w-full border px-4 py-2 rounded-md">
+                <option value="">Sin Componente</option>
                 @foreach($componentes as $componente)
-                    <option value="{{ $componente->id }}" data-fecha-revision="{{ $componente->fecha_revision }}">
-                        {{ $componente->nombre }} ({{ $componente->fecha_revision ? $componente->fecha_revision . ' meses' : 'Sin intervalo fijo' }})
-                    </option>
+                    <option value="{{ $componente->id }}">{{ $componente->nombre }}</option>
                 @endforeach
             </select>
         </div>
+
+        <script>
+            $(document).ready(function() {
+                $('#componente_id').select2({
+                    placeholder: "Buscar componente...",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+        </script>
 
         <div class="mb-4">
             <label for="fecha_revision" class="block text-gray-700">Fecha de Revisión</label>

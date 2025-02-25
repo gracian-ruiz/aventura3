@@ -16,13 +16,26 @@
         <div class="mb-4">
             <label for="user_id" class="block text-gray-700">Usuario</label>
             <select name="user_id" id="user_id" class="w-full border px-4 py-2 rounded-md">
+                <option value="">Seleccionar Usuario</option>
                 @foreach ($users as $user)
-                    <option value="{{ $user->id }}" {{ $user->id == $bike->user_id ? 'selected' : '' }}>
+                    <option value="{{ $user->id }}" {{ $bike->user_id == $user->id ? 'selected' : '' }}>
                         {{ $user->name }}
                     </option>
                 @endforeach
             </select>
         </div>
+        
+        <!-- Activar Select2 en el Select de Usuarios -->
+        <script>
+            $(document).ready(function() {
+                $('#user_id').select2({
+                    placeholder: "Buscar usuario...",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+        </script>
+        
 
         <div class="mb-4">
             <label for="nombre" class="block text-gray-700">Nombre</label>

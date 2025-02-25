@@ -10,13 +10,23 @@
         <!-- Selección de Bicicleta -->
         <div class="mb-4">
             <label for="bike_id" class="block text-gray-700">Bicicleta</label>
-            <select name="bike_id" id="bike_id" class="w-full border px-4 py-2 rounded-md" required>
+            <select name="bike_id" id="bike_id" class="w-full border px-4 py-2 rounded-md">
+                <option value="">Seleccionar Bicicleta</option>
                 @foreach($bikes as $bike)
                     <option value="{{ $bike->id }}">{{ $bike->nombre }} - {{ $bike->user->name }}</option>
                 @endforeach
             </select>
         </div>
-
+        <!-- Activar Select2 -->
+        <script>
+            $(document).ready(function() {
+                $('#bike_id').select2({
+                    placeholder: "Buscar bicicleta...",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+        </script>
         <!-- Selección de Componente -->
         <div class="mb-4">
             <label for="componente_id" class="block text-gray-700">Componente (Opcional)</label>
@@ -27,6 +37,16 @@
                 @endforeach
             </select>
         </div>
+
+        <script>
+            $(document).ready(function() {
+                $('#componente_id').select2({
+                    placeholder: "Buscar componente...",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+        </script>
 
         <!-- Prioridad -->
         <div class="mb-4">

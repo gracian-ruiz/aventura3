@@ -15,14 +15,27 @@
 
         <div class="mb-4">
             <label for="componente_id" class="block text-gray-700">Componente</label>
-            <select name="componente_id" id="componente_id" class="w-full border px-4 py-2 rounded-md" required>
+            <select name="componente_id" id="componente_id" class="w-full border px-4 py-2 rounded-md select2" required>
+                <option value="">Seleccionar Componente</option>
                 @foreach($componentes as $componente)
-                    <option value="{{ $componente->id }}" {{ $revision->componente_id == $componente->id ? 'selected' : '' }}>
+                    <option value="{{ $componente->id }}" {{ isset($revision->componente_id) && $revision->componente_id == $componente->id ? 'selected' : '' }}>
                         {{ $componente->nombre }}
                     </option>
                 @endforeach
             </select>
         </div>
+        
+        <!-- Activar Select2 para búsqueda -->
+        <script>
+            $(document).ready(function() {
+                $('#componente_id').select2({
+                    placeholder: "Buscar componente...",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+        </script>
+        
 
         <div class="mb-4">
             <label for="fecha_revision" class="block text-gray-700">Fecha de Revisión</label>
