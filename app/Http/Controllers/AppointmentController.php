@@ -43,29 +43,105 @@ class AppointmentController extends Controller
         return view('appointments.create', compact('bikes', 'componentes'));
     }
     
-    
-    
-
     public function store(Request $request)
     {
         $validated = $request->validate([
             'bike_id' => 'required|exists:bikes,id',
             'componente_id' => 'nullable|exists:components,id',
             'prioridad' => 'required|in:normal,urgente',
-            'tiempo_estimado' => 'nullable|string'
+            'descripcion_problema' => 'nullable|string',
+            'estimacion_reparacion' => 'nullable|string',
+            'tiempo_estimado' => 'required|integer|min:1',
         ]);
     
-        Appointment::create([
+        $fecha_asignada = $this->calcularFechaAsignada($request->tiempo_estimado);
+    
+        $appointment = Appointment::create([
             'bike_id' => $request->bike_id,
             'componente_id' => $request->componente_id,
             'prioridad' => $request->prioridad,
+            'descripcion_problema' => $request->descripcion_problema,
+            'estimacion_reparacion' => $request->estimacion_reparacion,
             'tiempo_estimado' => $request->tiempo_estimado,
-            'estado' => 'pendiente'
+            'estado' => 'pendiente',
+            'fecha_asignada' => $fecha_asignada,
         ]);
     
         return redirect()->route('appointments.index')->with('success', 'Cita registrada correctamente.');
     }
-
+    
+    
+        
+    /**
+     * Calcula la fecha en la que se podrá realizar la reparación
+     */
+    private function calcularFechaAsignada($tiempo_estimado, $inicioDesde = null)
+    {
+        $horarios_laborales = [
+            'lunes'     => [['9:30', '14:00'], ['17:00', '20:00']],
+            'martes'    => [['9:30', '14:00'], ['17:00', '20:00']],
+            'miércoles' => [['9:30', '14:00'], ['17:00', '20:00']],
+            'jueves'    => [['9:30', '14:00'], ['17:00', '20:00']],
+            'viernes'   => [['9:30', '14:00'], ['17:00', '20:00']],
+            'sábado'    => [['9:30', '14:00']], // Solo mañana
+        ];
+    
+        $fecha_actual = $inicioDesde ? \Carbon\Carbon::parse($inicioDesde) : now();
+        $intentos = 0;
+        $max_intentos = 100; // Limitar bucle para evitar bloqueo
+    
+        while ($intentos < $max_intentos) {
+            $intentos++;
+    
+            $dia_semana = strtolower($fecha_actual->isoFormat('dddd'));
+    
+            // Si es domingo o no hay horario, saltamos al siguiente día
+            if (!isset($horarios_laborales[$dia_semana])) {
+                $fecha_actual->addDay();
+                continue;
+            }
+    
+            foreach ($horarios_laborales[$dia_semana] as $horario) {
+                [$hora_inicio, $hora_fin] = $horario;
+    
+                $inicio_minutos = \Carbon\Carbon::parse($fecha_actual->toDateString() . ' ' . $hora_inicio)->diffInMinutes($fecha_actual->copy()->startOfDay());
+                $fin_minutos = \Carbon\Carbon::parse($fecha_actual->toDateString() . ' ' . $hora_fin)->diffInMinutes($fecha_actual->copy()->startOfDay());
+    
+                $minutos_ocupados = Appointment::whereDate('fecha_asignada', $fecha_actual->toDateString())->sum('tiempo_estimado');
+    
+                // Verifica si hay espacio en este bloque de horario
+                if (($minutos_ocupados + $tiempo_estimado) <= ($fin_minutos - $inicio_minutos)) {
+                    return $fecha_actual->toDateString();
+                }
+            }
+    
+            // Avanza al siguiente día hábil
+            $fecha_actual->addDay();
+        }
+    
+        return $fecha_actual->toDateString(); // Asigna la primera fecha disponible si no encontró antes
+    }
+    
+    
+    
+    private function recalcularCitasPendientes()
+    {
+        $appointments = Appointment::where('estado', 'pendiente')
+            ->orderByRaw("CASE WHEN prioridad = 'urgente' THEN 1 ELSE 2 END")
+            ->orderBy('created_at', 'asc')
+            ->get();
+    
+        $fecha_actual = now(); // Iniciamos en la fecha actual
+    
+        foreach ($appointments as $appointment) {
+            $appointment->fecha_asignada = $this->calcularFechaAsignada($appointment->tiempo_estimado, $fecha_actual);
+            $appointment->save();
+            $fecha_actual = \Carbon\Carbon::parse($appointment->fecha_asignada)->addMinutes($appointment->tiempo_estimado);
+        }
+    }
+    
+ 
+    
     public function update(Request $request, Appointment $appointment)
     {
         $validated = $request->validate([
@@ -134,8 +210,10 @@ class AppointmentController extends Controller
             return redirect()->route('appointments.historico')->with('success', '✅ Cita eliminada del historial.');
         }
     
-        return redirect()->route('appointments.index')->with('error', 'No puedes eliminar una cita pendiente.');
+        $appointment->delete();
+        return redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
     }
+    
     
     public function historic()
     {
@@ -146,5 +224,44 @@ class AppointmentController extends Controller
         return view('appointments.historic', compact('completedAppointments'));
     }
 
+    public function asignarFechasCitas()
+    {
+        $horas_laborales = [
+            'Monday' => 420,
+            'Tuesday' => 420,
+            'Wednesday' => 420,
+            'Thursday' => 420,
+            'Friday' => 420,
+            'Saturday' => 240,
+        ];
 
+        $citas = Appointment::whereNull('fecha_asignada')
+            ->orderByRaw("CASE WHEN prioridad = 'urgente' THEN 1 ELSE 2 END")
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $agenda = [];
+        $fecha_actual = now()->startOfDay();
+
+        foreach ($citas as $cita) {
+            while (true) {
+                $dia_semana = $fecha_actual->format('l');
+
+                if (isset($horas_laborales[$dia_semana])) {
+                    if (!isset($agenda[$fecha_actual->toDateString()])) {
+                        $agenda[$fecha_actual->toDateString()] = 0;
+                    }
+
+                    if ($agenda[$fecha_actual->toDateString()] + $cita->tiempo_estimado <= $horas_laborales[$dia_semana]) {
+                        $cita->fecha_asignada = $fecha_actual->toDateString();
+                        $cita->save();
+                        $agenda[$fecha_actual->toDateString()] += $cita->tiempo_estimado;
+                        break;
+                    }
+                }
+
+                $fecha_actual->addDay();
+            }
+        }
+    }
 }

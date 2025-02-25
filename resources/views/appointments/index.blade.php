@@ -5,10 +5,10 @@
     <h1 class="text-2xl font-bold text-center mb-4">Citas Pendientes</h1>
 
     <!-- Buscador -->
-    <form action="{{ route('appointments.index') }}" method="GET" class="mb-4">
+    <form action="{{ route('appointments.index') }}" method="GET" class="mb-4 flex items-center">
         <input type="text" name="search" placeholder="Buscar por bicicleta, usuario o componente..." 
                class="border px-4 py-2 rounded-md w-1/2" value="{{ request('search') }}">
-        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
             Buscar
         </button>
     </form>
@@ -37,6 +37,9 @@
                     <th class="py-2 px-4 text-left">Prioridad</th>
                     <th class="py-2 px-4 text-left">Tiempo Estimado</th>
                     <th class="py-2 px-4 text-left">Fecha Creación</th>
+                    <th class="py-2 px-4 text-left">Fecha Asignada</th>
+                    <th class="py-2 px-4 text-left">Descripción Problema</th>
+                    <th class="py-2 px-4 text-left">Estimación Reparación</th>
                     <th class="py-2 px-4 text-left">Estado</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
@@ -54,8 +57,13 @@
                                 {{ ucfirst($appointment->prioridad) }}
                             </span>
                         </td>
-                        <td class="py-2 px-4">{{ $appointment->tiempo_estimado ?? 'N/A' }}</td>
+                        <td class="py-2 px-4">{{ $appointment->tiempo_estimado }} min</td>
                         <td class="py-2 px-4">{{ \Carbon\Carbon::parse($appointment->created_at)->format('d/m/Y H:i') }}</td>
+                        <td class="py-2 px-4">
+                            {{ $appointment->fecha_asignada ? \Carbon\Carbon::parse($appointment->fecha_asignada)->format('d/m/Y') : 'Pendiente' }}
+                        </td>
+                        <td class="py-2 px-4">{{ $appointment->descripcion_problema ?? 'N/A' }}</td>
+                        <td class="py-2 px-4">{{ $appointment->estimacion_reparacion ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ ucfirst($appointment->estado) }}</td>
                         <td class="py-2 px-4 text-center">
                             @if($appointment->estado == 'pendiente')
@@ -71,7 +79,8 @@
                             <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600" onclick="return confirm('¿Seguro que quieres eliminar esta cita?')">
+                                <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600" 
+                                    onclick="return confirm('¿Seguro que quieres eliminar esta cita?')">
                                     Eliminar
                                 </button>
                             </form>
