@@ -7,38 +7,46 @@ use App\Models\Bike;
 use Illuminate\Http\Request;
 use App\Models\Component;
 use Carbon\Carbon;
-
+use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Requests\UpdateAppointmentRequest;
 
 class AppointmentController extends Controller
 {
     public function index(Request $request)
     {
         $search = $request->input('search');
-
+        $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
+    
         // Recalcular siempre antes de mostrar la vista
         $this->recalcularFechasAsignadas();
-
-
+    
         $appointments = Appointment::with('bike.user', 'componente')
-            ->where('estado', 'pendiente')
+            ->whereIn('estado', ['pendiente', 'en proceso']) // Incluir pendientes y en proceso
             ->when($search, function ($query, $search) {
                 $query->whereHas('bike', function ($q) use ($search) {
                     $q->where('nombre', 'like', "%{$search}%");
                 })
-                    ->orWhereHas('bike.user', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('componente', function ($q) use ($search) {
-                        $q->where('nombre', 'like', "%{$search}%");
-                    });
+                ->orWhereHas('bike.user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('componente', function ($q) use ($search) {
+                    $q->where('nombre', 'like', "%{$search}%");
+                });
             })
-            ->orderByRaw("CASE WHEN prioridad = 'urgente' THEN 1 ELSE 2 END")
-            ->orderBy('created_at', 'asc')
+            ->orderByRaw("
+                CASE 
+                    WHEN estado = 'en proceso' THEN 0  -- Citas en proceso primero
+                    WHEN prioridad = 'urgente' THEN 1  -- Luego urgentes
+                    WHEN tiempo_estimado < 30 THEN 2  -- Luego las de menos de 30 minutos
+                    ELSE 3 
+                END
+            ")
+            ->orderBy('fecha_asignada', 'asc') // Respetar la fecha asignada
+            ->orderBy('created_at', 'asc') // Si hay empate, ordenar por creación
             ->paginate(8);
-
-        return view('appointments.index', compact('appointments', 'search'));
+    
+        return view('appointments.index', compact('appointments', 'search', 'estado'));
     }
-
 
 
     public function create()
@@ -49,17 +57,10 @@ class AppointmentController extends Controller
         return view('appointments.create', compact('bikes', 'componentes'));
     }
 
-    public function update(Request $request, Appointment $appointment)
+    public function update(UpdateAppointmentRequest $request, Appointment $appointment)
     {
-        $validated = $request->validate([
-            'bike_id' => 'required|exists:bikes,id',
-            'componente_id' => 'nullable|exists:components,id',
-            'prioridad' => 'required|in:normal,urgente',
-            'tiempo_estimado' => 'nullable|string',
-        ]);
-
-        $appointment->update($validated);
-
+        $appointment->update($request->validated());
+    
         return redirect()->route('appointments.index')->with('success', '✅ Cita actualizada correctamente.');
     }
 
@@ -72,18 +73,24 @@ class AppointmentController extends Controller
 
 
 
-    public function updateEstado(Appointment $appointment)
+    public function updateEstado(Appointment $appointment, Request $request)
     {
-        // Marcar cita como completada y registrar la fecha de actualización
-        $appointment->update([
-            'estado' => 'completada',
-            'updated_at' => now()
-        ]);
+        $nuevoEstado = $request->input('estado');
 
-        // Redirigir a la creación de la revisión
-        return redirect()->route('bikes.revisions.create', $appointment->bike_id)
-            ->with('success', 'Cita convertida en revisión.');
+        if (!in_array($nuevoEstado, ['pendiente', 'en proceso', 'completada'])) {
+            return redirect()->back()->with('error', 'Estado no válido.');
+        }
+
+        $appointment->update(['estado' => $nuevoEstado]);
+
+        if ($nuevoEstado === 'completada') {
+            return redirect()->route('bikes.revisions.create', $appointment->bike_id)
+                ->with('success', 'Cita convertida en revisión.');
+        }
+
+        return redirect()->route('appointments.index')->with('success', 'Estado de la cita actualizado.');
     }
+
 
     public function historico(Request $request)
     {
@@ -170,104 +177,92 @@ class AppointmentController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(StoreAppointmentRequest $request)
     {
-        $validated = $request->validate([
-            'bike_id' => 'required|exists:bikes,id',
-            'componente_id' => 'nullable|exists:components,id',
-            'prioridad' => 'required|in:normal,urgente',
-            'descripcion_problema' => 'required|string',
-            'estimacion_reparacion' => 'nullable|string',
-            'tiempo_estimado' => 'required|integer|min:1',
-        ]);
-
         Appointment::create([
-            'bike_id' => $validated['bike_id'],
-            'componente_id' => $validated['componente_id'],
-            'prioridad' => $validated['prioridad'],
-            'descripcion_problema' => $validated['descripcion_problema'],
-            'estimacion_reparacion' => $validated['estimacion_reparacion'],
-            'tiempo_estimado' => $validated['tiempo_estimado'],
+            'bike_id' => $request->bike_id,
+            'componente_id' => $request->componente_id,
+            'prioridad' => $request->prioridad,
+            'descripcion_problema' => $request->descripcion_problema,
+            'estimacion_reparacion' => $request->estimacion_reparacion,
+            'tiempo_estimado' => $request->tiempo_estimado,
             'estado' => 'pendiente',
         ]);
-
+    
         // 🔥 Recalcula fechas automáticamente
         $this->recalcularFechasAsignadas();
-
+    
         return redirect()->route('appointments.index')->with('success', 'Cita registrada correctamente.');
     }
-
+    
     private function recalcularFechasAsignadas()
     {
         $horas_laborales = [
-            'monday'    => 400,
-            'tuesday'   => 400,
-            'wednesday' => 400,
-            'thursday'  => 400,
-            'friday'    => 400,
-            'saturday'  => 240,
+            'monday'    => 300,  // 5 horas
+            'tuesday'   => 300,
+            'wednesday' => 300,
+            'thursday'  => 300,
+            'friday'    => 300,
+            'saturday'  => 200,  // 3 horas y 20 minutos
         ];
-    
+
         // Reiniciar fechas para recalcular desde cero
-        Appointment::where('estado', 'pendiente')->update(['fecha_asignada' => null]);
-    
-        $appointments = Appointment::where('estado', 'pendiente')
-            ->orderByRaw("CASE WHEN prioridad = 'urgente' THEN 1 ELSE 2 END")
+        Appointment::where('estado', 'pendiente')->orWhere('estado', 'en proceso')->update(['fecha_asignada' => null]);
+
+        $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
+            ->orderByRaw("
+            CASE 
+                WHEN prioridad = 'urgente' THEN 1 
+                WHEN tiempo_estimado < 30 THEN 2 
+                ELSE 3 
+            END
+        ")
             ->orderBy('created_at', 'asc')
             ->get();
-    
-        // Comienza siempre desde hoy al horario actual correcto
+
+        // Fecha actual y hora actual
         $fecha_actual = Carbon::today();
         $ahora = Carbon::now();
-    
-        // Ajusta el tiempo disponible hoy según la hora actual
-        $dia_semana = strtolower($fecha_actual->format('l'));
-        $tiempo_disponible_hoy = 0;
-    
-        if ($dia_semana !== 'sunday' && isset($horas_laborales[$dia_semana])) {
-            if ($ahora->lt($fecha_actual->copy()->setTime(9, 30))) {
-                // Aún no abrió la tienda, tiempo completo
-                $tiempo_disponible_hoy = $horas_laborales[$dia_semana];
-            } elseif ($ahora->between($fecha_actual->copy()->setTime(9, 30), $fecha_actual->copy()->setTime(14, 0))) {
-                // Estamos en la mañana
-                $tiempo_disponible_hoy = $ahora->diffInMinutes($fecha_actual->copy()->setTime(14, 0));
-                $tiempo_disponible_hoy += 180; // Más la tarde completa (17-20)
-            } elseif ($ahora->between($fecha_actual->copy()->setTime(14, 0), $fecha_actual->copy()->setTime(17, 0))) {
-                // Mediodía cerrado, solo la tarde disponible
-                $tiempo_disponible_hoy = 180; // Tarde completa
-            } elseif ($ahora->between($fecha_actual->copy()->setTime(17, 0), $fecha_actual->copy()->setTime(20, 0))) {
-                // Estamos en la tarde
-                $tiempo_disponible_hoy = $ahora->diffInMinutes($fecha_actual->copy()->setTime(20, 0));
-            } else {
-                // Ya cerró el día, no queda tiempo hoy
-                $tiempo_disponible_hoy = 0;
-            }
+
+        // Horario de cierre (20:00)
+        $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
+
+        // Si ya cerró la tienda, empezamos desde el siguiente día laboral
+        if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
+            do {
+                $fecha_actual->addDay();
+                $dia_semana = strtolower($fecha_actual->format('l'));
+            } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])); // Evitar domingos y días sin horario laboral
         }
-    
+
+        $agenda = [];
+
         foreach ($appointments as $appointment) {
             $tiempo_estimado = $appointment->tiempo_estimado;
-    
+
             while (true) {
                 $dia_semana = strtolower($fecha_actual->format('l'));
-    
+
                 if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
                     $fecha_actual->addDay();
-                    $tiempo_disponible_hoy = $horas_laborales[strtolower($fecha_actual->format('l'))] ?? 0;
                     continue;
                 }
-    
-                if ($tiempo_disponible_hoy >= $tiempo_estimado) {
+
+                // Inicializar disponibilidad del día si no existe en la agenda
+                if (!isset($agenda[$fecha_actual->toDateString()])) {
+                    $agenda[$fecha_actual->toDateString()] = 0;
+                }
+
+                // Verificar si hay espacio en la fecha actual
+                if ($agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
                     $appointment->fecha_asignada = $fecha_actual->toDateString();
                     $appointment->save();
-    
-                    $tiempo_disponible_hoy -= $tiempo_estimado;
+                    $agenda[$fecha_actual->toDateString()] += $tiempo_estimado;
                     break;
                 } else {
                     $fecha_actual->addDay();
-                    $tiempo_disponible_hoy = $horas_laborales[strtolower($fecha_actual->format('l'))] ?? 0;
                 }
             }
         }
     }
-    
 }

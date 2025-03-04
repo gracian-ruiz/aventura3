@@ -39,14 +39,13 @@
                     <th class="py-2 px-4 text-left">Fecha Creación</th>
                     <th class="py-2 px-4 text-left">Fecha Asignada</th>
                     <th class="py-2 px-4 text-left">Descripción Problema</th>
-                    {{-- <th class="py-2 px-4 text-left">Estimación Reparación</th> --}}
                     <th class="py-2 px-4 text-left">Estado</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
                 @foreach ($appointments as $appointment)
-                    <tr class="hover:bg-gray-100">
+                    <tr class="hover:bg-gray-100 {{ $appointment->estado == 'en proceso' ? 'bg-yellow-200' : '' }}">
                         <td class="py-2 px-4">{{ $appointment->id }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->nombre }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
@@ -63,13 +62,24 @@
                             {{ $appointment->fecha_asignada ? \Carbon\Carbon::parse($appointment->fecha_asignada)->format('d/m/Y') : 'Pendiente' }}
                         </td>
                         <td class="py-2 px-4">{{ $appointment->descripcion_problema ?? 'N/A' }}</td>
-                        {{-- <td class="py-2 px-4">{{ $appointment->estimacion_reparacion ?? 'N/A' }}</td> --}}
                         <td class="py-2 px-4">{{ ucfirst($appointment->estado) }}</td>
                         <td class="py-2 px-4 text-center">
                             @if($appointment->estado == 'pendiente')
                                 <form action="{{ route('appointments.updateEstado', $appointment->id) }}" method="POST" class="inline-block">
                                     @csrf
                                     @method('PUT')
+                                    <input type="hidden" name="estado" value="en proceso">
+                                    <button type="submit" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                                        Revisar
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($appointment->estado == 'en proceso')
+                                <form action="{{ route('appointments.updateEstado', $appointment->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="estado" value="completada">
                                     <button type="submit" class="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600">
                                         Completar
                                     </button>
