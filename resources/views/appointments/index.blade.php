@@ -33,7 +33,7 @@
                     <th class="py-2 px-4 text-left">ID</th>
                     <th class="py-2 px-4 text-left">Bicicleta</th>
                     <th class="py-2 px-4 text-left">Usuario</th>
-                    <th class="py-2 px-4 text-left">Componente</th>
+                    <th class="py-2 px-4 text-left">Componentes</th>
                     <th class="py-2 px-4 text-left">Prioridad</th>
                     <th class="py-2 px-4 text-left">Tiempo Estimado</th>
                     <th class="py-2 px-4 text-left">Fecha Creación</th>
@@ -49,7 +49,13 @@
                         <td class="py-2 px-4">{{ $appointment->id }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->nombre }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
-                        <td class="py-2 px-4">{{ $appointment->componente->nombre ?? 'N/A' }}</td>
+                        <td class="py-2 px-4">
+                            @if($appointment->componentes->isNotEmpty())
+                                {{ $appointment->componentes->pluck('nombre')->join(', ') }}
+                            @else
+                                N/A
+                            @endif
+                        </td>
                         <td class="py-2 px-4">
                             <span class="px-2 py-1 rounded-full text-xs font-bold 
                                 {{ $appointment->prioridad == 'urgente' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white' }}">
@@ -64,6 +70,7 @@
                         <td class="py-2 px-4">{{ $appointment->descripcion_problema ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ ucfirst($appointment->estado) }}</td>
                         <td class="py-2 px-4 text-center">
+                            <!-- Botón Revisar (solo si está pendiente) -->
                             @if($appointment->estado == 'pendiente')
                                 <form action="{{ route('appointments.updateEstado', $appointment->id) }}" method="POST" class="inline-block">
                                     @csrf
@@ -75,21 +82,25 @@
                                 </form>
                             @endif
 
+                            <!-- Botón Completar (solo si está en proceso) -->
                             @if($appointment->estado == 'en proceso')
-                                <form action="{{ route('appointments.updateEstado', $appointment->id) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="estado" value="completada">
-                                    <button type="submit" class="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600">
-                                        Completar
-                                    </button>
-                                </form>
+                                <a href="{{ route('appointments.confirmCompletion', $appointment->id) }}" 
+                                    class="block px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 my-1">
+                                    Completar
+                                </a>
                             @endif
 
+                            <!-- Botón Editar -->
+                            <a href="{{ route('appointments.edit', $appointment->id) }}" 
+                                class="block px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 my-1">
+                                Editar
+                            </a>
+
+                            <!-- Botón Eliminar -->
                             <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600" 
+                                <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 my-1" 
                                     onclick="return confirm('¿Seguro que quieres eliminar esta cita?')">
                                     Eliminar
                                 </button>

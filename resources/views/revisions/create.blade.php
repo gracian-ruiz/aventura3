@@ -6,32 +6,30 @@
     ['name' => 'Revisiones', 'url' => route('revisions.index')],
     ['name' => 'Crear Revisión']
 ]" />
+
 <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Nueva Revisión para {{ $bike->nombre }}</h1>
 
     <form action="{{ route('bikes.revisions.store', $bike->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
         @csrf
 
-        <!-- Selección de Componente -->
+        <!-- Selección de Componentes (Múltiples) -->
         <div class="mb-4">
-            <label for="componente_id" class="block text-gray-700">Componente (Opcional)</label>
-            <select name="componente_id" id="componente_id" class="w-full border px-4 py-2 rounded-md">
-                <option value="">Sin Componente</option>
-                @foreach($componentes as $componente)
-                    <option value="{{ $componente->id }}">{{ $componente->nombre }}</option>
-                @endforeach
-            </select>
+            <label for="componentes" class="block text-gray-700">Componentes</label>
+            <div id="componentes-container">
+                <div class="componente-select mb-2">
+                    <select name="componentes[]" class="componente_id w-full border px-4 py-2 rounded-md">
+                        <option value="">Selecciona un componente</option>
+                        @foreach($componentes as $componente)
+                            <option value="{{ $componente->id }}">{{ $componente->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <button type="button" id="addComponente" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                + Agregar otro componente
+            </button>
         </div>
-
-        <script>
-            $(document).ready(function() {
-                $('#componente_id').select2({
-                    placeholder: "Buscar componente...",
-                    allowClear: true,
-                    width: '100%'
-                });
-            });
-        </script>
 
         <div class="mb-4">
             <label for="fecha_revision" class="block text-gray-700">Fecha de Revisión</label>
@@ -58,7 +56,7 @@
             </div>
         </div>
 
-        <!-- Campo de fecha opcional (se muestra solo si elige "opcional") -->
+        <!-- Campo de fecha opcional -->
         <div id="fechaOpcionalContainer" class="hidden">
             <label for="proxima_revision" class="block text-gray-700">Selecciona una fecha:</label>
             <input type="date" name="proxima_revision" id="proxima_revision" class="w-full border px-4 py-2 rounded-md">
@@ -66,7 +64,7 @@
 
         <div class="flex justify-end">
             <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
-                Guardar Revisión
+                Guardar Revisiones
             </button>
         </div>
     </form>
@@ -77,8 +75,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const tipoFechaInputs = document.querySelectorAll('input[name="tipo_fecha"]');
     const fechaOpcionalContainer = document.getElementById("fechaOpcionalContainer");
     const proximaRevisionInput = document.getElementById("proxima_revision");
-    const componenteSelect = document.getElementById("componente_id");
     const fechaRevisionInput = document.getElementById("fecha_revision");
+    const addComponenteBtn = document.getElementById("addComponente");
+    const componentesContainer = document.getElementById("componentes-container");
 
     // Manejar el cambio de tipo de fecha
     tipoFechaInputs.forEach(input => {
@@ -87,24 +86,24 @@ document.addEventListener("DOMContentLoaded", function() {
                 fechaOpcionalContainer.classList.remove("hidden");
             } else {
                 fechaOpcionalContainer.classList.add("hidden");
-                calcularFechaFija();
             }
         });
     });
 
-    // Manejar el cambio de componente
-    componenteSelect.addEventListener("change", calcularFechaFija);
-
-    function calcularFechaFija() {
-        const selectedOption = componenteSelect.options[componenteSelect.selectedIndex];
-        const intervaloMeses = selectedOption.dataset.fechaRevision;
-
-        if (intervaloMeses && tipoFechaInputs[0].checked) {
-            let fechaActual = new Date(fechaRevisionInput.value);
-            fechaActual.setMonth(fechaActual.getMonth() + parseInt(intervaloMeses));
-            proximaRevisionInput.value = fechaActual.toISOString().split("T")[0];
-        }
-    }
+    // Agregar más select de componentes dinámicamente
+    addComponenteBtn.addEventListener("click", function() {
+        const nuevoSelect = document.createElement("div");
+        nuevoSelect.classList.add("componente-select", "mb-2");
+        nuevoSelect.innerHTML = `
+            <select name="componentes[]" class="componente_id w-full border px-4 py-2 rounded-md">
+                <option value="">Selecciona un componente</option>
+                @foreach($componentes as $componente)
+                    <option value="{{ $componente->id }}">{{ $componente->nombre }}</option>
+                @endforeach
+            </select>
+        `;
+        componentesContainer.appendChild(nuevoSelect);
+    });
 });
 </script>
 @endsection

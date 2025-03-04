@@ -12,7 +12,6 @@ class Appointment extends Model
 
     protected $fillable = [
         'bike_id', 
-        'componente_id', 
         'prioridad', 
         'estado', 
         'tiempo_estimado', 
@@ -26,9 +25,9 @@ class Appointment extends Model
         return $this->belongsTo(Bike::class);
     }
 
-    public function componente()
+    public function componentes()
     {
-        return $this->belongsTo(Component::class);
+        return $this->belongsToMany(Component::class, 'appointment_component');
     }
 
     // Calcular la fecha en que se debe atender la cita

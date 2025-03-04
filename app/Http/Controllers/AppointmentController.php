@@ -16,36 +16,105 @@ class AppointmentController extends Controller
     {
         $search = $request->input('search');
         $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
-    
+
         // Recalcular siempre antes de mostrar la vista
         $this->recalcularFechasAsignadas();
-    
-        $appointments = Appointment::with('bike.user', 'componente')
-            ->whereIn('estado', ['pendiente', 'en proceso']) // Incluir pendientes y en proceso
+
+        $appointments = Appointment::with('bike.user', 'componentes')
+            ->whereIn('estado', ['pendiente', 'en proceso']) // Asegurar que en proceso aparece
             ->when($search, function ($query, $search) {
                 $query->whereHas('bike', function ($q) use ($search) {
                     $q->where('nombre', 'like', "%{$search}%");
                 })
-                ->orWhereHas('bike.user', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                })
-                ->orWhereHas('componente', function ($q) use ($search) {
-                    $q->where('nombre', 'like', "%{$search}%");
-                });
+                    ->orWhereHas('bike.user', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('componentes', function ($q) use ($search) {
+                        $q->where('nombre', 'like', "%{$search}%");
+                    });
             })
             ->orderByRaw("
-                CASE 
-                    WHEN estado = 'en proceso' THEN 0  -- Citas en proceso primero
-                    WHEN prioridad = 'urgente' THEN 1  -- Luego urgentes
-                    WHEN tiempo_estimado < 30 THEN 2  -- Luego las de menos de 30 minutos
-                    ELSE 3 
-                END
-            ")
-            ->orderBy('fecha_asignada', 'asc') // Respetar la fecha asignada
-            ->orderBy('created_at', 'asc') // Si hay empate, ordenar por creación
+            CASE 
+                WHEN estado = 'en proceso' THEN 0  -- Citas en proceso primero
+                WHEN prioridad = 'urgente' THEN 1  -- Luego urgentes
+                WHEN tiempo_estimado < 30 THEN 2  -- Luego las de menos de 30 minutos
+                ELSE 3 
+            END
+        ")
+            ->orderBy('fecha_asignada', 'asc')
+            ->orderBy('created_at', 'asc')
             ->paginate(8);
-    
+
+
         return view('appointments.index', compact('appointments', 'search', 'estado'));
+    }
+    public function confirmCompletion(Appointment $appointment)
+    {
+        return view('appointments.confirm', compact('appointment'));
+    }
+
+    public function finalizeCompletion(Request $request, Appointment $appointment)
+    {
+        // Cambia el estado a "completada" solo cuando el usuario lo confirme
+        $appointment->update(['estado' => 'completada']);
+
+        // Generar revisiones para cada componente seleccionado en la cita
+        foreach ($appointment->componentes as $componente) {
+            $appointment->bike->revisions()->create([
+                'component_id' => $componente->id,
+                'fecha_revision' => now(),
+                'descripcion' => "Revisión de " . $componente->nombre,
+                'fecha_proxima_revision' => now()->addDays(30),
+            ]);
+        }
+
+        return redirect()->route('appointments.index')->with('success', 'Cita completada y revisiones generadas.');
+    }
+
+    public function complete(Request $request, Appointment $appointment)
+    {
+        // Validar que al menos una revisión se ha seleccionado
+        $request->validate([
+            'revisiones' => 'required|array',
+            'revisiones.*' => 'exists:components,id',
+            'descripcion_revisiones.*' => 'required|string',
+            'proxima_revision.*' => 'nullable|date',
+            'tipo_fecha.*' => 'required|in:fija,opcional',
+        ]);
+        // Obtener el componente asociado
+
+
+        // Crear revisiones para los componentes seleccionados
+        foreach ($request->revisiones as $component_id) {
+            $descripcion = $request->descripcion_revisiones[$component_id] ?? 'Sin descripción';
+
+            $componente = Component::find($component_id);
+
+
+            // Determinar la fecha de la próxima revisión
+            if ($request->tipo_fecha[$component_id] === 'fija') {
+                $dias_a_sumar = $componente ? $componente->fecha_revision : 30; // Si no tiene, usar 30 días por defecto
+                $fecha_proxima = now()->addDays($dias_a_sumar);
+            } else {
+                // Si es opcional, se usa la fecha proporcionada
+                $fecha_proxima = $request->proxima_revision[$component_id]
+                    ? Carbon::parse($request->proxima_revision[$component_id])
+                    : now()->addDays(30); // Fallback en caso de error
+            }
+
+            // Crear la revisión asociada a la bicicleta
+            $appointment->bike->revisions()->create([
+                'componente_id' => $component_id,
+                'fecha_revision' => now(),
+                'descripcion' => $descripcion,
+                'proxima_revision' => $fecha_proxima,
+            ]);
+        }
+
+        // Marcar la cita como completada solo después de confirmar las revisiones
+        $appointment->update(['estado' => 'completada']);
+
+        return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
     }
 
 
@@ -59,21 +128,60 @@ class AppointmentController extends Controller
 
     public function update(UpdateAppointmentRequest $request, Appointment $appointment)
     {
-        $appointment->update($request->validated());
+        dd("aqui");
+        // Actualizar los datos de la cita
+        $appointment->update([
+            'descripcion_problema' => $request->descripcion_problema,
+            'tiempo_estimado' => $request->tiempo_estimado,
+        ]);
+
+        // Sincronizar los componentes seleccionados en la tabla intermedia
+        $appointment->componentes()->sync($request->componentes);
+
+        return redirect()->route('appointments.index')->with('success', '✅ Cita actualizada correctamente.');
+    }
+
+    public function updatedos(Request $request, Appointment $appointment)
+    {
+        // Validar los datos recibidos
+        $request->validate([
+            'descripcion_problema' => 'required|string|max:255',
+            'tiempo_estimado' => 'required|integer|min:1',
+            'componentes' => 'nullable|array', // Permitir que sea opcional
+            'componentes.*' => 'exists:components,id', // Validar que los IDs existen en la tabla
+        ]);
+    
+        // Actualizar los datos de la cita
+        $appointment->update([
+            'descripcion_problema' => $request->descripcion_problema,
+            'tiempo_estimado' => $request->tiempo_estimado,
+        ]);
+    
+        // Sincronizar los componentes seleccionados en la tabla intermedia
+        if ($request->has('componentes')) {
+            $appointment->componentes()->sync($request->componentes);
+        } else {
+            $appointment->componentes()->detach(); // Si no se selecciona ninguno, se eliminan
+        }
     
         return redirect()->route('appointments.index')->with('success', '✅ Cita actualizada correctamente.');
     }
+    
+
+
 
     public function edit(Appointment $appointment)
     {
         $bikes = Bike::all();
         $componentes = Component::all();
+
         return view('appointments.edit', compact('appointment', 'bikes', 'componentes'));
     }
 
 
 
-    public function updateEstado(Appointment $appointment, Request $request)
+
+    public function updateEstado(Request $request, Appointment $appointment)
     {
         $nuevoEstado = $request->input('estado');
 
@@ -83,20 +191,22 @@ class AppointmentController extends Controller
 
         $appointment->update(['estado' => $nuevoEstado]);
 
+        // Si el estado es 'completada', redirigir a la creación de revisión
         if ($nuevoEstado === 'completada') {
-            return redirect()->route('bikes.revisions.create', $appointment->bike_id)
-                ->with('success', 'Cita convertida en revisión.');
+            return redirect()->route('bikes.revisions.create', ['bike' => $appointment->bike_id])
+                ->with('success', 'Cita completada y revisiones generadas.');
         }
 
         return redirect()->route('appointments.index')->with('success', 'Estado de la cita actualizado.');
     }
 
 
+
     public function historico(Request $request)
     {
         $search = $request->input('search');
 
-        $completedAppointments = Appointment::with('bike.user', 'componente')
+        $completedAppointments = Appointment::with('bike.user', 'componentes')
             ->where('estado', 'completada')
             ->when($search, function ($query, $search) {
                 $query->whereHas('bike', function ($q) use ($search) {
@@ -105,7 +215,7 @@ class AppointmentController extends Controller
                     ->orWhereHas('bike.user', function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%");
                     })
-                    ->orWhereHas('componente', function ($q) use ($search) {
+                    ->orWhereHas('componentes', function ($q) use ($search) {
                         $q->where('nombre', 'like', "%{$search}%");
                     });
             })
@@ -179,22 +289,25 @@ class AppointmentController extends Controller
 
     public function store(StoreAppointmentRequest $request)
     {
-        Appointment::create([
+        $appointment = Appointment::create([
             'bike_id' => $request->bike_id,
-            'componente_id' => $request->componente_id,
             'prioridad' => $request->prioridad,
             'descripcion_problema' => $request->descripcion_problema,
             'estimacion_reparacion' => $request->estimacion_reparacion,
             'tiempo_estimado' => $request->tiempo_estimado,
             'estado' => 'pendiente',
         ]);
-    
+
+        // Asociar los componentes seleccionados a la cita
+        $appointment->componentes()->attach($request->componentes);
+
         // 🔥 Recalcula fechas automáticamente
         $this->recalcularFechasAsignadas();
-    
+
         return redirect()->route('appointments.index')->with('success', 'Cita registrada correctamente.');
     }
-    
+
+
     private function recalcularFechasAsignadas()
     {
         $horas_laborales = [

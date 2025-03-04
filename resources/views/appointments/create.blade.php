@@ -18,15 +18,20 @@
             </select>
         </div>
 
-        <!-- Selección de Componente -->
-        <div class="mb-4">
-            <label for="componente_id" class="block text-gray-700">Componente (Opcional)</label>
-            <select name="componente_id" id="componente_id" class="w-full border px-4 py-2 rounded-md">
-                <option value="">Sin Componente</option>
-                @foreach($componentes as $componente)
-                    <option value="{{ $componente->id }}">{{ $componente->nombre }}</option>
-                @endforeach
-            </select>
+        <!-- Selección de Múltiples Componentes -->
+        <div class="mb-4" id="component-container">
+            <label class="block text-gray-700">Componentes</label>
+            <div class="flex items-center component-group">
+                <select name="componentes[]" class="w-full border px-4 py-2 rounded-md" required>
+                    <option value="">Selecciona un componente</option>
+                    @foreach($componentes as $componente)
+                        <option value="{{ $componente->id }}">{{ $componente->nombre }}</option>
+                    @endforeach
+                </select>
+                <button type="button" id="add-component" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                    + Añadir
+                </button>
+            </div>
         </div>
 
         <!-- Prioridad -->
@@ -64,17 +69,37 @@
     </form>
 </div>
 
-<!-- Agregar Select2 para búsqueda en los selects -->
+<!-- Agregar Select2 para búsqueda en los selects y lógica para múltiples componentes -->
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('#bike_id, #componente_id').select2({
-            placeholder: "Selecciona una opción...",
+        $('#bike_id').select2({
+            placeholder: "Selecciona una bicicleta...",
             allowClear: true,
             width: '100%'
         });
     });
+
+    document.getElementById('add-component').addEventListener('click', function() {
+        let container = document.getElementById('component-container');
+        let newGroup = document.createElement('div');
+        newGroup.classList.add('flex', 'items-center', 'mt-2', 'component-group');
+
+        let select = document.querySelector('.component-group select').cloneNode(true);
+        select.value = "";
+        newGroup.appendChild(select);
+
+        let removeButton = document.createElement('button');
+        removeButton.type = "button";
+        removeButton.classList.add('ml-2', 'px-4', 'py-2', 'bg-red-500', 'text-white', 'rounded-md', 'hover:bg-red-600');
+        removeButton.innerText = "Eliminar";
+        removeButton.addEventListener('click', function() {
+            container.removeChild(newGroup);
+        });
+        newGroup.appendChild(removeButton);
+
+        container.appendChild(newGroup);
+    });
 </script>
 @endsection
-
 @endsection

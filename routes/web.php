@@ -99,7 +99,18 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
     Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
     
+    Route::get('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])
+    ->name('appointments.confirmCompletion');
 
+    Route::post('/appointments/{appointment}/finalize', [AppointmentController::class, 'finalizeCompletion'])
+        ->name('appointments.finalizeCompletion');
+
+        Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])
+    ->name('appointments.complete');
+
+
+    // ✅ Nueva ruta para update con otro nombre
+    Route::put('/{appointment}/updatedos', [AppointmentController::class, 'updatedos'])->name('appointments.updatedos');
 });
 
 
