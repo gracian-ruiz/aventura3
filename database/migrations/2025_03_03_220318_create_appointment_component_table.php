@@ -9,8 +9,11 @@ return new class extends Migration {
     {
         Schema::create('appointment_component', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('appointment_id')->constrained()->onDelete('cascade');
-            $table->foreignId('component_id')->constrained()->onDelete('cascade');
+            $table->foreignId('appointment_id');
+            $table->foreignId('componente_id');
+            $table->string('texto'); // Descripción del ítem
+            $table->integer('total_precio'); // Precio total del componente en la cita
+            $table->integer('horas_trabajo'); // Horas de trabajo estimadas para el componente
             $table->timestamps();
         });
     }

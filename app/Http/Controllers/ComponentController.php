@@ -47,13 +47,17 @@ class ComponentController extends Controller
     {
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
+            'fecha_preaviso' => 'required|integer|min:0',
             'fecha_revision' => 'required|integer|min:1',
+            'hora_taller' => 'required', // Nueva validación
+            'precio' => 'required', // Nueva validación
         ]);
     
         $component->update($validated);
     
         return redirect()->route('components.index')->with('success', '✅ Componente actualizado correctamente.');
     }
+    
 
     public function destroy(Component $component)
     {

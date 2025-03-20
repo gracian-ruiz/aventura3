@@ -12,6 +12,8 @@ return new class extends Migration {
             $table->string('nombre');
             $table->integer('fecha_preaviso')->default(0);
             $table->integer('fecha_revision')->nullable(); // Se almacena en meses
+            $table->integer('hora_taller')->default(0); // Se almacena en horas
+            $table->integer('precio')->default(0); // Precio como entero
             $table->timestamps();
         });
     }

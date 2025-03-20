@@ -11,15 +11,16 @@ class Revision extends Model
     use HasFactory;
 
     protected $fillable = ['bike_id', 'componente_id', 'fecha_revision', 'descripcion', 'proxima_revision'];
+    protected $table = 'revisions';
 
     public function bike()
     {
-        return $this->belongsTo(Bike::class);
+        return $this->belongsTo(Bike::class, 'bike_id');
     }
 
     public function componente()
     {
-        return $this->belongsTo(Component::class, 'componente_id'); // 🔥 Asegurar clave foránea
+        return $this->belongsTo(Component::class, 'componente_id');
     }
 }
 

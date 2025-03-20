@@ -20,15 +20,19 @@ class Appointment extends Model
         'fecha_asignada'
     ];
 
+    protected $table = 'appointments';
+
     public function bike()
     {
-        return $this->belongsTo(Bike::class);
+        return $this->belongsTo(Bike::class, 'bike_id');
     }
 
     public function componentes()
     {
-        return $this->belongsToMany(Component::class, 'appointment_component');
+        return $this->belongsToMany(Component::class, 'appointment_component', 'appointment_id', 'componente_id');
     }
+    
+    
 
     // Calcular la fecha en que se debe atender la cita
     public static function asignarFechas()

@@ -9,8 +9,8 @@ return new class extends Migration {
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('bike_id')->constrained()->onDelete('cascade');
-            $table->foreignId('componente_id')->nullable()->constrained('components')->onDelete('set null');
+            $table->foreignId('bike_id');
+            $table->integer('presupuesto_id')->nullable();
             $table->enum('prioridad', ['normal', 'urgente'])->default('normal');
             $table->enum('estado', ['pendiente', 'en proceso', 'completada'])->default('pendiente');
             $table->integer('tiempo_estimado')->default(0); // Minutos de estimación

@@ -9,6 +9,8 @@ use App\Http\Controllers\ComponentController;
 use App\Http\Controllers\RecordatorioController;
 use App\Http\Controllers\AvisoEnviadoController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\PresupuestoController;
+use App\Models\Bike;
 
 
 
@@ -86,11 +88,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/enviar-recordatorios', [RecordatorioController::class, 'enviarRecordatorios'])->name('enviar.recordatorios');
 
 
-    
+
     // Rutas de citas
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index'); // Ver citas pendientes
     Route::get('/appointments/historico', [AppointmentController::class, 'historico'])->name('appointments.historico');
- // Ver citas completadas
+    // Ver citas completadas
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store'); // Registrar nueva cita
     Route::put('/appointments/{appointment}/updateEstado', [AppointmentController::class, 'updateEstado'])->name('appointments.updateEstado'); // Completar cita
     Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy'); // Eliminar cita
@@ -98,19 +100,35 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
     Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
     Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
-    
+
     Route::get('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])
-    ->name('appointments.confirmCompletion');
+        ->name('appointments.confirmCompletion');
 
     Route::post('/appointments/{appointment}/finalize', [AppointmentController::class, 'finalizeCompletion'])
         ->name('appointments.finalizeCompletion');
 
-        Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])
-    ->name('appointments.complete');
+    Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])
+        ->name('appointments.complete');
 
 
     // ✅ Nueva ruta para update con otro nombre
     Route::put('/{appointment}/updatedos', [AppointmentController::class, 'updatedos'])->name('appointments.updatedos');
+
+
+
+
+    Route::resource('presupuestos', PresupuestoController::class);
+    Route::get('/bikes/by-user/{userId}', function ($userId) {
+        return response()->json(Bike::where('user_id', $userId)->get());
+    });
+
+    Route::get('/presupuestos/create/{user}', [PresupuestoController::class, 'create'])->name('presupuestos.create');
+
+    Route::get('/presupuestos/{id}/factura', [PresupuestoController::class, 'factura'])->name('presupuestos.factura');
+    Route::get('/presupuestos/{id}/pdf', [PresupuestoController::class, 'descargarPDF'])->name('presupuestos.pdf');
+    Route::get('/presupuestos/{id}', [PresupuestoController::class, 'show'])->name('presupuestos.show');
+    Route::patch('/presupuestos/{presupuesto}/estado', [PresupuestoController::class, 'actualizarEstado'])->name('presupuestos.actualizarEstado');
+
 });
 
 
@@ -118,4 +136,4 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

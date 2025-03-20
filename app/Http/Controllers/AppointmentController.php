@@ -13,13 +13,13 @@ use App\Http\Requests\UpdateAppointmentRequest;
 class AppointmentController extends Controller
 {
     public function index(Request $request)
-    {
+    { 
         $search = $request->input('search');
         $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
 
         // Recalcular siempre antes de mostrar la vista
         $this->recalcularFechasAsignadas();
-
+        
         $appointments = Appointment::with('bike.user', 'componentes')
             ->whereIn('estado', ['pendiente', 'en proceso']) // Asegurar que en proceso aparece
             ->when($search, function ($query, $search) {
@@ -61,7 +61,7 @@ class AppointmentController extends Controller
         // Generar revisiones para cada componente seleccionado en la cita
         foreach ($appointment->componentes as $componente) {
             $appointment->bike->revisions()->create([
-                'component_id' => $componente->id,
+                'componente_id' => $componente->id,
                 'fecha_revision' => now(),
                 'descripcion' => "Revisión de " . $componente->nombre,
                 'fecha_proxima_revision' => now()->addDays(30),
@@ -85,26 +85,26 @@ class AppointmentController extends Controller
 
 
         // Crear revisiones para los componentes seleccionados
-        foreach ($request->revisiones as $component_id) {
-            $descripcion = $request->descripcion_revisiones[$component_id] ?? 'Sin descripción';
+        foreach ($request->revisiones as $componente_id) {
+            $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
 
-            $componente = Component::find($component_id);
+            $componente = Component::find($componente_id);
 
 
             // Determinar la fecha de la próxima revisión
-            if ($request->tipo_fecha[$component_id] === 'fija') {
+            if ($request->tipo_fecha[$componente_id] === 'fija') {
                 $dias_a_sumar = $componente ? $componente->fecha_revision : 30; // Si no tiene, usar 30 días por defecto
                 $fecha_proxima = now()->addDays($dias_a_sumar);
             } else {
                 // Si es opcional, se usa la fecha proporcionada
-                $fecha_proxima = $request->proxima_revision[$component_id]
-                    ? Carbon::parse($request->proxima_revision[$component_id])
+                $fecha_proxima = $request->proxima_revision[$componente_id]
+                    ? Carbon::parse($request->proxima_revision[$componente_id])
                     : now()->addDays(30); // Fallback en caso de error
             }
 
             // Crear la revisión asociada a la bicicleta
             $appointment->bike->revisions()->create([
-                'componente_id' => $component_id,
+                'componente_id' => $componente_id,
                 'fecha_revision' => now(),
                 'descripcion' => $descripcion,
                 'proxima_revision' => $fecha_proxima,

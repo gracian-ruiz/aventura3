@@ -41,7 +41,7 @@
                     <th class="py-2 px-4 text-left">Nombre</th>
                     <th class="py-2 px-4 text-left">Email</th>
                     <th class="py-2 px-4 text-left">Telefono</th>
-                    <th class="py-2 px-4 text-left">Rol</th>
+                    <th class="py-2 px-4 text-left">Presupuesto</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
             </thead>
@@ -52,11 +52,10 @@
                         <td class="py-2 px-4">{{ $user->name }}</td>
                         <td class="py-2 px-4">{{ $user->email }}</td>
                         <td class="py-2 px-4">{{ $user->telefono }}</td>
-                        <td class="py-2 px-4">
-                            <span class="px-2 py-1 rounded-full text-xs font-bold 
-                                {{ $user->role == 'admin' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white' }}">
-                                {{ ucfirst($user->role) }}
-                            </span>
+                        <td>
+                            <a href="{{ route('presupuestos.create', $user->id) }}" class="btn btn-primary">
+                                Crear Presupuesto
+                            </a>
                         </td>
                         <td class="py-2 px-4 text-center">
                             <a href="{{ route('users.edit', $user->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Editar</a>

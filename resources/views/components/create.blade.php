@@ -22,6 +22,16 @@
             <input type="number" name="fecha_revision" id="fecha_revision" class="w-full border px-4 py-2 rounded-md" placeholder="Ej: 365" required>
         </div>
 
+        <div class="mb-4">
+            <label for="hora_taller" class="block text-gray-700">Horas de Taller</label>
+            <input type="number" name="hora_taller" id="hora_taller" class="w-full border px-4 py-2 rounded-md" placeholder="Ej: 2" required>
+        </div>
+
+        <div class="mb-4">
+            <label for="precio" class="block text-gray-700">Precio (€)</label>
+            <input type="number"  name="precio" id="precio" class="w-full border px-4 py-2 rounded-md" placeholder="Ej: 50.00" required>
+        </div>
+
         <div class="flex justify-end">
             <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
                 Guardar Componente

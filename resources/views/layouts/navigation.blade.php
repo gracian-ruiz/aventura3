@@ -36,6 +36,9 @@
                         </x-nav-link>
                         <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">
                             Historico Citas
+                        </x-nav-link>
+                        <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">
+                            Presupuestos
                         </x-nav-link>                                                                   
                     @endif
                 </div>

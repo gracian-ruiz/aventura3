@@ -23,6 +23,16 @@
             <input type="number" name="fecha_revision" id="fecha_revision" class="w-full border px-4 py-2 rounded-md" value="{{ $component->fecha_revision }}" required>
         </div>
 
+        <div class="mb-4">
+            <label for="hora_taller" class="block text-gray-700">Horas de Taller</label>
+            <input type="number" step="0.1" name="hora_taller" id="hora_taller" class="w-full border px-4 py-2 rounded-md" value="{{ $component->hora_taller }}" required>
+        </div>
+
+        <div class="mb-4">
+            <label for="precio" class="block text-gray-700">Precio (€)</label>
+            <input type="number"  name="precio" id="precio" class="w-full border px-4 py-2 rounded-md" value="{{ $component->precio }}" required>
+        </div>
+
         <div class="flex justify-end">
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                 Guardar Cambios
