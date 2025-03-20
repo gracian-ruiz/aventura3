@@ -25,21 +25,22 @@
                         <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">
                             Componentes
                         </x-nav-link>
+                        <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">
+                            Presupuestos
+                        </x-nav-link>
+                        <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
+                            Citas
+                        </x-nav-link>  
                         <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">
                             Revisiones
                         </x-nav-link>
                         <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">
                             Mensajes
                         </x-nav-link>
-                        <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
-                            Citas
-                        </x-nav-link>
                         <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">
                             Historico Citas
                         </x-nav-link>
-                        <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">
-                            Presupuestos
-                        </x-nav-link>                                                                   
+                                                                 
                     @endif
                 </div>
             </div>
