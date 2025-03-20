@@ -21,6 +21,7 @@ class PresupuestoController extends Controller
             ->leftJoin('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
             ->leftJoin('users', 'bikes.user_id', '=', 'users.id')
             ->select('presupuestos.*', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
+            ->where('presupuestos.estado', 'pendiente') // Filtrar solo los pendientes
             ->paginate(10); // Agrega paginación
 
         return view('presupuestos.index', compact('presupuestos'));
@@ -94,7 +95,7 @@ class PresupuestoController extends Controller
             $totalHoras += $horas;
             $totalPrecio += $precio;
         }
-
+        //dd($totalPrecio);
         // Actualizar los totales en la tabla presupuestos
         $presupuesto->update([
             'horas_total' => $totalHoras,
@@ -121,12 +122,12 @@ class PresupuestoController extends Controller
                 'users.email as usuario_email'
             )
             ->first();
-    
+
         // Si no se encuentra el presupuesto, retornar error 404
         if (!$presupuesto) {
             abort(404, 'Presupuesto no encontrado');
         }
-    
+
         // Obtener los ítems del presupuesto con los componentes
         $items = DB::table('presupuesto_items')
             ->join('components', 'presupuesto_items.componente_id', '=', 'components.id')
@@ -136,9 +137,9 @@ class PresupuestoController extends Controller
                 'components.nombre as componente_nombre'
             ])
             ->get();
-    
+
         return view('presupuestos.factura', compact('presupuesto', 'items'));
-    }    
+    }
 
     public function descargarPDF($id)
     {
@@ -182,7 +183,7 @@ class PresupuestoController extends Controller
         return $pdf->download($nombreArchivo);
     }
 
-    
+
     public function edit($id)
     {
         // Obtener el presupuesto con los datos de la bicicleta y el usuario
@@ -192,31 +193,37 @@ class PresupuestoController extends Controller
             ->select('presupuestos.*', 'bikes.id as bike_id', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
             ->where('presupuestos.id', $id)
             ->first();
-    
+
         if (!$presupuesto) {
             abort(404);
         }
-    
+
         // Obtener todos los ítems asociados a este presupuesto
         $presupuesto_items = DB::table('presupuesto_items')
-            ->join('components', 'presupuesto_items.componente_id', '=', 'components.id') // Cambio componente_id -> componente_id
-            ->where('presupuesto_items.presupuesto_id', $id)
-            ->select(
-                'presupuesto_items.*',
-                'components.nombre as componente_nombre',
-                'components.hora_taller',
-                'components.precio'
-            )
-            ->get();
+        ->join('components', 'presupuesto_items.componente_id', '=', 'components.id')
+        ->where('presupuesto_items.presupuesto_id', $id)
+        ->select(
+            'presupuesto_items.id',
+            'presupuesto_items.presupuesto_id',
+            'presupuesto_items.componente_id',
+            'presupuesto_items.texto',
+            'presupuesto_items.total_precio', // Ahora obtenemos el precio del presupuesto_item
+            'presupuesto_items.horas_trabajo', // Ahora obtenemos las horas de trabajo editadas
+            'components.nombre as componente_nombre'
+        )
+        ->get();
     
+    
+
         // Obtener todas las bicicletas y componentes disponibles
         $bikes = DB::table('bikes')->get();
         $components = DB::table('components')->get();
-    
+
         return view('presupuestos.edit', compact('presupuesto', 'bikes', 'components', 'presupuesto_items'));
     }
-    
-     
+
+
+
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -227,50 +234,93 @@ class PresupuestoController extends Controller
             'textos' => 'required|array',
         ]);
     
-        // Actualizar el presupuesto principal
-        DB::table('presupuestos')
-            ->where('id', $id)
-            ->update([
-                'bike_id' => $request->bike_id,
-                'updated_at' => now(),
-            ]);
+        DB::beginTransaction();
+        try {
+            // Actualizar el presupuesto principal (sin el total aún)
+            DB::table('presupuestos')
+                ->where('id', $id)
+                ->update([
+                    'bike_id' => $request->bike_id,
+                    'updated_at' => now(),
+                ]);
     
-        // Eliminar los componentes actuales del presupuesto
-        DB::table('presupuesto_items')->where('presupuesto_id', $id)->delete();
+            // Obtener los componentes actuales en la base de datos
+            $componentesActuales = DB::table('presupuesto_items')
+                ->where('presupuesto_id', $id)
+                ->pluck('id', 'componente_id') // Mapea componente_id => id
+                ->toArray();
     
-        // Insertar los nuevos componentes
-        foreach ($request->componentes as $index => $componente_id) {
-            DB::table('presupuesto_items')->insert([
-                'presupuesto_id' => $id,
-                'componente_id' => $componente_id,
-                'horas_trabajo' => $request->horas_trabajo[$index],
-                'total_precio' => $request->precio[$index],
-                'texto' => $request->textos[$index],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $totalPresupuesto = 0; // Inicializar el total
+    
+            foreach ($request->componentes as $index => $componente_id) {
+                $total_precio = (float) $request->precio[$index]; // Convertir a número
+                $totalPresupuesto += $total_precio; // Sumar al total
+    
+                $datosItem = [
+                    'presupuesto_id' => $id,
+                    'horas_trabajo' => $request->horas_trabajo[$index],
+                    'total_precio' => $total_precio,
+                    'texto' => $request->textos[$index],
+                    'updated_at' => now(),
+                ];
+    
+                if (isset($componentesActuales[$componente_id])) {
+                    // Actualizar componente existente
+                    DB::table('presupuesto_items')
+                        ->where('id', $componentesActuales[$componente_id])
+                        ->update($datosItem);
+                    unset($componentesActuales[$componente_id]); // Marcar como procesado
+                } else {
+                    // Insertar nuevo componente
+                    $datosItem['componente_id'] = $componente_id;
+                    $datosItem['created_at'] = now();
+                    DB::table('presupuesto_items')->insert($datosItem);
+                }
+            }
+    
+            // Eliminar los componentes que no fueron enviados en la solicitud
+            if (!empty($componentesActuales)) {
+                DB::table('presupuesto_items')
+                    ->whereIn('id', $componentesActuales)
+                    ->delete();
+            }
+    
+            // **Actualizar el total del presupuesto en la tabla `presupuestos`**
+            DB::table('presupuestos')
+                ->where('id', $id)
+                ->update(['precio_total' => $totalPresupuesto]);
+    
+            DB::commit();
+    
+            return redirect()->route('presupuestos.index')->with('success', 'Presupuesto actualizado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error al actualizar el presupuesto: ' . $e->getMessage());
         }
-    
-        return redirect()->route('presupuestos.index')->with('success', 'Presupuesto actualizado correctamente.');
     }
     
     
+
+
+
+
+
     public function actualizarEstado(Request $request, $id)
     {
         $request->validate([
             'estado' => 'required|in:aprobado,denegado',
         ]);
-    
+
         // Obtener el presupuesto y sus ítems
         $presupuesto = DB::table('presupuestos')->where('id', $id)->first();
-        
+
         if (!$presupuesto) {
             return redirect()->route('presupuestos.index')->with('error', 'Presupuesto no encontrado.');
         }
-    
+
         if ($request->estado === 'aprobado') {
             DB::beginTransaction(); // Iniciar transacción
-    
+
             try {
                 // Crear la cita
                 $appointmentId = DB::table('appointments')->insertGetId([
@@ -282,12 +332,12 @@ class PresupuestoController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-    
+
                 // Obtener los ítems del presupuesto
                 $presupuestoItems = DB::table('presupuesto_items')
                     ->where('presupuesto_id', $presupuesto->id)
                     ->get();
-    
+
                 // Insertar los ítems en appointment_component
                 foreach ($presupuestoItems as $item) {
                     DB::table('appointment_component')->insert([
@@ -300,15 +350,15 @@ class PresupuestoController extends Controller
                         'updated_at' => now(),
                     ]);
                 }
-    
+
                 // Actualizar el estado del presupuesto
                 DB::table('presupuestos')->where('id', $id)->update([
                     'estado' => 'aprobado',
                     'updated_at' => now(),
                 ]);
-    
+
                 DB::commit(); // Confirmar transacción
-    
+
                 return redirect()->route('presupuestos.index')->with('success', 'Presupuesto aprobado y cita creada.');
             } catch (\Exception $e) {
                 dd($e);
@@ -316,15 +366,13 @@ class PresupuestoController extends Controller
                 return redirect()->route('presupuestos.index')->with('error', 'Error al procesar la cita.');
             }
         }
-    
+
         // Si es denegado, solo actualizar el estado del presupuesto
         DB::table('presupuestos')->where('id', $id)->update([
             'estado' => $request->estado,
             'updated_at' => now(),
         ]);
-    
+
         return redirect()->route('presupuestos.index')->with('success', 'Presupuesto actualizado correctamente.');
     }
-    
-    
 }

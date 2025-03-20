@@ -10,7 +10,7 @@
         <!-- Selección de Bicicleta -->
         <div class="mb-4">
             <label class="block text-gray-700">Bicicleta</label>
-            <select name="bike_id" class="w-full border px-4 py-2 rounded-md">
+            <select name="bike_id" id="bike-select" class="w-full border px-4 py-2 rounded-md select2">
                 <option value="">Selecciona una bicicleta</option>
                 @foreach($bikes as $bike)
                     <option value="{{ $bike->id }}">{{ $bike->nombre }} ({{ $bike->marca }})</option>
@@ -22,7 +22,7 @@
         <div class="mb-4">
             <label class="block text-gray-700">Componentes</label>
             <div class="flex items-center">
-                <select id="component-select" class="w-full border px-4 py-2 rounded-md">
+                <select id="component-select" class="w-full border px-4 py-2 rounded-md select2">
                     <option value="">Selecciona un componente</option>
                     @foreach($components as $component)
                         <option value="{{ $component->id }}" 
@@ -52,7 +52,7 @@
                     </tr>
                 </thead>
                 <tbody id="component-list">
-                    <!-- Aquí se añadirán los componentes dinámicamente -->
+                    <!-- Componentes dinámicos -->
                 </tbody>
             </table>
         </div>
@@ -68,60 +68,64 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+
 <script>
-document.getElementById('add-component').addEventListener('click', function() {
-    let select = document.getElementById('component-select');
-    let selectedOption = select.options[select.selectedIndex];
-
-    if (selectedOption.value === "") return;
-
-    let componentId = selectedOption.value;
-    let nombre = selectedOption.getAttribute('data-nombre');
-    let horas = selectedOption.getAttribute('data-horas') || 0;
-    let precio = selectedOption.getAttribute('data-precio') || 0;
-    
-    let tableBody = document.getElementById('component-list');
-
-    // Permitir repetir solo el componente "Material"
-    if (nombre !== "Material" && document.querySelector(`#component-list tr[data-id="${componentId}"]`)) {
-        alert('Este componente ya ha sido añadido.');
-        return;
-    }
-
-    // Crear la fila de la tabla con inputs editables
-    let newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td class="border px-4 py-2">${nombre}</td>
-        <td class="border px-4 py-2">
-            <input type="number" name="horas_trabajo[]" value="${horas}" min="0" step="0.1" class="w-full border rounded px-2 py-1">
-        </td>
-        <td class="border px-4 py-2">
-            <input type="number" name="precios[]" value="${precio}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
-        </td>
-        <td class="border px-4 py-2">
-            <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
-        </td>
-        <td class="border px-4 py-2">
-            <button type="button" class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
-                Eliminar
-            </button>
-        </td>
-        <input type="hidden" name="componentes[]" value="${componentId}">
-    `;
-
-    // Asegurar que solo "Material" se puede repetir
-    if (nombre !== "Material") {
-        newRow.setAttribute('data-id', componentId);
-    }
-
-    tableBody.appendChild(newRow);
-
-    // Agregar evento de eliminación
-    newRow.querySelector('.remove-component').addEventListener('click', function() {
-        tableBody.removeChild(newRow);
+$(document).ready(function() {
+    $('.select2').select2({
+        placeholder: "Selecciona una opción",
+        allowClear: true
     });
 
-    select.value = "";
+    $('#add-component').on('click', function() {
+        let select = $('#component-select');
+        let selectedOption = select.find(':selected');
+
+        if (!selectedOption.val()) return;
+
+        let componentId = selectedOption.val();
+        let nombre = selectedOption.data('nombre');
+        let horas = selectedOption.data('horas') || 0;
+        let precio = selectedOption.data('precio') || 0;
+        let tableBody = $('#component-list');
+
+        // Permitir repetir solo "Material"
+        if (nombre !== "Material" && tableBody.find(`tr[data-id='${componentId}']`).length) {
+            alert('Este componente ya ha sido añadido.');
+            return;
+        }
+
+        let newRow = `
+            <tr data-id="${nombre !== 'Material' ? componentId : ''}">
+                <td class="border px-4 py-2">${nombre}</td>
+                <td class="border px-4 py-2">
+                    <input type="number" name="horas_trabajo[]" value="${horas}" min="0" step="0.1" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="border px-4 py-2">
+                    <input type="number" name="precios[]" value="${precio}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="border px-4 py-2">
+                    <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="border px-4 py-2">
+                    <button type="button" class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                        Eliminar
+                    </button>
+                </td>
+                <input type="hidden" name="componentes[]" value="${componentId}">
+            </tr>`;
+
+        tableBody.append(newRow);
+
+        // Agregar evento de eliminación
+        $('.remove-component').on('click', function() {
+            $(this).closest('tr').remove();
+        });
+
+        select.val(null).trigger('change');
+    });
 });
 </script>
 @endsection

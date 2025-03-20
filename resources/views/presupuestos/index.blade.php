@@ -70,16 +70,22 @@
                             @endif
                         </td>
                         <td class="py-2 px-4 text-center">
-                            <a href="{{ route('presupuestos.edit', $presupuesto->id) }}"
-                                class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
-                                Editar
-                            </a>                                                         
-                            
-                            <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" 
-                               class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600" target="_blank">
-                                Descargar PDF
-                            </a>
+                            <div class="flex flex-col space-y-2">
+                                <a href="{{ route('presupuestos.edit', $presupuesto->id) }}"
+                                    class="px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                                    Editar
+                                </a>                       
+                                <a href="{{ url("/presupuestos/{$presupuesto->id}/factura") }}" 
+                                    class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                     Ver Factura
+                                 </a>
+                                <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" 
+                                   class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                                    Descargar PDF
+                                </a>
+                            </div>
                         </td>
+                                                                     
                     </tr>
                 @endforeach
             </tbody>
