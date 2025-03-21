@@ -14,6 +14,16 @@
             <p class="text-gray-900 font-semibold">{{ $appointment->bike->nombre }} - {{ $appointment->bike->user->name }}</p>
         </div>
 
+        <!-- Prioridad de la Cita -->
+        <div class="mb-4">
+            <label for="prioridad" class="block text-gray-700">Prioridad</label>
+            <select name="prioridad" class="w-full border px-4 py-2 rounded-md" required>
+                <option value="normal" {{ $appointment->prioridad == 'normal' ? 'selected' : '' }}>Normal</option>
+                <option value="urgente" {{ $appointment->prioridad == 'urgente' ? 'selected' : '' }}>Urgente</option>
+            </select>
+        </div>
+
+
         <!-- Descripción del Problema -->
         <div class="mb-4">
             <label for="descripcion_problema" class="block text-gray-700">Descripción del Problema</label>

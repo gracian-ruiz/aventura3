@@ -150,12 +150,14 @@ class AppointmentController extends Controller
             'tiempo_estimado' => 'required|integer|min:1',
             'componentes' => 'nullable|array', // Permitir que sea opcional
             'componentes.*' => 'exists:components,id', // Validar que los IDs existen en la tabla
+            'prioridad' => 'required|in:normal,urgente',
         ]);
 
         // Actualizar los datos de la cita
         $appointment->update([
             'descripcion_problema' => $request->descripcion_problema,
             'tiempo_estimado' => $request->tiempo_estimado,
+            'prioridad' => $request->prioridad, // Guardar prioridad
         ]);
 
         // Sincronizar los componentes seleccionados en la tabla intermedia
