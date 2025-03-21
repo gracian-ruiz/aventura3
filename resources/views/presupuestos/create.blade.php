@@ -91,14 +91,24 @@ $(document).ready(function() {
         let precio = selectedOption.data('precio') || 0;
         let tableBody = $('#component-list');
 
-        // Permitir repetir solo "Material"
-        if (nombre !== "Material" && tableBody.find(`tr[data-id='${componentId}']`).length) {
+        // Verificar si el componente ya está en la tabla
+        let exists = tableBody.find(`tr[data-id='${componentId}']`).length > 0;
+        let materialExists = tableBody.find("tr[data-nombre='Material']").length > 0;
+
+        // Bloquear más de un "Material"
+        if (nombre === "Material" && materialExists) {
+            alert('Solo puedes agregar un componente de tipo "Material".');
+            return;
+        }
+
+        // Bloquear componentes repetidos (excepto "Material")
+        if (nombre !== "Material" && exists) {
             alert('Este componente ya ha sido añadido.');
             return;
         }
 
         let newRow = `
-            <tr data-id="${nombre !== 'Material' ? componentId : ''}">
+            <tr data-id="${componentId}" data-nombre="${nombre}">
                 <td class="border px-4 py-2">${nombre}</td>
                 <td class="border px-4 py-2">
                     <input type="number" name="horas_trabajo[]" value="${horas}" min="0" step="0.1" class="w-full border rounded px-2 py-1">
