@@ -42,8 +42,20 @@
         <p class="text-gray-600">No se encontró la cita.</p>
     @endif
 
-    <a href="{{ route('appointments.index') }}" class="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-        Volver a Citas
-    </a>
+    <div class="mt-4 flex space-x-4">
+        <!-- Botón Volver -->
+        <a href="{{ route('appointments.index') }}" class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+            Volver a Citas
+        </a>
+
+        <!-- Botón Descargar Presupuesto -->
+        @if (!empty($appointment[0]->presupuesto))
+        <a href="{{ route('presupuestos.pdf', $appointment[0]->presupuesto) }}" 
+           class="btn text-white px-4 py-2 rounded-md" style="background-color: #E1251B;">
+            <i class="fas fa-file-pdf"></i> Descargar PDF
+        </a>
+    @endif
+    
+    </div>
 </div>
 @endsection

@@ -388,6 +388,7 @@ class AppointmentController extends Controller
         ->leftJoin('components', 'appointment_component.componente_id', '=', 'components.id') // Asegúrate de que es `componente_id`
         ->select(
             'appointments.id as appointment_id',
+            'appointments.presupuesto_id as presupuesto',
             'appointments.fecha_asignada as appointment_fecha', // Corregido según tu modelo
             'bikes.nombre as bike_nombre',
             'bikes.marca as bike_marca',

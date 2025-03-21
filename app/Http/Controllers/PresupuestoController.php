@@ -236,7 +236,7 @@ class PresupuestoController extends Controller
     
         DB::beginTransaction();
         try {
-            // Actualizar el presupuesto principal (sin el total aún)
+            // Actualizar el presupuesto principal (sin los totales aún)
             DB::table('presupuestos')
                 ->where('id', $id)
                 ->update([
@@ -250,15 +250,19 @@ class PresupuestoController extends Controller
                 ->pluck('id', 'componente_id') // Mapea componente_id => id
                 ->toArray();
     
-            $totalPresupuesto = 0; // Inicializar el total
+            $totalPresupuesto = 0; // Inicializar el total de precio
+            $totalHoras = 0; // Inicializar el total de horas
     
             foreach ($request->componentes as $index => $componente_id) {
-                $total_precio = (float) $request->precio[$index]; // Convertir a número
-                $totalPresupuesto += $total_precio; // Sumar al total
+                $horas_trabajo = (int) $request->horas_trabajo[$index];
+                $total_precio = (float) $request->precio[$index];
+    
+                $totalPresupuesto += $total_precio; // Sumar al total de precio
+                $totalHoras += $horas_trabajo; // Sumar al total de horas
     
                 $datosItem = [
                     'presupuesto_id' => $id,
-                    'horas_trabajo' => $request->horas_trabajo[$index],
+                    'horas_trabajo' => $horas_trabajo,
                     'total_precio' => $total_precio,
                     'texto' => $request->textos[$index],
                     'updated_at' => now(),
@@ -288,7 +292,10 @@ class PresupuestoController extends Controller
             // **Actualizar el total del presupuesto en la tabla `presupuestos`**
             DB::table('presupuestos')
                 ->where('id', $id)
-                ->update(['precio_total' => $totalPresupuesto]);
+                ->update([
+                    'horas_total' => $totalHoras, // Agregamos la actualización de horas
+                    'precio_total' => $totalPresupuesto,
+                ]);
     
             DB::commit();
     
@@ -298,6 +305,7 @@ class PresupuestoController extends Controller
             return redirect()->back()->with('error', 'Error al actualizar el presupuesto: ' . $e->getMessage());
         }
     }
+    
     
     
 
@@ -325,6 +333,7 @@ class PresupuestoController extends Controller
                 // Crear la cita
                 $appointmentId = DB::table('appointments')->insertGetId([
                     'bike_id' => $presupuesto->bike_id,
+                    'presupuesto_id' => $presupuesto->id,
                     'descripcion_problema' => 'Cita generada desde presupuesto aprobado',
                     'tiempo_estimado' => $presupuesto->horas_total, // Convertir horas a minutos
                     'estimacion_reparacion' => $presupuesto->precio_total,
