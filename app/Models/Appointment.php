@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Appointment extends Model
 {
@@ -29,8 +30,10 @@ class Appointment extends Model
 
     public function componentes()
     {
-        return $this->belongsToMany(Component::class, 'appointment_component', 'appointment_id', 'componente_id');
+        return $this->belongsToMany(Component::class, 'appointment_component', 'appointment_id', 'componente_id')
+            ->withPivot('horas_trabajo', 'total_precio', 'texto');
     }
+    
     
     
 

@@ -1,0 +1,49 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-4">Detalles de la Cita</h2>
+
+    @if ($appointment->isNotEmpty())
+        <!-- Información de la Bicicleta -->
+        <div class="mb-4">
+            <p class="text-gray-700"><strong>Bicicleta:</strong> {{ $appointment[0]->bike_nombre }}</p>
+            <p class="text-gray-700"><strong>Marca:</strong> {{ $appointment[0]->bike_marca }}</p>
+            <p class="text-gray-700"><strong>Fecha de la Cita:</strong> {{ $appointment[0]->appointment_fecha }}</p>
+        </div>
+
+        <!-- Componentes y Trabajos -->
+        @if ($appointment->first()->component_nombre)
+            <h3 class="text-xl font-semibold mb-3">Trabajos a realizar</h3>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2">Componente</th>
+                        <th class="border px-4 py-2">Horas Taller</th>
+                        <th class="border px-4 py-2">Precio</th>
+                        <th class="border px-4 py-2">Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($appointment as $item)
+                        <tr>
+                            <td class="border px-4 py-2">{{ $item->component_nombre }}</td>
+                            <td class="border px-4 py-2">{{ $item->horas_trabajo }}</td>
+                            <td class="border px-4 py-2">{{ $item->total_precio }}€</td>
+                            <td class="border px-4 py-2">{{ $item->texto }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @else
+            <p class="text-gray-600">No hay componentes asociados a esta cita.</p>
+        @endif
+    @else
+        <p class="text-gray-600">No se encontró la cita.</p>
+    @endif
+
+    <a href="{{ route('appointments.index') }}" class="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        Volver a Citas
+    </a>
+</div>
+@endsection

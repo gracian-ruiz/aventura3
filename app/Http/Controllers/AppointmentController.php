@@ -9,17 +9,18 @@ use App\Models\Component;
 use Carbon\Carbon;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
     public function index(Request $request)
-    { 
+    {
         $search = $request->input('search');
         $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
 
         // Recalcular siempre antes de mostrar la vista
         $this->recalcularFechasAsignadas();
-        
+
         $appointments = Appointment::with('bike.user', 'componentes')
             ->whereIn('estado', ['pendiente', 'en proceso']) // Asegurar que en proceso aparece
             ->when($search, function ($query, $search) {
@@ -150,23 +151,23 @@ class AppointmentController extends Controller
             'componentes' => 'nullable|array', // Permitir que sea opcional
             'componentes.*' => 'exists:components,id', // Validar que los IDs existen en la tabla
         ]);
-    
+
         // Actualizar los datos de la cita
         $appointment->update([
             'descripcion_problema' => $request->descripcion_problema,
             'tiempo_estimado' => $request->tiempo_estimado,
         ]);
-    
+
         // Sincronizar los componentes seleccionados en la tabla intermedia
         if ($request->has('componentes')) {
             $appointment->componentes()->sync($request->componentes);
         } else {
             $appointment->componentes()->detach(); // Si no se selecciona ninguno, se eliminan
         }
-    
+
         return redirect()->route('appointments.index')->with('success', '✅ Cita actualizada correctamente.');
     }
-    
+
 
 
 
@@ -378,4 +379,33 @@ class AppointmentController extends Controller
             }
         }
     }
+
+    public function show($id)
+    {
+        $appointment = DB::table('appointments')
+        ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
+        ->leftJoin('appointment_component', 'appointments.id', '=', 'appointment_component.appointment_id')
+        ->leftJoin('components', 'appointment_component.componente_id', '=', 'components.id') // Asegúrate de que es `componente_id`
+        ->select(
+            'appointments.id as appointment_id',
+            'appointments.fecha_asignada as appointment_fecha', // Corregido según tu modelo
+            'bikes.nombre as bike_nombre',
+            'bikes.marca as bike_marca',
+            'components.nombre as component_nombre',
+            'appointment_component.horas_trabajo',
+            'appointment_component.total_precio',
+            'appointment_component.texto'
+        )
+        ->where('appointments.id', $id)
+        ->get();
+    
+    
+        if ($appointment->isEmpty()) {
+            abort(404, 'Cita no encontrada');
+        }
+    
+        return view('appointments.show', compact('appointment'));
+    }
+    
+    
 }

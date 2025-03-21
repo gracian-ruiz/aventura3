@@ -95,6 +95,10 @@
                                 class="block px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 my-1">
                                 Editar
                             </a>
+                            <a href="{{ route('appointments.show', $appointment->id) }}" class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                                Ver
+                            </a>
+                            
 
                             <!-- Botón Eliminar -->
                             <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">

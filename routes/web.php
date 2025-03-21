@@ -109,6 +109,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])
         ->name('appointments.complete');
+    Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 
 
     // ✅ Nueva ruta para update con otro nombre
@@ -128,7 +129,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/presupuestos/{id}/pdf', [PresupuestoController::class, 'descargarPDF'])->name('presupuestos.pdf');
     Route::get('/presupuestos/{id}', [PresupuestoController::class, 'show'])->name('presupuestos.show');
     Route::patch('/presupuestos/{presupuesto}/estado', [PresupuestoController::class, 'actualizarEstado'])->name('presupuestos.actualizarEstado');
-
 });
 
 
