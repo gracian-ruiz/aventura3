@@ -231,12 +231,11 @@ class PresupuestoController extends Controller
             'componentes' => 'required|array',
             'horas_trabajo' => 'required|array',
             'precio' => 'required|array',
-            'textos' => 'required|array',
+            'textos' => 'nullable|array',
         ]);
     
         DB::beginTransaction();
         try {
-            // Actualizar el presupuesto principal (sin los totales aún)
             DB::table('presupuestos')
                 ->where('id', $id)
                 ->update([
@@ -244,56 +243,51 @@ class PresupuestoController extends Controller
                     'updated_at' => now(),
                 ]);
     
-            // Obtener los componentes actuales en la base de datos
             $componentesActuales = DB::table('presupuesto_items')
                 ->where('presupuesto_id', $id)
-                ->pluck('id', 'componente_id') // Mapea componente_id => id
+                ->pluck('id', 'componente_id')
                 ->toArray();
     
-            $totalPresupuesto = 0; // Inicializar el total de precio
-            $totalHoras = 0; // Inicializar el total de horas
+            $totalPresupuesto = 0;
+            $totalHoras = 0;
     
             foreach ($request->componentes as $index => $componente_id) {
                 $horas_trabajo = (int) $request->horas_trabajo[$index];
                 $total_precio = (float) $request->precio[$index];
     
-                $totalPresupuesto += $total_precio; // Sumar al total de precio
-                $totalHoras += $horas_trabajo; // Sumar al total de horas
+                $totalPresupuesto += $total_precio;
+                $totalHoras += $horas_trabajo;
     
                 $datosItem = [
                     'presupuesto_id' => $id,
                     'horas_trabajo' => $horas_trabajo,
                     'total_precio' => $total_precio,
-                    'texto' => $request->textos[$index],
+                    'texto' => isset($request->textos[$index]) ? $request->textos[$index] : '', // Usa cadena vacía si no está definido
                     'updated_at' => now(),
                 ];
     
                 if (isset($componentesActuales[$componente_id])) {
-                    // Actualizar componente existente
                     DB::table('presupuesto_items')
                         ->where('id', $componentesActuales[$componente_id])
                         ->update($datosItem);
-                    unset($componentesActuales[$componente_id]); // Marcar como procesado
+                    unset($componentesActuales[$componente_id]);
                 } else {
-                    // Insertar nuevo componente
                     $datosItem['componente_id'] = $componente_id;
                     $datosItem['created_at'] = now();
                     DB::table('presupuesto_items')->insert($datosItem);
                 }
             }
     
-            // Eliminar los componentes que no fueron enviados en la solicitud
             if (!empty($componentesActuales)) {
                 DB::table('presupuesto_items')
                     ->whereIn('id', $componentesActuales)
                     ->delete();
             }
     
-            // **Actualizar el total del presupuesto en la tabla `presupuestos`**
             DB::table('presupuestos')
                 ->where('id', $id)
                 ->update([
-                    'horas_total' => $totalHoras, // Agregamos la actualización de horas
+                    'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
                 ]);
     
@@ -307,11 +301,6 @@ class PresupuestoController extends Controller
     }
     
     
-    
-
-
-
-
 
     public function actualizarEstado(Request $request, $id)
     {

@@ -4,7 +4,7 @@
 <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
     <h2 class="text-2xl font-bold mb-4">Crear Presupuesto</h2>
 
-    <form action="{{ route('presupuestos.store') }}" method="POST">
+    <form id="budget-form" action="{{ route('presupuestos.store') }}" method="POST">
         @csrf
 
         <!-- Selección de Bicicleta -->
@@ -16,6 +16,7 @@
                     <option value="{{ $bike->id }}">{{ $bike->nombre }} ({{ $bike->marca }})</option>
                 @endforeach
             </select>
+            <p id="bike-error" class="text-red-500 text-sm mt-1 hidden">Debes seleccionar una bicicleta.</p>
         </div>
 
         <!-- Selección de Componentes -->
@@ -37,6 +38,7 @@
                     + Añadir
                 </button>
             </div>
+            <p id="component-error" class="text-red-500 text-sm mt-1 hidden">Debes añadir al menos un componente.</p>
         </div>
 
         <!-- Tabla de Componentes -->
@@ -77,6 +79,31 @@ $(document).ready(function() {
     $('.select2').select2({
         placeholder: "Selecciona una opción",
         allowClear: true
+    });
+
+    // Validar selección de bicicleta y componentes antes de enviar el formulario
+    $('#budget-form').on('submit', function(event) {
+        let bikeSelected = $('#bike-select').val();
+        let componentsAdded = $('#component-list tr').length > 0;
+        let valid = true;
+
+        if (!bikeSelected) {
+            $('#bike-error').removeClass('hidden');
+            valid = false;
+        } else {
+            $('#bike-error').addClass('hidden');
+        }
+
+        if (!componentsAdded) {
+            $('#component-error').removeClass('hidden');
+            valid = false;
+        } else {
+            $('#component-error').addClass('hidden');
+        }
+
+        if (!valid) {
+            event.preventDefault(); // Evita el envío del formulario si hay errores
+        }
     });
 
     $('#add-component').on('click', function() {
@@ -129,9 +156,17 @@ $(document).ready(function() {
 
         tableBody.append(newRow);
 
+        // Ocultar error si se añade un componente
+        $('#component-error').addClass('hidden');
+
         // Agregar evento de eliminación
         $('.remove-component').on('click', function() {
             $(this).closest('tr').remove();
+
+            // Mostrar error si no hay componentes después de eliminar
+            if ($('#component-list tr').length === 0) {
+                $('#component-error').removeClass('hidden');
+            }
         });
 
         select.val(null).trigger('change');
