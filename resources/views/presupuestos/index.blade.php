@@ -83,6 +83,10 @@
                                    class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
                                     Descargar PDF
                                 </a>
+                                <a href="{{ route('presupuesto.enviar', ['clienteId' => $presupuesto->user_id, 'presupuestoId' => $presupuesto->id]) }}" 
+                                    class="bg-green-500 text-white px-4 py-2 rounded">
+                                    📩 Enviar PDF por WhatsApp
+                                </a>                                
                             </div>
                         </td>
                                                                      

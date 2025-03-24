@@ -10,6 +10,7 @@ use App\Http\Controllers\RecordatorioController;
 use App\Http\Controllers\AvisoEnviadoController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PresupuestoController;
+use App\Http\Controllers\WhatsappController;
 use App\Models\Bike;
 
 
@@ -129,6 +130,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/presupuestos/{id}/pdf', [PresupuestoController::class, 'descargarPDF'])->name('presupuestos.pdf');
     Route::get('/presupuestos/{id}', [PresupuestoController::class, 'show'])->name('presupuestos.show');
     Route::patch('/presupuestos/{presupuesto}/estado', [PresupuestoController::class, 'actualizarEstado'])->name('presupuestos.actualizarEstado');
+
+    Route::get('/presupuesto/{clienteId}/{presupuestoId}/enviar', [WhatsAppController::class, 'enviarPresupuestoWhatsApp'])
+    ->name('presupuesto.enviar');
+
 });
 
 
