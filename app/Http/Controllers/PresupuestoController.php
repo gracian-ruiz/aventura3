@@ -15,17 +15,28 @@ use App\Models\Cita;
 
 class PresupuestoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $presupuestos = DB::table('presupuestos')
+        $query = DB::table('presupuestos')
             ->leftJoin('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
             ->leftJoin('users', 'bikes.user_id', '=', 'users.id')
             ->select('presupuestos.*', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
-            ->where('presupuestos.estado', 'pendiente') // Filtrar solo los pendientes
-            ->paginate(10); // Agrega paginación
-
+            ->where('presupuestos.estado', 'pendiente'); // Filtrar solo los pendientes
+    
+        // Aplicar filtro de búsqueda
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('users.name', 'like', "%$search%")
+                  ->orWhere('bikes.nombre', 'like', "%$search%");
+            });
+        }
+    
+        $presupuestos = $query->paginate(10)->appends(['search' => $request->search]); // Mantiene el término en la paginación
+    
         return view('presupuestos.index', compact('presupuestos'));
     }
+    
 
     public function create($userId)
     {
