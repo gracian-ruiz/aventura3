@@ -30,7 +30,7 @@
         <table class="min-w-full bg-white shadow-md rounded-lg">
             <thead class="bg-gray-800 text-white">
                 <tr>
-                    <th class="py-2 px-4 text-left">ID</th>
+                    {{-- <th class="py-2 px-4 text-left">ID</th> --}}
                     <th class="py-2 px-4 text-left">Bicicleta</th>
                     <th class="py-2 px-4 text-left">Usuario</th>
                     <th class="py-2 px-4 text-left">Componentes</th>
@@ -38,7 +38,7 @@
                     <th class="py-2 px-4 text-left">Tiempo Estimado</th>
                     <th class="py-2 px-4 text-left">Fecha Creación</th>
                     <th class="py-2 px-4 text-left">Fecha Asignada</th>
-                    <th class="py-2 px-4 text-left">Descripción Problema</th>
+{{--                     <th class="py-2 px-4 text-left">Descripción Problema</th> --}}
                     <th class="py-2 px-4 text-left">Estado</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
@@ -46,7 +46,7 @@
             <tbody class="divide-y divide-gray-300">
                 @foreach ($appointments as $appointment)
                     <tr class="hover:bg-gray-100 {{ $appointment->estado == 'en proceso' ? 'bg-yellow-200' : '' }}">
-                        <td class="py-2 px-4">{{ $appointment->id }}</td>
+                        {{-- <td class="py-2 px-4">{{ $appointment->id }}</td> --}}
                         <td class="py-2 px-4">{{ $appointment->bike->nombre }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
                         <td class="py-2 px-4">
@@ -67,7 +67,7 @@
                         <td class="py-2 px-4">
                             {{ $appointment->fecha_asignada ? \Carbon\Carbon::parse($appointment->fecha_asignada)->format('d/m/Y') : 'Pendiente' }}
                         </td>
-                        <td class="py-2 px-4">{{ $appointment->descripcion_problema ?? 'N/A' }}</td>
+                       {{--  <td class="py-2 px-4">{{ $appointment->descripcion_problema ?? 'N/A' }}</td> --}}
                         <td class="py-2 px-4">{{ ucfirst($appointment->estado) }}</td>
                         <td class="py-2 px-4 text-center">
                             <!-- Botón Revisar (solo si está pendiente) -->
