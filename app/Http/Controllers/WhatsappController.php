@@ -70,7 +70,7 @@ class WhatsAppController extends Controller
         // Nombre del archivo PDF basado en el ID del presupuesto
         $nombreArchivo = "presupuesto_{$presupuestoId}.pdf";
         $rutaAlmacenamiento = "public/presupuestos/$nombreArchivo";
-
+        
         // Generar y guardar el PDF
         $pdf = Pdf::loadView('pdf.presupuesto2', compact('presupuesto', 'items'));
         Storage::put($rutaAlmacenamiento, $pdf->output());
@@ -85,7 +85,7 @@ class WhatsAppController extends Controller
             $twilio = new Client(env('TWILIO_SID'), env('TWILIO_AUTH_TOKEN'));
 
             // Obtener URL del PDF
-            $pdfUrl = asset("storage/presupuestos/" . basename($pdfPath));
+            $pdfUrl = url("storage/presupuestos/" . basename($pdfPath));
             
             // Enviar mensaje con PDF adjunto
             $twilio->messages->create(

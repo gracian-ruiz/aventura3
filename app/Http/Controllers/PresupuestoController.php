@@ -152,45 +152,35 @@ class PresupuestoController extends Controller
         return view('presupuestos.factura', compact('presupuesto', 'items'));
     }
 
-    public function descargarPDF($id)
+    public function descargarPDF($presupuestoId)
     {
-        // Obtener el presupuesto con la bicicleta y el usuario
         $presupuesto = DB::table('presupuestos')
             ->join('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
             ->join('users', 'bikes.user_id', '=', 'users.id')
-            ->where('presupuestos.id', $id)
-            ->select(
-                'presupuestos.*',
-                'bikes.id as bicicleta_id', // Asegura que este campo esté disponible
-                'bikes.nombre as bicicleta_nombre',
-                'users.name as usuario_nombre',
-                'users.telefono as usuario_telefono'
-            )
+            ->where('presupuestos.id', $presupuestoId)
+            ->select('presupuestos.*', 'bikes.nombre as bicicleta_nombre', 'users.name as usuario_nombre')
             ->first();
 
-
+        $items = DB::table('presupuesto_items')
+            ->join('components', 'presupuesto_items.componente_id', '=', 'components.id')
+            ->where('presupuesto_items.presupuesto_id', $presupuestoId)
+            ->select('presupuesto_items.*', 'components.nombre as componente_nombre')
+            ->get();
+    
         // Si no se encuentra el presupuesto, retornar error 404
         if (!$presupuesto) {
             abort(404, 'Presupuesto no encontrado');
         }
+    
 
-        // Obtener los ítems del presupuesto con los componentes
-        $items = DB::table('presupuesto_items')
-            ->join('components', 'presupuesto_items.componente_id', '=', 'components.id')
-            ->where('presupuesto_items.presupuesto_id', $id)
-            ->select([
-                'presupuesto_items.*',
-                'components.nombre as componente_nombre'
-            ])
-            ->get();
-
+    
         // Generar el nombre del archivo PDF
         $nombreArchivo = "Factura_{$presupuesto->usuario_nombre}_{$presupuesto->bicicleta_nombre}_" .
             date('Y-m-d', strtotime($presupuesto->created_at)) . ".pdf";
-
+    
         // Generar PDF
         $pdf = Pdf::loadView('pdf.presupuesto', compact('presupuesto', 'items'));
-
+    
         return $pdf->download($nombreArchivo);
     }
 
