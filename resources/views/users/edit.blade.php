@@ -29,7 +29,7 @@
         <div class="mb-4">
             <label for="telefono" class="block text-gray-700">Número de Teléfono</label>
             <input type="text" name="telefono" id="telefono" value="{{ old('telefono', $user->telefono ?? '') }}"
-                   class="w-full border px-4 py-2 rounded-md" placeholder="Ejemplo: +34612345678" required>
+                   class="w-full border px-4 py-2 rounded-md" placeholder="Ejemplo: 612345678" required>
         </div>
 
         <!-- Rol -->
@@ -37,6 +37,7 @@
             <label for="role" class="block text-gray-700 font-semibold mb-2">Rol</label>
             <select id="role" name="role" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                 <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>Usuario</option>
+                <option value="taller" {{ $user->role === 'taller' ? 'selected' : '' }}>Taller</option>
                 <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Administrador</option>
             </select>
         </div>

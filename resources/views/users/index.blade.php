@@ -53,10 +53,24 @@
                         <td class="py-2 px-4">{{ $user->email }}</td>
                         <td class="py-2 px-4">{{ $user->telefono }}</td>
                         <td>
-                            <a href="{{ route('presupuestos.create', $user->id) }}" class="btn btn-primary">
+                            <a href="{{ route('presupuestos.create', $user->id) }}" class="btn custom-btn">
                                 Crear Presupuesto
                             </a>
                         </td>
+                        
+                        <style>
+                            .custom-btn {
+                                background-color: #30e16e; /* Color naranja */
+                                color: white; /* Texto en blanco */
+                                border: none;
+                            }
+                        
+                            .custom-btn:hover {
+                                background-color: #e64a19; /* Naranja más oscuro al pasar el mouse */
+                            }
+                        </style>
+                        
+                        
                         <td class="py-2 px-4 text-center">
                             <a href="{{ route('users.edit', $user->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Editar</a>
 
