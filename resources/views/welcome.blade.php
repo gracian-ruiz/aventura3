@@ -15,7 +15,7 @@
         @if (Route::has('login'))
             <div class="sm:fixed sm:top-0 sm:right-0 p-6 text-right z-10">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="font-semibold text-gray-600 hover:text-gray-900">Dashboard</a>
+                    <a href="{{ route('users.index') }}" class="font-semibold text-gray-600 hover:text-gray-900">Admin</a>
                 @else
                     <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900">Iniciar sesión</a>
                     @if (Route::has('register'))
