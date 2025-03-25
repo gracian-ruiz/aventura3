@@ -41,14 +41,14 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'admin','taller'])->group(function () {
     Route::get('/admin', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 });
 
 
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'admin','taller'])->group(function () {
     Route::get('/usuarios', [UserController::class, 'index'])->name('users.index');
     Route::get('/usuarios/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/usuarios', [UserController::class, 'store'])->name('users.store');
@@ -64,7 +64,7 @@ Route::get('/usuarios/data', [UserController::class, 'getUsers'])->name('users.d
 
 
 // Rutas protegidas por autenticación
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'admin','taller'])->group(function () {
 
     // ✅ Bicicletas
     Route::resource('bikes', BikeController::class);
