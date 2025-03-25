@@ -40,16 +40,22 @@ class UserController extends Controller
 
     public function store(UserRequest $request)
     {
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'telefono' => $request->telefono,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
-
-        return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
+        try {
+            User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'telefono' => $request->telefono,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+            ]);
+    
+            return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Hubo un problema al crear el usuario: ' . $e->getMessage()])
+                         ->withInput();
+        }
     }
+    
 
     public function edit(User $user)
     {
