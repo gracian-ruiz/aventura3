@@ -23,7 +23,7 @@
         <p>Correo: aventurabikepk@gmail.com</p>
     </div>
 
-    <h2>Factura del Presupuesto #{{ $presupuesto->id }}</h2>
+    <h2>Presupuesto #{{ $presupuesto->id }}</h2>
     
     <p><strong>Cliente:</strong> {{ $presupuesto->usuario_nombre }}</p>
     <p><strong>Bicicleta:</strong> {{ $presupuesto->bicicleta_nombre }}</p>

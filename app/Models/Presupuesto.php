@@ -17,6 +17,8 @@ class Presupuesto extends Model
         'horas_total',
         'precio_total',
         'estado',
+        'token_presupuesto',
+        'mensaje_enviado'
     ];
 
     public function items()

@@ -33,6 +33,8 @@ class WhatsAppController extends Controller
             )
             ->first();
 
+            $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
+
         if (!$presupuesto) {
             return response()->json(['error' => 'Presupuesto no encontrado'], 404);
         }
@@ -45,7 +47,10 @@ class WhatsAppController extends Controller
             $mensaje = "📄 ¡Hola {$cliente->name}! Te enviamos el presupuesto de tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
                 . "📎 Adjuntamos el PDF con los detalles.";
 
-            $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath);
+            $mensaje .= "\n🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
+
+
+            $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
         }
 
         return back()->with('success', '📩 Presupuesto enviado por WhatsApp.');
@@ -78,7 +83,7 @@ class WhatsAppController extends Controller
         return storage_path("app/$rutaAlmacenamiento");
     }
 
-    private function enviarMensajeWhatsApp($telefono, $mensaje, $pdfPath)
+    private function enviarMensajeWhatsApp($telefono, $mensaje, $pdfPath, $presupuestoId)
     {
         try {
             // Configurar Twilio
@@ -96,6 +101,9 @@ class WhatsAppController extends Controller
                     "mediaUrl" => [$pdfUrl]
                 ]
             );
+
+
+
         } catch (\Exception $e) {
             dd($e);
             Log::error("Error al enviar mensaje de WhatsApp: " . $e->getMessage());

@@ -29,7 +29,7 @@
     <p><strong>Bicicleta:</strong> {{ $presupuesto->bicicleta_nombre }}</p>
     <p><strong>Fecha:</strong> {{ date('d/m/Y', strtotime($presupuesto->created_at)) }}</p>
 
-    <h3>Detalles del Presupuesto</h3>
+    <h3>Presupuesto</h3>
     <table>
         <thead>
             <tr>

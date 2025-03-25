@@ -11,6 +11,7 @@ use App\Models\Bike;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use App\Models\Cita;
+use Carbon\Carbon;
 
 
 class PresupuestoController extends Controller
@@ -47,7 +48,7 @@ class PresupuestoController extends Controller
 
         return view('presupuestos.create', compact('user', 'bikes', 'components'));
     }
-
+    
     public function store(Request $request)
     {
         $request->validate([
@@ -59,63 +60,74 @@ class PresupuestoController extends Controller
             'horas_trabajo.*' => 'required|integer|min:0',
             'precios.*' => 'required|numeric|min:0',
         ]);
-
+    
         $bikeId = $request->bike_id;
         $componentes = $request->componentes;
         $horasTrabajo = $request->horas_trabajo;
         $precios = $request->precios;
         $textos = $request->textos;
-
+    
         // Validar que los arrays sean del mismo tamaño
         if (count($componentes) !== count($horasTrabajo) || count($componentes) !== count($precios) || count($componentes) !== count($textos)) {
             return redirect()->back()->withErrors(['error' => 'Los datos de los componentes no coinciden.']);
         }
-
+    
         // Validar que haya al menos un componente
         if (empty($componentes)) {
             return redirect()->back()->withErrors(['error' => 'Debe agregar al menos un componente.']);
         }
-
-        // Crear el presupuesto sin totales aún
+    
+        // Obtener la bicicleta y su propietario
+        $bike = Bike::find($bikeId);
+        if (!$bike) {
+            return redirect()->back()->withErrors(['error' => 'Bicicleta no encontrada.']);
+        }
+    
+        // Generar token único para el presupuesto
+        $tokenPresupuesto = md5(Carbon::now()->timestamp . $bike->user_id);
+        
+        // Crear el presupuesto con el propietario correcto
         $presupuesto = Presupuesto::create([
             'bike_id' => $bikeId,
             'horas_total' => 0,
             'precio_total' => 0,
-            'user_id' => auth()->id(),
+            'user_id' => $bike->user_id, // ✅ Asignamos el usuario de la bicicleta
+            'token_presupuesto' => $tokenPresupuesto,
+            'mensaje_enviado' => false,
         ]);
-
+        
         $totalHoras = 0;
         $totalPrecio = 0;
-
+    
         // Insertar cada componente en `presupuesto_items` y calcular totales
         foreach ($componentes as $index => $componenteId) {
-
             $horas = (int) $horasTrabajo[$index];
-            $precio = (int) $precios[$index];
+            $precio = (float) $precios[$index];
             $texto = $textos[$index] ?? '';
-
+    
             PresupuestoItem::create([
                 'presupuesto_id' => $presupuesto->id,
                 'componente_id' => $componenteId,
                 'horas_trabajo' => $horas,
-                'total_precio' => $precio, // Asegúrate que en la migración se llame igual
+                'total_precio' => $precio,
                 'texto' => $texto,
             ]);
-
+    
             // Acumular totales
             $totalHoras += $horas;
             $totalPrecio += $precio;
         }
-        //dd($totalPrecio);
+    
         // Actualizar los totales en la tabla presupuestos
         $presupuesto->update([
             'horas_total' => $totalHoras,
             'precio_total' => round($totalPrecio, 2),
         ]);
-
+    
         return redirect()->route('presupuestos.factura', ['id' => $presupuesto->id])
             ->with('success', 'Presupuesto guardado correctamente.');
     }
+    
 
     public function factura($id)
     {
