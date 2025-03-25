@@ -13,8 +13,6 @@ use App\Http\Controllers\PresupuestoController;
 use App\Http\Controllers\WhatsappController;
 use App\Models\Bike;
 
-
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -34,45 +32,39 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Rutas de perfil de usuario
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-Route::middleware(['auth', 'admin|taller'])->group(function () {
+// Rutas protegidas por admin
+Route::middleware(['auth', 'admin'])->group(function () {
+    // Panel de administración
     Route::get('/admin', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
-});
 
-
-Route::middleware(['auth', 'admin|taller'])->group(function () {
+    // Rutas de gestión de usuarios
     Route::get('/usuarios', [UserController::class, 'index'])->name('users.index');
     Route::get('/usuarios/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/usuarios', [UserController::class, 'store'])->name('users.store');
     Route::get('/usuarios/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/usuarios/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-});
+    
+    // Ruta para el datatable de usuarios
+    Route::get('/usuarios-datatable', function () {
+        return view('users.datatables');
+    })->name('users.datatable');
+    Route::get('/usuarios/data', [UserController::class, 'getUsers'])->name('users.data');
 
-Route::get('/usuarios-datatable', function () {
-    return view('users.datatables');
-})->name('users.datatable');
-Route::get('/usuarios/data', [UserController::class, 'getUsers'])->name('users.data');
-
-
-// Rutas protegidas por autenticación
-Route::middleware(['auth', 'admin|taller'])->group(function () {
-
-    // ✅ Bicicletas
+    // Rutas de bicicletas
     Route::resource('bikes', BikeController::class);
 
-    // ✅ Revisiones en general (todas las revisiones)
+    // Rutas de revisiones
     Route::get('/revisions', [RevisionController::class, 'allRevisions'])->name('revisions.index');
-
-    // ✅ Revisiones específicas por bicicleta
     Route::prefix('bikes/{bike}/revisions')->group(function () {
         Route::get('/', [RevisionController::class, 'index'])->name('bikes.revisions.index');
         Route::get('/create', [RevisionController::class, 'create'])->name('bikes.revisions.create');
@@ -82,63 +74,77 @@ Route::middleware(['auth', 'admin|taller'])->group(function () {
         Route::delete('/{revision}', [RevisionController::class, 'destroy'])->name('bikes.revisions.destroy');
     });
 
-    // ✅ Componentes
+    // Rutas de componentes
     Route::resource('components', ComponentController::class);
 
+    // Rutas de avisos y recordatorios
     Route::get('/avisos-enviados', [AvisoEnviadoController::class, 'index'])->name('avisos.index');
     Route::get('/enviar-recordatorios', [RecordatorioController::class, 'enviarRecordatorios'])->name('enviar.recordatorios');
 
-
-
     // Rutas de citas
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index'); // Ver citas pendientes
-    Route::get('/appointments/historico', [AppointmentController::class, 'historico'])->name('appointments.historico');
-    // Ver citas completadas
+    Route::get('/appointments/historico', [AppointmentController::class, 'historico'])->name('appointments.historico'); // Ver citas completadas
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store'); // Registrar nueva cita
     Route::put('/appointments/{appointment}/updateEstado', [AppointmentController::class, 'updateEstado'])->name('appointments.updateEstado'); // Completar cita
     Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy'); // Eliminar cita
-
     Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
     Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
     Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
-
-    Route::get('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])
-        ->name('appointments.confirmCompletion');
-
-    Route::post('/appointments/{appointment}/finalize', [AppointmentController::class, 'finalizeCompletion'])
-        ->name('appointments.finalizeCompletion');
-
-    Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])
-        ->name('appointments.complete');
+    Route::get('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])->name('appointments.confirmCompletion');
+    Route::post('/appointments/{appointment}/finalize', [AppointmentController::class, 'finalizeCompletion'])->name('appointments.finalizeCompletion');
+    Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
-
-
-    // ✅ Nueva ruta para update con otro nombre
     Route::put('/{appointment}/updatedos', [AppointmentController::class, 'updatedos'])->name('appointments.updatedos');
 
-
-
-
+    // Rutas de presupuestos
     Route::resource('presupuestos', PresupuestoController::class);
-    Route::get('/bikes/by-user/{userId}', function ($userId) {
-        return response()->json(Bike::where('user_id', $userId)->get());
-    });
-
     Route::get('/presupuestos/create/{user}', [PresupuestoController::class, 'create'])->name('presupuestos.create');
-
     Route::get('/presupuestos/{id}/factura', [PresupuestoController::class, 'factura'])->name('presupuestos.factura');
     Route::get('/presupuestos/{id}/pdf', [PresupuestoController::class, 'descargarPDF'])->name('presupuestos.pdf');
     Route::get('/presupuestos/{id}', [PresupuestoController::class, 'show'])->name('presupuestos.show');
     Route::patch('/presupuestos/{presupuesto}/estado', [PresupuestoController::class, 'actualizarEstado'])->name('presupuestos.actualizarEstado');
-
+    
+    // Ruta de presupuesto para enviar por WhatsApp
     Route::get('/presupuesto/{clienteId}/{presupuestoId}/enviar', [WhatsAppController::class, 'enviarPresupuestoWhatsApp'])
-    ->name('presupuesto.enviar');
+        ->name('presupuesto.enviar');
 
+    // Ruta de bicicletas por usuario (para obtener bicicletas de un usuario específico)
+    Route::get('/bikes/by-user/{userId}', function ($userId) {
+        return response()->json(Bike::where('user_id', $userId)->get());
+    });
 });
 
 
+// Rutas de taller
+Route::middleware(['auth', 'taller'])->group(function () {
+    // Ver usuario
+    Route::get('/usuarios', [UserController::class, 'index'])->name('users.index');
+    Route::get('/usuarios/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/usuarios', [UserController::class, 'store'])->name('users.store');
 
 
+    // Rutas de presupuestos
+    Route::get('/presupuestos', [PresupuestoController::class, 'index'])->name('taller.presupuestos.index');
+    Route::get('/presupuestos/create/{user}', [PresupuestoController::class, 'create'])->name('taller.presupuestos.create');
+    Route::get('/presupuestos/{id}', [PresupuestoController::class, 'show'])->name('taller.presupuestos.show');
+    Route::get('/presupuestos/{id}/factura', [PresupuestoController::class, 'factura'])->name('taller.presupuestos.factura');
+    Route::get('/presupuestos/{id}/pdf', [PresupuestoController::class, 'descargarPDF'])->name('taller.presupuestos.pdf');
+    Route::patch('/presupuestos/{presupuesto}/estado', [PresupuestoController::class, 'actualizarEstado'])->name('taller.presupuestos.actualizarEstado');
+    
+    // Rutas de citas
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('taller.appointments.index'); // Ver citas pendientes
+    Route::get('/appointments/historico', [AppointmentController::class, 'historico'])->name('taller.appointments.historico'); // Ver citas completadas
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('taller.appointments.store'); // Registrar nueva cita
+    Route::put('/appointments/{appointment}/updateEstado', [AppointmentController::class, 'updateEstado'])->name('taller.appointments.updateEstado'); // Completar cita
+    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('taller.appointments.destroy'); // Eliminar cita
+    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('taller.appointments.create');
+    Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('taller.appointments.edit');
+    Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('taller.appointments.update');
+    Route::get('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])->name('taller.appointments.confirmCompletion');
+    Route::post('/appointments/{appointment}/finalize', [AppointmentController::class, 'finalizeCompletion'])->name('taller.appointments.finalizeCompletion');
+    Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])->name('taller.appointments.complete');
+    Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('taller.appointments.show');
+});
 
 
 require __DIR__ . '/auth.php';
