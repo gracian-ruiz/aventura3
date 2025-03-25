@@ -63,7 +63,9 @@
                             </span>
                         </td>
                         <td class="py-2 px-4">{{ $appointment->tiempo_estimado }} min</td>
-                        <td class="py-2 px-4">{{ \Carbon\Carbon::parse($appointment->created_at)->format('d/m/Y H:i') }}</td>
+                        <td class="py-2 px-4">
+                            {{ \Carbon\Carbon::parse($appointment->created_at)->addHour()->format('d/m/Y H:i') }}
+                        </td>
                         <td class="py-2 px-4">
                             {{ $appointment->fecha_asignada ? \Carbon\Carbon::parse($appointment->fecha_asignada)->format('d/m/Y') : 'Pendiente' }}
                         </td>

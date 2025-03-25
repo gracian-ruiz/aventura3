@@ -38,7 +38,7 @@ class AppointmentController extends Controller
             CASE 
                 WHEN estado = 'en proceso' THEN 0  -- Citas en proceso primero
                 WHEN prioridad = 'urgente' THEN 1  -- Luego urgentes
-                WHEN tiempo_estimado < 30 THEN 2  -- Luego las de menos de 30 minutos
+                WHEN tiempo_estimado < 31 THEN 2  -- Luego las de menos de 30 minutos
                 ELSE 3 
             END
         ")
