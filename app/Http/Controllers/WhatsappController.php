@@ -33,7 +33,7 @@ class WhatsAppController extends Controller
             )
             ->first();
 
-            $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
+        $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
 
         if (!$presupuesto) {
             return response()->json(['error' => 'Presupuesto no encontrado'], 404);
@@ -75,7 +75,7 @@ class WhatsAppController extends Controller
         // Nombre del archivo PDF basado en el ID del presupuesto
         $nombreArchivo = "presupuesto_{$presupuestoId}.pdf";
         $rutaAlmacenamiento = "public/presupuestos/$nombreArchivo";
-        
+
         // Generar y guardar el PDF
         $pdf = Pdf::loadView('pdf.presupuesto2', compact('presupuesto', 'items'));
         Storage::put($rutaAlmacenamiento, $pdf->output());
@@ -91,7 +91,7 @@ class WhatsAppController extends Controller
 
             // Obtener URL del PDF
             $pdfUrl = url("storage/presupuestos/" . basename($pdfPath));
-            
+
             // Enviar mensaje con PDF adjunto
             $twilio->messages->create(
                 "whatsapp:+34$telefono",
@@ -102,12 +102,15 @@ class WhatsAppController extends Controller
                 ]
             );
 
-
-
+            // Verificar si el mensaje se envió correctamente
+            if (isset($message) && !empty($message->sid)) {
+                DB::table('presupuestos')
+                    ->where('id', $presupuestoId)
+                    ->update(['mensaje_enviado' => true]);
+            }
         } catch (\Exception $e) {
             dd($e);
             Log::error("Error al enviar mensaje de WhatsApp: " . $e->getMessage());
         }
     }
 }
-
