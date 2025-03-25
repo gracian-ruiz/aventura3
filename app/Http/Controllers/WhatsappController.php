@@ -107,12 +107,11 @@ class WhatsAppController extends Controller
                 ]
             );
 
-            // Verificar si el mensaje se envió correctamente
-            if (isset($message) && !empty($message->sid)) {
+
                 DB::table('presupuestos')
                     ->where('id', $presupuestoId)
                     ->update(['mensaje_enviado' => true]);
-            }
+
         } catch (\Exception $e) {
             dd($e);
             Log::error("Error al enviar mensaje de WhatsApp: " . $e->getMessage());
