@@ -44,10 +44,15 @@ class WhatsAppController extends Controller
 
         // 2. ENVIAR POR WHATSAPP
         if (!empty($cliente->telefono)) {
-            $mensaje = "📄 ¡Hola {$cliente->name}! Te enviamos el presupuesto de tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
-                . "📎 Adjuntamos el PDF con los detalles.";
+            // 2. ENVIAR POR WHATSAPP
+            if (!empty($cliente->telefono)) {
+                $mensaje = "📄 ¡Hola {$cliente->name}! Te enviamos el presupuesto de tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
+                    . "📎 Adjuntamos el PDF con los detalles.\n\n" // Doble salto de línea aquí
+                    . "🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
 
-            $mensaje .= "\n🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
+                $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
+            }
+
 
 
             $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
