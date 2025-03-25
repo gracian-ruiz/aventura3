@@ -12,15 +12,19 @@
             <!-- Menú de Navegación (Escritorio) -->
             <div class="hidden md:flex space-x-8">
                 @if(Auth::user()->role === 'admin')
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">Usuarios</x-nav-link>
-                    <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-nav-link>
-                    <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Citas</x-nav-link>
-                    <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-nav-link>
-                    <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">Bicicletas</x-nav-link>
-                    <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-nav-link>
-                    <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">Mensajes</x-nav-link>
-                    <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">Histórico Citas</x-nav-link>
-                @endif
+                <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">Usuarios</x-nav-link>
+                <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-nav-link>
+                <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Citas</x-nav-link>
+                <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-nav-link>
+                <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">Bicicletas</x-nav-link>
+                <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-nav-link>
+                <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">Mensajes</x-nav-link>
+                <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">Histórico Citas</x-nav-link>
+            @elseif(Auth::user()->role === 'taller')
+                <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">Usuarios</x-nav-link>
+                <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-nav-link>
+                <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Citas</x-nav-link>
+            @endif            
             </div>
 
             <!-- Botón de Usuario (Escritorio) -->

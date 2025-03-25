@@ -17,14 +17,15 @@
         </div>
     </form>
 
-    <!-- Botón para Añadir Nuevo Usuario -->
-    <div class="flex justify-end">
-        <a href="{{ route('users.create') }}" 
-           class="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 transition duration-200">
-            + Nuevo Usuario
-        </a>
-    </div>
-    
+    <!-- Botón para Añadir Nuevo Usuario (Solo Admins) -->
+    @if(Auth::user()->role === 'admin')
+        <div class="flex justify-end">
+            <a href="{{ route('users.create') }}" 
+               class="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 transition duration-200">
+                + Nuevo Usuario
+            </a>
+        </div>
+    @endif
 
     @if (session('success'))
         <div class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
@@ -40,9 +41,11 @@
                     <th class="py-2 px-4 text-left">ID</th>
                     <th class="py-2 px-4 text-left">Nombre</th>
                     <th class="py-2 px-4 text-left">Email</th>
-                    <th class="py-2 px-4 text-left">Telefono</th>
+                    <th class="py-2 px-4 text-left">Teléfono</th>
                     <th class="py-2 px-4 text-left">Presupuesto</th>
-                    <th class="py-2 px-4 text-center">Acciones</th>
+                    @if(Auth::user()->role === 'admin')
+                        <th class="py-2 px-4 text-center">Acciones</th>
+                    @endif
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
@@ -60,28 +63,29 @@
                         
                         <style>
                             .custom-btn {
-                                background-color: #30e16e; /* Color naranja */
-                                color: white; /* Texto en blanco */
+                                background-color: #30e16e; /* Verde */
+                                color: white;
                                 border: none;
                             }
                         
                             .custom-btn:hover {
-                                background-color: #e64a19; /* Naranja más oscuro al pasar el mouse */
+                                background-color: #2cb865; /* Verde más oscuro */
                             }
                         </style>
                         
-                        
-                        <td class="py-2 px-4 text-center">
-                            <a href="{{ route('users.edit', $user->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Editar</a>
+                        @if(Auth::user()->role === 'admin')
+                            <td class="py-2 px-4 text-center">
+                                <a href="{{ route('users.edit', $user->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Editar</a>
 
-                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline-block">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600" onclick="return confirm('¿Seguro que quieres eliminar este usuario?')">
-                                    Eliminar
-                                </button>
-                            </form>
-                        </td>
+                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600" onclick="return confirm('¿Seguro que quieres eliminar este usuario?')">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>
