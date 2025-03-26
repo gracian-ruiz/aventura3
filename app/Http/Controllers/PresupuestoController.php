@@ -313,9 +313,14 @@ class PresupuestoController extends Controller
         }
     }
 
-
-
     public function actualizarEstado(Request $request, $id)
+    {
+        $resultado = $this->cita($request, $id);
+
+        return redirect()->route('presupuestos.index')->with($resultado['tipo'], $resultado['mensaje']);
+    }
+
+    public function cita($request, $id)
     {
         $request->validate([
             'estado' => 'required|in:aprobado,denegado',
@@ -325,7 +330,10 @@ class PresupuestoController extends Controller
         $presupuesto = DB::table('presupuestos')->where('id', $id)->first();
 
         if (!$presupuesto) {
-            return redirect()->route('presupuestos.index')->with('error', 'Presupuesto no encontrado.');
+            return [
+                'tipo' => 'error',
+                'mensaje' => 'Presupuesto no encontrado.'
+            ];
         }
 
         if ($request->estado === 'aprobado') {
@@ -370,11 +378,17 @@ class PresupuestoController extends Controller
 
                 DB::commit(); // Confirmar transacción
 
-                return redirect()->route('presupuestos.index')->with('success', 'Presupuesto aprobado y cita creada.');
+                return [
+                    'tipo' => 'success',
+                    'mensaje' => 'Presupuesto aprobado y cita creada.'
+                ];
             } catch (\Exception $e) {
-                dd($e);
                 DB::rollBack(); // Revertir cambios en caso de error
-                return redirect()->route('presupuestos.index')->with('error', 'Error al procesar la cita.');
+
+                return [
+                    'tipo' => 'error',
+                    'mensaje' => 'Error al procesar la cita.'
+                ];
             }
         }
 
@@ -384,8 +398,12 @@ class PresupuestoController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('presupuestos.index')->with('success', 'Presupuesto actualizado correctamente.');
+        return [
+            'tipo' => 'success',
+            'mensaje' => 'Presupuesto actualizado correctamente.'
+        ];
     }
+
 
 
 
@@ -411,14 +429,17 @@ class PresupuestoController extends Controller
 
         // Obtener presupuesto y verificar token
         $presupuesto = DB::table('presupuestos')
-        ->join('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
-        ->join('users', 'bikes.user_id', '=', 'users.id')
-        ->where('presupuestos.token_presupuesto', $token)
-        ->where('presupuestos.id', $presupuestoId)
-        ->select('presupuestos.*', 'bikes.nombre as bicicleta_nombre', 'users.name as cliente_nombre') // Cambié usuario_nombre a cliente_nombre
-        ->first();
-    
-            // Verificar si el presupuesto ya fue aprobado o rechazado
+            ->join('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
+            ->join('users', 'bikes.user_id', '=', 'users.id')
+            ->where('presupuestos.token_presupuesto', $token)
+            ->where('presupuestos.id', $presupuestoId)
+            ->select('presupuestos.*', 'bikes.nombre as bicicleta_nombre', 'users.name as cliente_nombre') // Cambié usuario_nombre a cliente_nombre
+            ->first();
+
+        if (!$presupuesto) {
+            return response()->view('presupuestos.error', ['mensaje' => 'Token inválido o presupuesto no encontrado'], 403);
+        }
+        // Verificar si el presupuesto ya fue aprobado o rechazado
         if ($presupuesto->estado === 'aprobado') {
             return response()->view('presupuestos.error', ['mensaje' => 'Este presupuesto ya ha sido aprobado.'], 403);
         }
@@ -427,54 +448,45 @@ class PresupuestoController extends Controller
             return response()->view('presupuestos.error', ['mensaje' => 'Este presupuesto ha sido rechazado.'], 403);
         }
 
-        if (!$presupuesto) {
-            return response()->view('presupuestos.error', ['mensaje' => 'Token inválido o presupuesto no encontrado'], 403);
-        }
+
 
         return view('presupuestos.confirmacion', compact('presupuesto'));
     }
 
 
-public function procesarConfirmacion(Request $request, $presupuestoId)
-{
-    $token = $request->query('token');
-    $estado = $request->input('accion'); // 'aprobado' o 'denegado'
+    public function procesarConfirmacion(Request $request, $presupuestoId)
+    {
+        $token = $request->query('token');
+        $estado = $request->input('accion'); // 'aprobado' o 'denegado'
 
-    // Verificar que el estado es válido
-    if (!in_array($estado, ['aprobado', 'denegado'])) {
-        return response()->view('presupuestos.error', ['mensaje' => '❌ Estado inválido.'], 400);
+        // Verificar que el estado es válido
+        if (!in_array($estado, ['aprobado', 'denegado'])) {
+            return response()->view('presupuestos.error', ['mensaje' => '❌ Estado inválido.'], 400);
+        }
+
+        // Obtener presupuesto y verificar token
+        $presupuesto = DB::table('presupuestos')
+            ->where('id', $presupuestoId)
+            ->where('token_presupuesto', $token)
+            ->first();
+
+        if (!$presupuesto) {
+            return response()->view('presupuestos.error', ['mensaje' => '❌ Token inválido o presupuesto no encontrado'], 403);
+        }
+
+        // Evitar doble aprobación
+        if ($presupuesto->estado === 'aprobado') {
+            return view('presupuestos.aprobada', ['mensaje' => '⚠️ Este presupuesto ya ha sido aprobado anteriormente.']);
+        }
+        $request = new Request(['estado' => $estado]);
+        // Llamar a la función cita() para procesar la aprobación o denegación
+        $resultado = $this->cita($request, $presupuestoId);
+
+        // Mostrar la vista correspondiente con el mensaje de la función cita()
+        if ($estado === 'aprobado') {
+            return view('presupuestos.aprobada', ['mensaje' => $resultado['mensaje']]);
+        } else {
+            return view('presupuestos.denegada', ['mensaje' => '❌ Has rechazado el presupuesto. Si cambias de opinión, contáctanos.']);
+        }
     }
-
-    // Obtener presupuesto y verificar token
-    $presupuesto = DB::table('presupuestos')
-        ->where('id', $presupuestoId)
-        ->where('token_presupuesto', $token)
-        ->first();
-
-    if (!$presupuesto) {
-        return response()->view('presupuestos.error', ['mensaje' => '❌ Token inválido o presupuesto no encontrado'], 403);
-    }
-
-    // Evitar doble aprobación
-    if ($presupuesto->estado === 'aprobado') {
-        return view('presupuestos.aprobada', ['mensaje' => '⚠️ Este presupuesto ya ha sido aprobado anteriormente.']);
-    }
-
-    // Actualizar estado
-    DB::table('presupuestos')->where('id', $presupuestoId)->update(['estado' => $estado]);
-
-    // Redirigir según la acción
-    if ($estado === 'aprobado') {
-        return view('presupuestos.aprobada', [
-            'mensaje' => '✅ Presupuesto aceptado correctamente. Procederemos a reparar tu bicicleta.'
-        ]);
-    } else {
-        return view('presupuestos.denegada', [
-            'mensaje' => '❌ Has rechazado el presupuesto. Si cambias de opinión, contáctanos.'
-        ]);
-    }
-}
-
-    
-               
 }
