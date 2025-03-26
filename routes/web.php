@@ -137,6 +137,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 
+Route::get('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'confirmarPresupuesto'])
+    ->name('presupuesto.confirmar');
+
+    Route::post('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'procesarConfirmacion'])
+    ->name('presupuesto.procesar');
+
+
+
+
 
 
 
