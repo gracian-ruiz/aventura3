@@ -23,6 +23,19 @@
             </select>
         </div>
 
+        <!-- Estado de la Cita -->
+        <div class="mb-4">
+            <label for="estado" class="block text-gray-700">Estado</label>
+            <select name="estado" class="w-full border px-4 py-2 rounded-md" required>
+                <option value="pendiente" {{ $appointment->estado === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                <option value="en proceso" {{ $appointment->estado === 'en proceso' ? 'selected' : '' }}>En Proceso</option>
+                <option value="completada" {{ $appointment->estado === 'completada' ? 'selected' : '' }}>Completada</option>
+                <option value="cancelada" {{ $appointment->estado === 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+            </select>
+                     
+        </div>
+
+
         <!-- Descripción del Problema -->
         <div class="mb-4">
             <label for="descripcion_problema" class="block text-gray-700">Descripción del Problema</label>

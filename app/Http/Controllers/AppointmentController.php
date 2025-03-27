@@ -151,12 +151,14 @@ class AppointmentController extends Controller
             'componentes' => 'nullable|array',
             'componentes.*' => 'exists:components,id',
             'prioridad' => 'required|in:normal,urgente',
+            'estado' => 'required|in:pendiente,en proceso,completada,cancelada', // Validación del estado
         ]);
     
         // Actualizar los datos de la cita
         $appointment->update([
             'descripcion_problema' => $request->descripcion_problema,
             'prioridad' => $request->prioridad,
+            'estado' => $request->estado, // Se añade la actualización del estado
         ]);
     
         // Verificar y sincronizar componentes con texto
@@ -208,6 +210,7 @@ class AppointmentController extends Controller
     
         return redirect()->route('appointments.index')->with('success', '✅ Cita actualizada correctamente.');
     }
+    
     
     
     
