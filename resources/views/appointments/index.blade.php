@@ -37,9 +37,9 @@
                     <th class="py-2 px-4 text-left">Prioridad</th>
                     <th class="py-2 px-4 text-left">Tiempo Estimado</th>
                     <th class="py-2 px-4 text-left">Fecha Creación</th>
-{{--                     <th class="py-2 px-4 text-left">Fecha Asignada</th> --}}
+                    <th class="py-2 px-4 text-left">Fecha Asignada</th>
 {{--                     <th class="py-2 px-4 text-left">Descripción Problema</th> --}}
-                    <th class="py-2 px-4 text-left">Estado</th>
+                    {{-- <th class="py-2 px-4 text-left">Estado</th> --}}
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
             </thead>
