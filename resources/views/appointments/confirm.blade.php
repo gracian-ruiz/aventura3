@@ -26,8 +26,21 @@
         </ul>
     </div>
 
+    <!-- Checklist de Componentes Revisados -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-2">Checklist de Componentes Revisados:</h2>
+        <ul class="list-none pl-0 text-gray-700">
+            @foreach($appointment->componentes as $componente)
+                <li class="mb-2 flex items-center">
+                    <input type="checkbox" name="componentes_revisados[]" value="{{ $componente->id }}" class="mr-2" required>
+                    <span>{{ $componente->nombre }} - {{ $componente->pivot->texto }}</span>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+
     <!-- Revisiones a Generar -->
-    <form action="{{ route('appointments.complete', $appointment->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
+    <form action="{{ route('appointments.complete', $appointment->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6" id="appointment-form">
         @csrf
         @method('PUT')
 
@@ -66,8 +79,9 @@
 
                     <!-- Descripción de la revisión -->
                     <textarea name="descripcion_revisiones[{{ $componente->id }}]" 
-                              class="w-full border px-4 py-2 rounded-md mt-2"
-                              placeholder="Descripción de la revisión..." required></textarea>
+                        class="w-full border px-4 py-2 rounded-md mt-2"
+                        placeholder="Descripción de la revisión..." required>{{ $componente->nombre }}</textarea>
+              
                 </li>
             @endforeach
         </ul>
@@ -77,17 +91,19 @@
             <a href="{{ route('appointments.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
                 Volver
             </a>
-            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600" id="submit-button">
                 Confirmar Finalización
             </button>
         </div>
     </form>
 </div>
 
-<!-- Script para manejar la visualización de la fecha opcional -->
+<!-- Script para manejar la visualización de la fecha opcional y validación de checkboxes -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const tipoFechaRadios = document.querySelectorAll('input[type="radio"][name^="tipo_fecha"]');
+    const submitButton = document.getElementById('submit-button');
+    const checkboxes = document.querySelectorAll('input[name="componentes_revisados[]"]');
 
     tipoFechaRadios.forEach(radio => {
         radio.addEventListener("change", function() {
@@ -100,6 +116,21 @@ document.addEventListener("DOMContentLoaded", function() {
                 fechaOpcionalContainer.classList.add("hidden");
             }
         });
+    });
+
+    // Validación antes de enviar el formulario
+    document.getElementById('appointment-form').addEventListener('submit', function(event) {
+        let allChecked = true;
+        checkboxes.forEach(function(checkbox) {
+            if (!checkbox.checked) {
+                allChecked = false;
+            }
+        });
+
+        if (!allChecked) {
+            event.preventDefault(); // Previene el envío del formulario
+            alert('Por favor, marca todos los componentes antes de continuar.');
+        }
     });
 });
 </script>

@@ -51,7 +51,22 @@ class AppointmentController extends Controller
     }
     public function confirmCompletion(Appointment $appointment)
     {
-        return view('appointments.confirm', compact('appointment'));
+        // Realizamos la consulta directamente con DB
+        $data = DB::table('appointment_component')
+            ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $appointment->id)
+            ->select(
+                'appointment_component.*',
+                'appointments.*',
+                'components.*'
+            )
+            ->get();
+
+            // Verificar lo que contiene la variable $data
+        ;
+
+        return view('appointments.confirm', compact('appointment', 'data'));
     }
 
     public function finalizeCompletion(Request $request, Appointment $appointment)
@@ -127,48 +142,77 @@ class AppointmentController extends Controller
         return view('appointments.create', compact('bikes', 'componentes'));
     }
 
-    public function update(UpdateAppointmentRequest $request, Appointment $appointment)
-    {
-        dd("aqui");
-        // Actualizar los datos de la cita
-        $appointment->update([
-            'descripcion_problema' => $request->descripcion_problema,
-            'tiempo_estimado' => $request->tiempo_estimado,
-        ]);
-
-        // Sincronizar los componentes seleccionados en la tabla intermedia
-        $appointment->componentes()->sync($request->componentes);
-
-        return redirect()->route('appointments.index')->with('success', '✅ Cita actualizada correctamente.');
-    }
-
     public function updatedos(Request $request, Appointment $appointment)
     {
         // Validar los datos recibidos
         $request->validate([
             'descripcion_problema' => 'required|string|max:255',
             'tiempo_estimado' => 'required|integer|min:1',
-            'componentes' => 'nullable|array', // Permitir que sea opcional
-            'componentes.*' => 'exists:components,id', // Validar que los IDs existen en la tabla
+            'componentes' => 'nullable|array',
+            'componentes.*' => 'exists:components,id',
             'prioridad' => 'required|in:normal,urgente',
         ]);
-
+    
         // Actualizar los datos de la cita
         $appointment->update([
             'descripcion_problema' => $request->descripcion_problema,
-            'tiempo_estimado' => $request->tiempo_estimado,
-            'prioridad' => $request->prioridad, // Guardar prioridad
+            'prioridad' => $request->prioridad,
         ]);
-
-        // Sincronizar los componentes seleccionados en la tabla intermedia
+    
+        // Verificar y sincronizar componentes con texto
         if ($request->has('componentes')) {
-            $appointment->componentes()->sync($request->componentes);
+            $componentes = array_values($request->componentes);
+            $precios = array_values($request->precio);
+            $horas_trabajo = array_values($request->horas_trabajo);
+            $textos = array_values($request->textos);
+            $datosComponentes = [];
+            
+            // Inicializar la variable para el total de las horas de trabajo
+            $totalHoras = 0;
+    
+            foreach ($componentes as $index => $componenteId) {
+                $precio = intval($precios[$index] ?? 0);
+                $horas = intval($horas_trabajo[$index] ?? 0);
+                $texto = $textos[$index] ?? ''; // Si es null, poner una cadena vacía
+    
+                // Los precios son independientes, no necesitamos multiplicarlos por las horas.
+                $total_precio = $precio; // Ahora el precio total es simplemente el precio del componente.
+    
+                // Sumar el tiempo de trabajo del componente
+                $totalHoras += $horas;
+    
+                // Asegurarse de que el total_precio esté dentro del rango permitido
+                if ($total_precio > PHP_INT_MAX) {
+                    // Si el valor excede el rango, puedes establecerlo en el valor máximo permitido
+                    $total_precio = PHP_INT_MAX;
+                }
+    
+                $datosComponentes[$componenteId] = [
+                    'total_precio' => $total_precio,
+                    'horas_trabajo' => $horas,
+                    'texto' => $texto
+                ];
+            }
+    
+            // Sincronizar los componentes con los datos calculados
+            $appointment->componentes()->sync($datosComponentes);
+    
+            // Actualizar el tiempo estimado total de la cita sumando las horas de todos los componentes
+            $appointment->update(['tiempo_estimado' => $totalHoras]);
         } else {
-            $appointment->componentes()->detach(); // Si no se selecciona ninguno, se eliminan
+            // Si no se pasan componentes, eliminarlos
+            $appointment->componentes()->detach();
+            // Si no hay componentes, también actualizamos el tiempo estimado a 0 o algún valor predeterminado
+            $appointment->update(['tiempo_estimado' => 0]);
         }
-
+    
         return redirect()->route('appointments.index')->with('success', '✅ Cita actualizada correctamente.');
     }
+    
+    
+    
+    
+    
 
 
 
@@ -178,8 +222,24 @@ class AppointmentController extends Controller
         $bikes = Bike::all();
         $componentes = Component::all();
 
-        return view('appointments.edit', compact('appointment', 'bikes', 'componentes'));
+        // Obtener los componentes asociados a la cita
+        $appointment_items = DB::table('appointment_component')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $appointment->id)
+            ->select(
+                'appointment_component.componente_id as componente_id',
+                'components.nombre as componente_nombre',
+                'appointment_component.horas_trabajo',
+                'appointment_component.total_precio',
+                'appointment_component.texto'
+            )
+            ->get();
+
+        //dd($componentes);
+
+        return view('appointments.edit', compact('appointment', 'bikes', 'componentes', 'appointment_items'));
     }
+
 
 
 
@@ -385,30 +445,28 @@ class AppointmentController extends Controller
     public function show($id)
     {
         $appointment = DB::table('appointments')
-        ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
-        ->leftJoin('appointment_component', 'appointments.id', '=', 'appointment_component.appointment_id')
-        ->leftJoin('components', 'appointment_component.componente_id', '=', 'components.id') // Asegúrate de que es `componente_id`
-        ->select(
-            'appointments.id as appointment_id',
-            'appointments.presupuesto_id as presupuesto',
-            'appointments.fecha_asignada as appointment_fecha', // Corregido según tu modelo
-            'bikes.nombre as bike_nombre',
-            'bikes.marca as bike_marca',
-            'components.nombre as component_nombre',
-            'appointment_component.horas_trabajo',
-            'appointment_component.total_precio',
-            'appointment_component.texto'
-        )
-        ->where('appointments.id', $id)
-        ->get();
-    
-    
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
+            ->leftJoin('appointment_component', 'appointments.id', '=', 'appointment_component.appointment_id')
+            ->leftJoin('components', 'appointment_component.componente_id', '=', 'components.id') // Asegúrate de que es `componente_id`
+            ->select(
+                'appointments.id as appointment_id',
+                'appointments.presupuesto_id as presupuesto',
+                'appointments.fecha_asignada as appointment_fecha', // Corregido según tu modelo
+                'bikes.nombre as bike_nombre',
+                'bikes.marca as bike_marca',
+                'components.nombre as component_nombre',
+                'appointment_component.horas_trabajo',
+                'appointment_component.total_precio',
+                'appointment_component.texto'
+            )
+            ->where('appointments.id', $id)
+            ->get();
+
+
         if ($appointment->isEmpty()) {
             abort(404, 'Cita no encontrada');
         }
-    
+
         return view('appointments.show', compact('appointment'));
     }
-    
-    
 }

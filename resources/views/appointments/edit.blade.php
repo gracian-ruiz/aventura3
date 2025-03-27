@@ -23,7 +23,6 @@
             </select>
         </div>
 
-
         <!-- Descripción del Problema -->
         <div class="mb-4">
             <label for="descripcion_problema" class="block text-gray-700">Descripción del Problema</label>
@@ -36,43 +35,85 @@
             <input type="number" name="tiempo_estimado" value="{{ $appointment->tiempo_estimado }}" class="w-full border px-4 py-2 rounded-md" required>
         </div>
 
-        <!-- Componentes a Revisar -->
+        <!-- Tabla de Componentes -->
         <div class="mb-4">
-            <label class="block text-gray-700">Componentes a Revisar</label>
-            <select name="componentes[]" multiple class="w-full border px-4 py-2 rounded-md">
-                @foreach($componentes as $componente)
-                    <option value="{{ $componente->id }}" 
-                        {{ $appointment->componentes->contains($componente->id) ? 'selected' : '' }}>
-                        {{ $componente->nombre }}
-                    </option>
-                @endforeach
-            </select>
-            <p class="text-sm text-gray-500 mt-2">Puedes seleccionar varios componentes.</p>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2">Nombre</th>
+                        <th class="border px-4 py-2">Horas Taller</th>
+                        <th class="border px-4 py-2">Precio</th>
+                        <th class="border px-4 py-2">Descripción</th>
+                        <th class="border px-4 py-2">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="component-list">
+                    @foreach($appointment_items as $item)
+                        <tr data-id="{{ $item->componente_id }}">
+                            <td class="border px-4 py-2">
+                                <input type="hidden" name="componentes[]" value="{{ $item->componente_id }}">
+                                {{ $item->componente_nombre }}
+                            </td>
+                            <td class="border px-4 py-2">
+                                <input type="number" name="horas_trabajo[]" value="{{ $item->horas_trabajo }}" min="0" step="0.1" class="w-full border rounded px-2 py-1">
+                            </td>
+                            <td class="border px-4 py-2">
+                                <input type="number" name="precio[]" value="{{ old('precio.' . $loop->index, $item->total_precio) }}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                            </td>
+                            <td class="border px-4 py-2">
+                                <input type="text" name="textos[]" value="{{ $item->texto }}" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
+                            </td>
+                            <td class="border px-4 py-2">
+                                <button type="button" class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Eliminar</button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
 
-        <!-- Resumen de la Cita -->
-        <div class="bg-gray-100 p-4 rounded-md shadow-inner">
-            <h2 class="text-lg font-semibold mb-2">Resumen de la Cita:</h2>
-            <p><strong>Descripción:</strong> {{ $appointment->descripcion_problema }}</p>
-            <p><strong>Tiempo Estimado:</strong> {{ $appointment->tiempo_estimado }} min</p>
-            <p><strong>Componentes:</strong> 
-                @if($appointment->componentes->isNotEmpty())
-                    {{ $appointment->componentes->pluck('nombre')->join(', ') }}
-                @else
-                    N/A
-                @endif
-            </p>
+        <!-- Selección de Componentes -->
+        <div class="mb-4">
+            <label class="block text-gray-700">Componentes</label>
+            <div class="flex items-center">
+                <select id="component-select" class="w-full border px-4 py-2 rounded-md select2">
+                    <option value="">Selecciona un componente</option>
+                    @foreach($componentes as $component)
+                        <option value="{{ $component->id }}" data-nombre="{{ $component->nombre }}" data-horas="{{ $component->hora_taller }}" data-precio="{{ $component->precio }}">
+                            {{ $component->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+                <button type="button" id="add-component" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">+ Añadir</button>
+            </div>
         </div>
 
-        <!-- Botones -->
-        <div class="flex justify-between mt-6">
-            <a href="{{ route('appointments.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
-                Cancelar
-            </a>
-            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
-                Guardar Cambios
-            </button>
+        <!-- Botón de Guardar -->
+        <div class="mt-4">
+            <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Guardar Cambios</button>
         </div>
     </form>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({ width: '100%', placeholder: "Selecciona un componente", allowClear: true });
+        $('#add-component').on('click', function() {
+            let selectedOption = $('#component-select option:selected');
+            if (!selectedOption.val()) return;
+            let componentId = selectedOption.val();
+            let componentNombre = selectedOption.data('nombre');
+            let componentHoras = selectedOption.data('horas') || 0;
+            let componentPrecio = selectedOption.data('precio') || 0;
+            if ($(`tr[data-id="${componentId}"]`).length > 0) return;
+            let newRow = `<tr data-id="${componentId}"><td class="border px-4 py-2"><input type="hidden" name="componentes[]" value="${componentId}">${componentNombre}</td><td class="border px-4 py-2"><input type="number" name="horas_trabajo[]" value="${componentHoras}" min="0" step="0.1" class="w-full border rounded px-2 py-1"></td><td class="border px-4 py-2"><input type="number" name="precio[]" value="${componentPrecio}" min="0" step="0.01" class="w-full border rounded px-2 py-1"></td><td class="border px-4 py-2"><input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1"></td><td class="border px-4 py-2"><button type="button" class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Eliminar</button></td></tr>`;
+            $('#component-list').append(newRow);
+            $('.remove-component').on('click', function() { $(this).closest('tr').remove(); });
+        });
+    });
+</script>
 @endsection
