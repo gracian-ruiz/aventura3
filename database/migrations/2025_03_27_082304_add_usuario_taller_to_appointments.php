@@ -12,15 +12,14 @@ return new class extends Migration
     public function up()
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->foreignId('usuario_taller')->nullable()->constrained('users')->nullOnDelete();
+            $table->unsignedBigInteger('usuario_taller_id')->nullable();
         });
     }
     
     public function down()
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->dropForeign(['usuario_taller']);
-            $table->dropColumn('usuario_taller');
+
         });
     }
     

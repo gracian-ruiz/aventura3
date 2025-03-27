@@ -17,7 +17,7 @@
                     <th class="py-2 px-4 text-left">ID</th>
                     <th class="py-2 px-4 text-left">Bicicleta</th>
                     <th class="py-2 px-4 text-left">Usuario</th>
-                    <th class="py-2 px-4 text-left">Componente</th>
+                    <th class="py-2 px-4 text-left">Usuario Taller</th>
                     <th class="py-2 px-4 text-left">Prioridad</th>
                     <th class="py-2 px-4 text-left">Tiempo Estimado</th>
                     <th class="py-2 px-4 text-left">Fecha Creación</th>
@@ -31,7 +31,7 @@
                         <td class="py-2 px-4">{{ $appointment->id }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->nombre }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
-                        <td class="py-2 px-4">{{ $appointment->componente->nombre ?? 'N/A' }}</td>
+                        <td class="py-2 px-4">{{ $appointment->usuario_taller_id ?? 'N/A' }}</td>
                         <td class="py-2 px-4">
                             <span class="px-2 py-1 rounded-full text-xs font-bold 
                                 {{ $appointment->prioridad == 'urgente' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white' }}">
@@ -49,6 +49,9 @@
                                 <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600" onclick="return confirm('¿Seguro que quieres eliminar esta cita del historial?')">
                                     Eliminar
                                 </button>
+                                <a href="{{ route('appointments.show', $appointment->id) }}" class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                                    Ver
+                                </a>
                             </form>
                         </td>
                     </tr>
