@@ -25,7 +25,7 @@
                     <th class="py-2 px-4 text-left">Nombre</th>
                     <th class="py-2 px-4 text-left">Preaviso (días)</th>
                     <th class="py-2 px-4 text-left">Intervalo de Revisión (días)</th>
-                    <th class="py-2 px-4 text-left">Horas Taller</th>
+                    <th class="py-2 px-4 text-left">Minutos Taller</th>
                     <th class="py-2 px-4 text-left">Precio (€)</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
@@ -37,7 +37,7 @@
                         <td class="py-2 px-4">{{ $component->nombre }}</td>
                         <td class="py-2 px-4">{{ $component->fecha_preaviso ?? 'N/A' }} días</td>
                         <td class="py-2 px-4">{{ $component->fecha_revision ?? 'N/A' }} días</td>
-                        <td class="py-2 px-4">{{ $component->hora_taller ?? 'N/A' }} horas</td>
+                        <td class="py-2 px-4">{{ $component->hora_taller ?? 'N/A' }} Minutos</td>
                         <td class="py-2 px-4">{{ $component->precio }} €</td>
                         <td class="py-2 px-4 text-center">
                             <a href="{{ route('components.edit', $component->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Editar</a>

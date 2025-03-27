@@ -41,7 +41,7 @@
                 <thead>
                     <tr class="bg-gray-200">
                         <th class="border px-4 py-2">Nombre</th>
-                        <th class="border px-4 py-2">Horas Taller</th>
+                        <th class="border px-4 py-2">Minutos Taller</th>
                         <th class="border px-4 py-2">Precio</th>
                         <th class="border px-4 py-2">Descripción</th>
                         <th class="border px-4 py-2">Acción</th>

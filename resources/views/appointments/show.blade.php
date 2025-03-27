@@ -19,7 +19,7 @@
                 <thead>
                     <tr class="bg-gray-200">
                         <th class="border px-4 py-2">Componente</th>
-                        <th class="border px-4 py-2">Horas Taller</th>
+                        <th class="border px-4 py-2">Minutos Taller</th>
                         <th class="border px-4 py-2">Precio</th>
                         <th class="border px-4 py-2">Descripción</th>
                     </tr>

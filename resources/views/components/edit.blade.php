@@ -24,7 +24,7 @@
         </div>
 
         <div class="mb-4">
-            <label for="hora_taller" class="block text-gray-700">Horas de Taller</label>
+            <label for="hora_taller" class="block text-gray-700">Minutos de Taller</label>
             <input type="number" step="0.1" name="hora_taller" id="hora_taller" class="w-full border px-4 py-2 rounded-md" value="{{ $component->hora_taller }}" required>
         </div>
 
