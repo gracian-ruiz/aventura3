@@ -53,9 +53,6 @@ class WhatsAppController extends Controller
                 $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
             }
 
-
-
-            $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
         }
 
         return back()->with('success', '📩 Presupuesto enviado por WhatsApp.');
