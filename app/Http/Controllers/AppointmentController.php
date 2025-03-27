@@ -126,7 +126,7 @@ class AppointmentController extends Controller
         // Marcar la cita como completada y registrar quién la realizó
         $appointment->update([
             'estado' => 'completada',
-            'usuario_taller' => auth()->id(), // Guardar el usuario logueado
+            'usuario_taller_id' => auth()->id(), // Guardar el usuario logueado
         ]);
     
         return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
