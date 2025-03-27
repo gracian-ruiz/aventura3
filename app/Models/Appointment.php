@@ -19,7 +19,7 @@ class Appointment extends Model
         'descripcion_problema', 
         'estimacion_reparacion', 
         'fecha_asignada',
-        'usuario_taller'
+        'usuario_taller_id'
     ];
 
     protected $table = 'appointments';
