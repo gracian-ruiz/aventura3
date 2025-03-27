@@ -31,7 +31,7 @@
                     <th class="py-2 px-4 text-left">Cliente</th>
                     <th class="py-2 px-4 text-left">Bicicleta</th>
                     <th class="py-2 px-4 text-left">Fecha</th>
-                    <th class="py-2 px-4 text-left">Estado</th>
+                    {{-- <th class="py-2 px-4 text-left">Estado</th> --}}
                     <th class="py-2 px-4 text-center">Aprobar / Denegar</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
@@ -43,12 +43,12 @@
                         <td class="py-2 px-4">{{ $presupuesto->user_nombre ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ $presupuesto->bike_nombre ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ date('d/m/Y', strtotime($presupuesto->created_at)) }}</td>
-                        <td class="py-2 px-4">
+{{--                         <td class="py-2 px-4">
                             <span class="px-2 py-1 text-white rounded-md 
                                 {{ $presupuesto->estado === 'pendiente' ? 'bg-yellow-500' : ($presupuesto->estado === 'aprobado' ? 'bg-green-500' : 'bg-red-500') }}">
                                 {{ ucfirst($presupuesto->estado) }}
                             </span>
-                        </td>
+                        </td> --}}
                         <td class="py-2 px-4 text-center">
                             @if ($presupuesto->estado === 'pendiente')
                                 <form action="{{ route('presupuestos.actualizarEstado', $presupuesto->id) }}" method="POST" class="mb-1">
