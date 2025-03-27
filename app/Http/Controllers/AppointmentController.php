@@ -51,6 +51,17 @@ class AppointmentController extends Controller
     }
     public function confirmCompletion(Appointment $appointment)
     {
+        $userId = auth()->id(); // ID del usuario actual
+
+        // Si la cita no tiene mecánico asignado, se le asigna el actual
+        if (!$appointment->usuario_taller_id) {
+            $appointment->usuario_taller_id = $userId;
+            $appointment->save();
+        } elseif ($appointment->usuario_taller_id !== $userId) {
+            // Si otro mecánico ya la está trabajando, bloqueamos la acción
+            return redirect()->route('appointments.index')->with('error', '⚠️ Esta cita ya está siendo trabajada por otro mecánico.');
+        }
+        
         // Realizamos la consulta directamente con DB
         $data = DB::table('appointment_component')
             ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')

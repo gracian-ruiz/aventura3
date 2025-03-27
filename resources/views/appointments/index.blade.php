@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+@if (session('error'))
+    <div class="alert alert-danger text-white bg-red-500 p-3 rounded-lg">
+        {{ session('error') }}
+    </div>
+@endif
+
+
 <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Citas Pendientes</h1>
 
