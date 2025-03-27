@@ -9,7 +9,7 @@ class Bike extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id','nombre', 'marca', 'anio_modelo'];
+    protected $fillable = ['user_id','nombre', 'marca', 'anio_modelo','kilometros'];
 
     public function user()
     {

@@ -32,6 +32,7 @@
                     <th class="py-2 px-4 text-left">Nombre</th>
                     <th class="py-2 px-4 text-left">Marca</th>
                     <th class="py-2 px-4 text-left">Año</th>
+                    <th class="py-2 px-4 text-left">Kilómetros</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
             </thead>
@@ -42,6 +43,7 @@
                         <td class="py-2 px-4">{{ $bike->nombre }}</td>
                         <td class="py-2 px-4">{{ $bike->marca }}</td>
                         <td class="py-2 px-4">{{ $bike->anio_modelo }}</td>
+                        <td class="py-2 px-4">{{ $bike->kilometros ?? 'N/A' }}</td>
                         <td class="py-2 px-4 text-center">
                             <a href="{{ route('bikes.revisions.index', $bike->id) }}" 
                                class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600">

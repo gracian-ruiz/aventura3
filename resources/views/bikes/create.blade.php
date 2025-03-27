@@ -4,7 +4,7 @@
 <x-breadcrumbs :items="[
     ['name' => 'Inicio', 'url' => route('dashboard')],
     ['name' => 'Bicicletas', 'url' => route('bikes.index')],
-    ['name' => 'Crear Componente']
+    ['name' => 'Crear Bicicleta']
 ]" />
 <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Añadir Bicicleta</h1>
@@ -21,6 +21,7 @@
                 @endforeach
             </select>
         </div>
+
         <!-- Activar Select2 en el Select de Usuarios -->
         <script>
             $(document).ready(function() {
@@ -31,7 +32,6 @@
                 });
             });
         </script>
-
 
         <div class="mb-4">
             <label for="nombre" class="block text-gray-700">Nombre</label>
@@ -46,6 +46,12 @@
         <div class="mb-4">
             <label for="anio_modelo" class="block text-gray-700">Año Modelo</label>
             <input type="number" name="anio_modelo" id="anio_modelo" class="w-full border px-4 py-2 rounded-md" required min="1900" max="{{ date('Y') }}">
+        </div>
+
+        <!-- Nuevo campo de Kilómetros -->
+        <div class="mb-4">
+            <label for="kilometros" class="block text-gray-700">Kilómetros</label>
+            <input type="number" name="kilometros" id="kilometros" class="w-full border px-4 py-2 rounded-md" min="0" step="1">
         </div>
 
         <div class="flex justify-end">
