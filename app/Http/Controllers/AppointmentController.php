@@ -97,16 +97,12 @@ class AppointmentController extends Controller
             'proxima_revision.*' => 'nullable|date',
             'tipo_fecha.*' => 'required|in:fija,opcional',
         ]);
-        // Obtener el componente asociado
-
-
+    
         // Crear revisiones para los componentes seleccionados
         foreach ($request->revisiones as $componente_id) {
             $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
-
             $componente = Component::find($componente_id);
-
-
+    
             // Determinar la fecha de la próxima revisión
             if ($request->tipo_fecha[$componente_id] === 'fija') {
                 $dias_a_sumar = $componente ? $componente->fecha_revision : 30; // Si no tiene, usar 30 días por defecto
@@ -117,7 +113,7 @@ class AppointmentController extends Controller
                     ? Carbon::parse($request->proxima_revision[$componente_id])
                     : now()->addDays(30); // Fallback en caso de error
             }
-
+    
             // Crear la revisión asociada a la bicicleta
             $appointment->bike->revisions()->create([
                 'componente_id' => $componente_id,
@@ -126,12 +122,16 @@ class AppointmentController extends Controller
                 'proxima_revision' => $fecha_proxima,
             ]);
         }
-
-        // Marcar la cita como completada solo después de confirmar las revisiones
-        $appointment->update(['estado' => 'completada']);
-
+    
+        // Marcar la cita como completada y registrar quién la realizó
+        $appointment->update([
+            'estado' => 'completada',
+            'usuario_taller' => auth()->id(), // Guardar el usuario logueado
+        ]);
+    
         return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
     }
+    
 
 
     public function create()
