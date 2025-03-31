@@ -91,29 +91,29 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
     // Rutas de citas
-    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index'); // Ver citas pendientes
-    Route::get('/appointments/historico', [AppointmentController::class, 'historico'])->name('appointments.historico');
+    Route::get('/citas', [AppointmentController::class, 'index'])->name('appointments.index'); // Ver citas pendientes
+    Route::get('/citas/historico', [AppointmentController::class, 'historico'])->name('appointments.historico');
     // Ver citas completadas
-    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store'); // Registrar nueva cita
-    Route::put('/appointments/{appointment}/updateEstado', [AppointmentController::class, 'updateEstado'])->name('appointments.updateEstado'); // Completar cita
-    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy'); // Eliminar cita
+    Route::post('/citas', [AppointmentController::class, 'store'])->name('appointments.store'); // Registrar nueva cita
+    Route::put('/citas/{appointment}/updateEstado', [AppointmentController::class, 'updateEstado'])->name('appointments.updateEstado'); // Completar cita
+    Route::delete('/citas/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy'); // Eliminar cita
 
-    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
-    Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
-    Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
+    Route::get('/citas/create', [AppointmentController::class, 'create'])->name('appointments.create');
+    Route::get('/citas/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
+    Route::put('/citas/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
 
-    Route::get('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])
+    Route::get('/citas/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])
         ->name('appointments.confirmCompletion');
 
-    Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])
+    Route::put('/citas/{appointment}/complete', [AppointmentController::class, 'complete'])
         ->name('appointments.complete');
-    Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
+    Route::get('/citas/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 
 
     // ✅ Nueva ruta para update con otro nombre
     Route::put('/{appointment}/updatedos', [AppointmentController::class, 'updatedos'])->name('appointments.updatedos');
-    Route::get('/appointments/{appointment}/reparacion', [AppointmentController::class, 'showReparacion'])->name('appointments.reparacion.show');
-    Route::put('/appointments/{appointment}/reparacion', [AppointmentController::class, 'updateReparacion'])->name('appointments.updateReparacion');
+    Route::get('/citas/{appointment}/reparacion', [AppointmentController::class, 'showReparacion'])->name('appointments.reparacion.show');
+    Route::put('/citas/{appointment}/reparacion', [AppointmentController::class, 'updateReparacion'])->name('appointments.updateReparacion');
 
 
 
