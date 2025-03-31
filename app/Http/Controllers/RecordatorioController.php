@@ -109,15 +109,6 @@ class RecordatorioController extends Controller
             ]
         );
     
-        AvisoEnviado::create([
-            'user_id' => $user->id,
-            'bike_id' => $bike->id,
-            'appointment_id' => $appointment->id,
-            'telefono' => $user->telefono,
-            'mensaje' => $mensaje,
-            'enviado_en' => now(),
-        ]);
-    
         return $message->sid;
     }
 }
