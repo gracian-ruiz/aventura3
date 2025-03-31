@@ -85,7 +85,6 @@ class AppointmentController extends Controller
     
     public function complete(Request $request, Appointment $appointment)
     {
-        // Validar que al menos una revisión se ha seleccionado
         $request->validate([
             'revisiones' => 'required|array',
             'revisiones.*' => 'exists:components,id',
@@ -93,24 +92,20 @@ class AppointmentController extends Controller
             'proxima_revision.*' => 'nullable|date',
             'tipo_fecha.*' => 'required|in:fija,opcional',
         ]);
-
-        // Crear revisiones para los componentes seleccionados
+    
         foreach ($request->revisiones as $componente_id) {
             $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
             $componente = Component::find($componente_id);
-
-            // Determinar la fecha de la próxima revisión
+    
             if ($request->tipo_fecha[$componente_id] === 'fija') {
-                $dias_a_sumar = $componente ? $componente->fecha_revision : 30; // Si no tiene, usar 30 días por defecto
+                $dias_a_sumar = $componente ? $componente->fecha_revision : 30;
                 $fecha_proxima = now()->addDays($dias_a_sumar);
             } else {
-                // Si es opcional, se usa la fecha proporcionada
                 $fecha_proxima = $request->proxima_revision[$componente_id]
                     ? Carbon::parse($request->proxima_revision[$componente_id])
-                    : now()->addDays(30); // Fallback en caso de error
+                    : now()->addDays(30);
             }
-
-            // Crear la revisión asociada a la bicicleta
+    
             $appointment->bike->revisions()->create([
                 'componente_id' => $componente_id,
                 'fecha_revision' => now(),
@@ -118,13 +113,15 @@ class AppointmentController extends Controller
                 'proxima_revision' => $fecha_proxima,
             ]);
         }
-
-        // Marcar la cita como completada y registrar quién la realizó
+    
         $appointment->update([
             'estado' => 'completada',
-            'usuario_taller_id' => auth()->id(), // Guardar el usuario logueado
+            'usuario_taller_id' => auth()->id(),
         ]);
-
+    
+        // Llamar al controlador de recordatorios para enviar mensaje de WhatsApp
+        app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
+    
         return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
     }
 

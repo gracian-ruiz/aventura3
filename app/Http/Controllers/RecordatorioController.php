@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AvisoEnviado;
+use App\Models\Appointment;
 use App\Models\Revision;
 use App\Models\Component;
 use Illuminate\Http\Request;
@@ -81,5 +82,42 @@ class RecordatorioController extends Controller
         ]);
     
         return $message->sid;
-    }    
+    }
+    
+    public function enviarMensajeFinalizacionCita(Appointment $appointment)
+    {
+        $bike = $appointment->bike;
+        $user = $bike->user;
+    
+        if (!$bike || !$user) {
+            return;
+        }
+    
+        $sid    = Config::get('services.twilio.sid');
+        $token  = Config::get('services.twilio.token');
+        $twilio = new Client($sid, $token);
+    
+        $mensaje = "✅ ¡Hola {$user->name}! Tu bicicleta {$bike->nombre} ya está lista.
+\n"
+                 . "Puedes pasar a recogerla cuando quieras. ¡Gracias por confiar en nosotros! 🚴";
+    
+        $message = $twilio->messages->create(
+            "whatsapp:+34{$user->telefono}", 
+            [
+                "from" => Config::get('services.twilio.whatsapp_from'),
+                "body" => $mensaje
+            ]
+        );
+    
+        AvisoEnviado::create([
+            'user_id' => $user->id,
+            'bike_id' => $bike->id,
+            'appointment_id' => $appointment->id,
+            'telefono' => $user->telefono,
+            'mensaje' => $mensaje,
+            'enviado_en' => now(),
+        ]);
+    
+        return $message->sid;
+    }
 }
