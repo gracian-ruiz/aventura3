@@ -32,7 +32,7 @@ class Appointment extends Model
     public function componentes()
     {
         return $this->belongsToMany(Component::class, 'appointment_component', 'appointment_id', 'componente_id')
-            ->withPivot('horas_trabajo', 'total_precio', 'texto');
+            ->withPivot('horas_trabajo', 'total_precio', 'texto','checked','usuario_taller_id');
     }
     
     

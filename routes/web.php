@@ -105,9 +105,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])
         ->name('appointments.confirmCompletion');
 
-    Route::post('/appointments/{appointment}/finalize', [AppointmentController::class, 'finalizeCompletion'])
-        ->name('appointments.finalizeCompletion');
-
     Route::put('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])
         ->name('appointments.complete');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
@@ -115,6 +112,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // ✅ Nueva ruta para update con otro nombre
     Route::put('/{appointment}/updatedos', [AppointmentController::class, 'updatedos'])->name('appointments.updatedos');
+    Route::get('/appointments/{appointment}/reparacion', [AppointmentController::class, 'showReparacion'])->name('appointments.reparacion.show');
+    Route::put('/appointments/{appointment}/reparacion', [AppointmentController::class, 'updateReparacion'])->name('appointments.updateReparacion');
 
 
 
@@ -130,6 +129,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/presupuestos/{id}/pdf', [PresupuestoController::class, 'descargarPDF'])->name('presupuestos.pdf');
     Route::get('/presupuestos/{id}', [PresupuestoController::class, 'show'])->name('presupuestos.show');
     Route::patch('/presupuestos/{presupuesto}/estado', [PresupuestoController::class, 'actualizarEstado'])->name('presupuestos.actualizarEstado');
+    
+
+
 
     Route::get('/presupuesto/{clienteId}/{presupuestoId}/enviar', [WhatsAppController::class, 'enviarPresupuestoWhatsApp'])
     ->name('presupuesto.enviar');

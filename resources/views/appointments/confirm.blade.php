@@ -26,19 +26,6 @@
         </ul>
     </div>
 
-    <!-- Checklist de Componentes Revisados -->
-    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-        <h2 class="text-lg font-semibold mb-2">Checklist de Componentes Revisados:</h2>
-        <ul class="list-none pl-0 text-gray-700">
-            @foreach($appointment->componentes as $componente)
-                <li class="mb-2 flex items-center">
-                    <input type="checkbox" name="componentes_revisados[]" value="{{ $componente->id }}" class="mr-2" required>
-                    <span>{{ $componente->nombre }} - {{ $componente->pivot->texto }}</span>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-
     <!-- Revisiones a Generar -->
     <form action="{{ route('appointments.complete', $appointment->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6" id="appointment-form">
         @csrf
@@ -47,9 +34,6 @@
         <h2 class="text-lg font-semibold mb-2">Revisiones a Generar:</h2>
         <ul class="list-disc pl-5 text-gray-700">
             @foreach($appointment->componentes as $componente)
-                @php
-                    $proximaRevision = now()->addDays(30)->format('d/m/Y');
-                @endphp
                 <li class="mb-4">
                     <label class="flex items-center">
                         <input type="checkbox" name="revisiones[]" value="{{ $componente->id }}" class="mr-2" checked>
@@ -86,24 +70,31 @@
             @endforeach
         </ul>
 
+        @if ($faltanComponentes)
+            <div class="bg-red-100 text-red-700 border border-red-400 px-4 py-3 rounded-md mb-4">
+                ⚠️ <strong>No puedes finalizar la cita</strong>: Faltan componentes por reparar. Debes completar todos antes de continuar.
+            </div>
+        @endif
+
         <!-- Botones -->
         <div class="flex justify-between mt-6">
             <a href="{{ route('appointments.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
                 Volver
             </a>
-            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600" id="submit-button">
-                Confirmar Finalización
+
+            <button class="px-6 py-2 text-white font-semibold rounded-md transition duration-300
+                @if($faltanComponentes) bg-gray-400 cursor-not-allowed @else bg-green-600 hover:bg-green-700 @endif" 
+                @if($faltanComponentes) disabled @endif>
+                Confirmar finalización
             </button>
         </div>
     </form>
 </div>
 
-<!-- Script para manejar la visualización de la fecha opcional y validación de checkboxes -->
+<!-- Script para manejar la visualización de la fecha opcional -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const tipoFechaRadios = document.querySelectorAll('input[type="radio"][name^="tipo_fecha"]');
-    const submitButton = document.getElementById('submit-button');
-    const checkboxes = document.querySelectorAll('input[name="componentes_revisados[]"]');
 
     tipoFechaRadios.forEach(radio => {
         radio.addEventListener("change", function() {
@@ -116,21 +107,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 fechaOpcionalContainer.classList.add("hidden");
             }
         });
-    });
-
-    // Validación antes de enviar el formulario
-    document.getElementById('appointment-form').addEventListener('submit', function(event) {
-        let allChecked = true;
-        checkboxes.forEach(function(checkbox) {
-            if (!checkbox.checked) {
-                allChecked = false;
-            }
-        });
-
-        if (!allChecked) {
-            event.preventDefault(); // Previene el envío del formulario
-            alert('Por favor, marca todos los componentes antes de continuar.');
-        }
     });
 });
 </script>
