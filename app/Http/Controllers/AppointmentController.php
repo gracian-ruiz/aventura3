@@ -36,10 +36,11 @@ class AppointmentController extends Controller
             })
             ->orderByRaw("
             CASE 
-                WHEN estado = 'en proceso' THEN 0  -- Citas en proceso primero
-                WHEN prioridad = 'urgente' THEN 1  -- Luego urgentes
-                WHEN tiempo_estimado < 31 THEN 2  -- Luego las de menos de 30 minutos
-                ELSE 3 
+                WHEN estado = 'en proceso' AND prioridad = 'urgente' THEN 0  -- Urgentes en proceso primero
+                WHEN estado = 'en proceso' THEN 1  -- Luego las demás en proceso
+                WHEN prioridad = 'urgente' THEN 2  -- Luego urgentes en pendiente
+                WHEN tiempo_estimado < 31 THEN 3  -- Luego las de menos de 30 minutos
+                ELSE 4 
             END
         ")
             ->orderBy('fecha_asignada', 'asc')
@@ -362,56 +363,54 @@ class AppointmentController extends Controller
             'friday'    => 300,
             'saturday'  => 200,  // 3 horas y 20 minutos
         ];
-
+    
         // Reiniciar fechas para recalcular desde cero
-        Appointment::where('estado', 'pendiente')->orWhere('estado', 'en proceso')->update(['fecha_asignada' => null]);
-
+        Appointment::whereIn('estado', ['pendiente', 'en proceso'])->update(['fecha_asignada' => null]);
+    
         $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
             ->orderByRaw("
-            CASE 
-                WHEN prioridad = 'urgente' THEN 1 
-                WHEN tiempo_estimado < 30 THEN 2 
-                ELSE 3 
-            END
-        ")
+                CASE 
+                    WHEN estado = 'en proceso' AND prioridad = 'urgente' THEN 0  -- Urgentes en proceso primero
+                    WHEN prioridad = 'urgente' THEN 1  -- Luego urgentes en pendiente
+                    WHEN tiempo_estimado < 30 THEN 2  -- Luego las de menos de 30 minutos
+                    ELSE 3 
+                END
+            ")
             ->orderBy('created_at', 'asc')
             ->get();
-
-        // Fecha actual y hora actual
+    
         $fecha_actual = Carbon::today();
         $ahora = Carbon::now();
-
-        // Horario de cierre (20:00)
         $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
-
+    
         // Si ya cerró la tienda, empezamos desde el siguiente día laboral
         if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
             do {
                 $fecha_actual->addDay();
                 $dia_semana = strtolower($fecha_actual->format('l'));
-            } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])); // Evitar domingos y días sin horario laboral
+            } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
         }
-
+    
         $agenda = [];
-
+    
         foreach ($appointments as $appointment) {
             $tiempo_estimado = $appointment->tiempo_estimado;
-
+    
             while (true) {
                 $dia_semana = strtolower($fecha_actual->format('l'));
-
+    
                 if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
                     $fecha_actual->addDay();
                     continue;
                 }
-
+    
                 // Inicializar disponibilidad del día si no existe en la agenda
                 if (!isset($agenda[$fecha_actual->toDateString()])) {
                     $agenda[$fecha_actual->toDateString()] = 0;
                 }
-
-                // Verificar si hay espacio en la fecha actual
-                if ($agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
+    
+                // **Asignar urgentes primero si hay huecos**
+                if ($appointment->prioridad === 'urgente' || $agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
                     $appointment->fecha_asignada = $fecha_actual->toDateString();
                     $appointment->save();
                     $agenda[$fecha_actual->toDateString()] += $tiempo_estimado;
@@ -422,6 +421,7 @@ class AppointmentController extends Controller
             }
         }
     }
+    
 
     public function show($id)
     {
