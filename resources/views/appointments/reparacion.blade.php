@@ -20,7 +20,7 @@
                                @if($item->checked) checked @endif
                                class="form-checkbox h-5 w-5 text-green-500">
                         <input type="hidden" name="componentes[{{ $item->componente_id }}][id]" value="{{ $item->componente_id }}">
-                        <label for="componentes[]" class="ml-3 text-lg text-gray-700">{{ $item->nombre }}</label>
+                        <label for="componentes[]" class="ml-3 text-lg text-gray-700">{{ $item->component_nombre }}</label>
                     </div>
 
                     <!-- Mostrar el texto descriptivo del componente (solo visualización) -->

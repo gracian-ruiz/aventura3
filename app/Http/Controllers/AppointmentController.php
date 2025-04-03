@@ -465,15 +465,29 @@ class AppointmentController extends Controller
     public function showReparacion(Appointment $appointment)
     {
         $data = DB::table('appointment_component')
-            ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
-            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
-            ->where('appointment_component.appointment_id', $appointment->id)
-            ->select(
-                'appointment_component.*',
-                'appointments.*',
-                'components.*'
-            )
-            ->get();
+        ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
+        ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+        ->where('appointment_component.appointment_id', $appointment->id)
+        ->select(
+            'appointment_component.id',
+            'appointment_component.usuario_taller_id',
+            'appointment_component.texto',
+            'appointment_component.total_precio',
+            'appointment_component.horas_trabajo',
+            'appointment_component.checked',
+            'appointments.id as appointment_id',
+            'appointments.fecha_asignada',
+            'appointments.prioridad',
+            'appointments.estado',
+            'appointments.descripcion_problema',
+            'appointments.estimacion_reparacion',
+            'components.id as componente_id',
+            'components.nombre as component_nombre',
+            'components.fecha_preaviso',
+            'components.fecha_revision'
+        )
+        ->get();
+    
 
             // Verificar lo que contiene la variable $data
         ;
