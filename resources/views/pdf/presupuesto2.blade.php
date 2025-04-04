@@ -16,6 +16,7 @@
 <body>
 
     <div class="header">
+        <img src="{{ public_path('images/logo_taller.jpeg') }}" alt="Logo Taller" class="logo" style="height: 60px; width: auto; margin-bottom: 10px;">
         <h2>AVENTURA BIKE PK S.L.</h2>
         <p>Cif/Nif: B-19781212</p>
         <p>Avenida del Mediterráneo, 222, 04006 - Almería</p>

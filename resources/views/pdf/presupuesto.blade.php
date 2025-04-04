@@ -10,17 +10,36 @@
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f4f4f4; }
         .total { font-weight: bold; text-align: right; }
-        .header { text-align: center; margin-bottom: 20px; }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header-info {
+            flex: 1;
+            text-align: center;
+        }
+        .logo {
+            height: 100px;
+            width: auto;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2>AVENTURA BIKE PK S.L.</h2>
-        <p>Cif/Nif: B-19781212</p>
-        <p>Avenida del Mediterráneo, 222, 04006 - Almería</p>
-        <p>Tel/Fax: 950 01 34 48</p>
-        <p>Correo: aventurabikepk@gmail.com</p>
+    <div class="header-container">
+        <div class="logo-container">
+            <img src="{{ public_path('images/logo_taller.jpeg') }}" alt="Logo Taller" class="logo">
+        </div>
+        <div class="header-info">
+            <h2>AVENTURA BIKE PK S.L.</h2>
+            <p>Cif/Nif: B-19781212</p>
+            <p>Avenida del Mediterráneo, 222, 04006 - Almería</p>
+            <p>Tel/Fax: 950 01 34 48</p>
+            <p>Correo: aventurabikepk@gmail.com</p>
+        </div>
+        <div style="width: 100px;"><!-- espacio vacío para alinear bien --></div>
     </div>
 
     <h2>Factura del Presupuesto #{{ $presupuesto->id }}</h2>
