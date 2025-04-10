@@ -48,7 +48,7 @@
             @foreach ($items as $item)
             <tr>
                 <td>{{ $item->componente_id }}</td>
-                <td>{{ $item->componente_nombre }}</td>
+                <td>{{ str_contains(strtolower($item->componente_nombre), 'material') ? $item->texto : $item->componente_nombre }}</td>
                 <td>1</td>
                 <td>{{ number_format($item->total_precio, 2) }}€</td>
                 <td>21%</td>
