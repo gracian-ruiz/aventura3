@@ -51,7 +51,7 @@ class BikeController extends Controller
             'nombre' => $request->nombre,
             'marca' => $request->marca,
             'anio_modelo' => $request->anio_modelo,
-            'kilometros' => $request->kilometros ?? null,
+            'kilometros' => $request->kilometros ?? 0,
         ]);
 
         return redirect()->route('bikes.index')->with('success', '🚴‍♂️ Bicicleta añadida correctamente.');

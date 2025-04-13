@@ -9,11 +9,10 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::table('presupuestos', function (Blueprint $table) {
-            $table->string('token_presupuesto')->unique()->nullable();
-            $table->boolean('mensaje_enviado')->default(false);
+        Schema::table('appointments', function (Blueprint $table) {
+            $table->integer('descuento')->nullable()->default(0);
         });
     }
 
@@ -22,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('presupuestos', function (Blueprint $table) {
+        Schema::table('appointments', function (Blueprint $table) {
             //
         });
     }

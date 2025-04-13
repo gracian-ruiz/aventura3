@@ -21,12 +21,12 @@ class WhatsAppController extends Controller
         }
 
         // Buscar el presupuesto y la bicicleta
-        $presupuesto = DB::table('presupuestos')
-            ->join('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
+        $presupuesto = DB::table('appointments')
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->join('users', 'bikes.user_id', '=', 'users.id')
-            ->where('presupuestos.id', $presupuestoId)
+            ->where('appointments.id', $presupuestoId)
             ->select(
-                'presupuestos.*',
+                'appointments.*',
                 'bikes.nombre as bicicleta_nombre',
                 'users.name as usuario_nombre',
                 'users.telefono as usuario_telefono'
@@ -46,9 +46,9 @@ class WhatsAppController extends Controller
         if (!empty($cliente->telefono)) {
             // 2. ENVIAR POR WHATSAPP
             if (!empty($cliente->telefono)) {
-                $mensaje = "📄 ¡Hola {$cliente->name}! Te enviamos el presupuesto de tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
+                $mensaje = "📄 ¡Hola {$cliente->name}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
                     . "📎 Adjuntamos el PDF con los detalles.\n\n" // Doble salto de línea aquí
-                    . "🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
+                    . "🔗 Puedes confirmar el presupuesto pinchando aquí: si no estás de acuerdo dime que quieres que hagamos y te mando nuevo presupuesto. Gracias: {$presupuestoUrl}";
 
                 $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
             }
@@ -61,17 +61,18 @@ class WhatsAppController extends Controller
     private function generarPDF($presupuestoId)
     {
         // Obtener datos del presupuesto
-        $presupuesto = DB::table('presupuestos')
-            ->join('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
+        $presupuesto = DB::table('appointments')
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->join('users', 'bikes.user_id', '=', 'users.id')
-            ->where('presupuestos.id', $presupuestoId)
-            ->select('presupuestos.*', 'bikes.nombre as bicicleta_nombre', 'users.name as usuario_nombre')
+            ->where('appointments.id', $presupuestoId)
+            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'users.name as usuario_nombre')
             ->first();
+            
 
-        $items = DB::table('presupuesto_items')
-            ->join('components', 'presupuesto_items.componente_id', '=', 'components.id')
-            ->where('presupuesto_items.presupuesto_id', $presupuestoId)
-            ->select('presupuesto_items.*', 'components.nombre as componente_nombre')
+        $items = DB::table('appointment_component')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $presupuestoId)
+            ->select('appointment_component.*', 'components.nombre as componente_nombre')
             ->get();
 
         // Nombre del archivo PDF basado en el ID del presupuesto
@@ -105,9 +106,9 @@ class WhatsAppController extends Controller
             );
 
 
-                DB::table('presupuestos')
+                DB::table('appointments')
                     ->where('id', $presupuestoId)
-                    ->update(['mensaje_enviado' => true]);
+                    ->update(['presupuesto_enviado' => true]);
 
         } catch (\Exception $e) {
             dd($e);

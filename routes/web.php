@@ -114,6 +114,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::put('/{appointment}/updatedos', [AppointmentController::class, 'updatedos'])->name('appointments.updatedos');
     Route::get('/citas/{appointment}/reparacion', [AppointmentController::class, 'showReparacion'])->name('appointments.reparacion.show');
     Route::put('/citas/{appointment}/reparacion', [AppointmentController::class, 'updateReparacion'])->name('appointments.updateReparacion');
+    Route::delete('/presupuestos/{id}', [PresupuestoController::class, 'destroy'])->name('presupuestos.destroy');
+
 
 
 

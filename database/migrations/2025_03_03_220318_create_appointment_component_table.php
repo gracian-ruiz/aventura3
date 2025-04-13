@@ -11,9 +11,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('appointment_id');
             $table->foreignId('componente_id');
-            $table->string('texto'); // Descripción del ítem
-            $table->integer('total_precio'); // Precio total del componente en la cita
-            $table->integer('horas_trabajo'); // Horas de trabajo estimadas para el componente
+            $table->string('texto')->nullable()->default(''); // Descripción del ítem
+            $table->integer('total_precio')->nullable(0); // Precio total del componente en la cita
+            $table->integer('horas_trabajo')->nullable(0); // Horas de trabajo estimadas para el componente
             $table->timestamps();
         });
     }

@@ -12,15 +12,18 @@ return new class extends Migration
     public function up()
     {
         Schema::table('appointment_component', function (Blueprint $table) {
-            $table->string('texto')->nullable()->default('')->change();
+            $table->integer('descuento')->nullable()->default(0);
         });
     }
     
-    public function down()
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::table('appointment_component', function (Blueprint $table) {
-            $table->string('texto')->nullable(false)->change();
+            //
         });
     }
-    
 };

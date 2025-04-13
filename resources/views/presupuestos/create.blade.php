@@ -19,26 +19,39 @@
             <p id="bike-error" class="text-red-500 text-sm mt-1 hidden">Debes seleccionar una bicicleta.</p>
         </div>
 
-        <!-- Selección de Componentes -->
+        <!-- Selección de Componentes con select -->
         <div class="mb-4">
-            <label class="block text-gray-700">Componentes</label>
-            <div class="flex items-center">
-                <select id="component-select" class="w-full border px-4 py-2 rounded-md select2">
-                    <option value="">Selecciona un componente</option>
-                    @foreach($components as $component)
-                        <option value="{{ $component->id }}" 
-                                data-nombre="{{ $component->nombre }}" 
-                                data-horas="{{ $component->hora_taller }}" 
-                                data-precio="{{ $component->precio }}">
-                            {{ $component->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-                <button type="button" id="add-component" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                    + Añadir
-                </button>
-            </div>
+            <label class="block text-gray-700">Selecciona un Componente</label>
+            <select id="component-select" class="w-full border px-4 py-2 rounded-md select2">
+                <option value="">Selecciona un componente</option>
+                @foreach($components as $component)
+                    <option value="{{ $component->id }}" 
+                            data-nombre="{{ $component->nombre }}" 
+                            data-horas="{{ $component->hora_taller }}" 
+                            data-precio="{{ $component->precio }}">
+                        {{ $component->nombre }}
+                    </option>
+                @endforeach
+            </select>
+            <button type="button" id="add-component" class="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                + Añadir Componente
+            </button>
             <p id="component-error" class="text-red-500 text-sm mt-1 hidden">Debes añadir al menos un componente.</p>
+        </div>
+
+        <!-- Botones para agregar componentes -->
+        <div class="mb-4">
+            <div class="flex flex-wrap space-x-4">
+                @foreach($components->take(15) as $component)
+                    <button type="button" class="add-component-btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-2" 
+                            data-id="{{ $component->id }}" 
+                            data-nombre="{{ $component->nombre }}"
+                            data-horas="{{ $component->hora_taller }}"
+                            data-precio="{{ $component->precio }}">
+                        {{ $component->nombre }}
+                    </button>
+                @endforeach
+            </div>
         </div>
 
         <!-- Tabla de Componentes -->
@@ -49,6 +62,7 @@
                         <th class="border px-4 py-2">Nombre</th>
                         <th class="border px-4 py-2">Minutos Taller</th>
                         <th class="border px-4 py-2">Precio</th>
+                        <th class="border px-4 py-2">Descuento (€)</th>
                         <th class="border px-4 py-2">Descripción</th>
                         <th class="border px-4 py-2">Acción</th>
                     </tr>
@@ -94,28 +108,13 @@ $(document).ready(function() {
             $('#bike-error').addClass('hidden');
         }
 
-        if (!componentsAdded) {
-            $('#component-error').removeClass('hidden');
-            valid = false;
-        } else {
-            $('#component-error').addClass('hidden');
-        }
-
         if (!valid) {
             event.preventDefault(); // Evita el envío del formulario si hay errores
         }
     });
 
-    $('#add-component').on('click', function() {
-        let select = $('#component-select');
-        let selectedOption = select.find(':selected');
-
-        if (!selectedOption.val()) return;
-
-        let componentId = selectedOption.val();
-        let nombre = selectedOption.data('nombre');
-        let horas = selectedOption.data('horas') || 0;
-        let precio = selectedOption.data('precio') || 0;
+    // Función para añadir componentes (botón o select)
+    function addComponent(componentId, nombre, horas, precio) {
         let tableBody = $('#component-list');
 
         // Verificar si el componente ya está en la tabla
@@ -144,6 +143,9 @@ $(document).ready(function() {
                     <input type="number" name="precios[]" value="${precio}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
                 </td>
                 <td class="border px-4 py-2">
+                    <input type="number" name="descuentos[]" value="0" min="0" step="1" class="w-full border rounded px-2 py-1" placeholder="Descuento €">
+                </td>
+                <td class="border px-4 py-2">
                     <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
                 </td>
                 <td class="border px-4 py-2">
@@ -168,8 +170,32 @@ $(document).ready(function() {
                 $('#component-error').removeClass('hidden');
             }
         });
+    }
 
+    // Evento de añadir componente desde el select
+    $('#add-component').on('click', function() {
+        let select = $('#component-select');
+        let selectedOption = select.find(':selected');
+
+        if (!selectedOption.val()) return;
+
+        let componentId = selectedOption.val();
+        let nombre = selectedOption.data('nombre');
+        let horas = selectedOption.data('horas') || 0;
+        let precio = selectedOption.data('precio') || 0;
+
+        addComponent(componentId, nombre, horas, precio);
         select.val(null).trigger('change');
+    });
+
+    // Evento de añadir componente desde el botón
+    $('.add-component-btn').on('click', function() {
+        let componentId = $(this).data('id');
+        let nombre = $(this).data('nombre');
+        let horas = $(this).data('horas') || 0;
+        let precio = $(this).data('precio') || 0;
+
+        addComponent(componentId, nombre, horas, precio);
     });
 });
 </script>

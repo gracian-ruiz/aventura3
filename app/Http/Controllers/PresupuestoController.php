@@ -6,11 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Presupuesto;
 use App\Models\User;
 use App\Models\Component;
-use App\Models\PresupuestoItem;
+use App\Models\AppointmentComponent;
 use App\Models\Bike;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
-use App\Models\Cita;
+use App\Models\Appointment;
 use Carbon\Carbon;
 
 
@@ -18,11 +18,11 @@ class PresupuestoController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('presupuestos')
-            ->leftJoin('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
+        $query = DB::table('appointments')
+            ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->leftJoin('users', 'bikes.user_id', '=', 'users.id')
-            ->select('presupuestos.*', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
-            ->where('presupuestos.estado', 'pendiente'); // Filtrar solo los pendientes
+            ->select('appointments.*', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
+            ->whereIn('appointments.estado', ['presupuesto', 'denegado','vacia']); // Filtrar solo los pendientes
 
         // Aplicar filtro de búsqueda
         if ($request->has('search') && !empty($request->search)) {
@@ -32,7 +32,7 @@ class PresupuestoController extends Controller
                     ->orWhere('bikes.nombre', 'like', "%$search%");
             });
         }
-
+        
         $presupuestos = $query->paginate(10)->appends(['search' => $request->search]); // Mantiene el término en la paginación
 
         return view('presupuestos.index', compact('presupuestos'));
@@ -49,95 +49,102 @@ class PresupuestoController extends Controller
         return view('presupuestos.create', compact('user', 'bikes', 'components'));
     }
 
+
     public function store(Request $request)
     {
         $request->validate([
             'bike_id' => 'required|exists:bikes,id',
-            'componentes' => 'required|array',
-            'horas_trabajo' => 'required|array',
-            'precios' => 'required|array',
-            'textos' => 'required|array',
-            'horas_trabajo.*' => 'required|integer|min:0',
-            'precios.*' => 'required|numeric|min:0',
+            'componentes' => 'nullable|array',
+            'horas_trabajo' => 'nullable|array',
+            'precios' => 'nullable|array',
+            'textos' => 'nullable|array',
+            'descuentos' => 'nullable|array',
+    
+            'horas_trabajo.*' => 'nullable|integer|min:0',
+            'precios.*' => 'nullable|numeric|min:0',
+            'descuentos.*' => 'nullable|integer|min:0',
         ]);
-
+    
         $bikeId = $request->bike_id;
-        $componentes = $request->componentes;
-        $horasTrabajo = $request->horas_trabajo;
-        $precios = $request->precios;
-        $textos = $request->textos;
-
-        // Validar que los arrays sean del mismo tamaño
-        if (count($componentes) !== count($horasTrabajo) || count($componentes) !== count($precios) || count($componentes) !== count($textos)) {
+        $componentes = $request->componentes ?? [];
+        $horasTrabajo = $request->horas_trabajo ?? [];
+        $precios = $request->precios ?? [];
+        $textos = $request->textos ?? [];
+        $descuentos = $request->descuentos ?? [];
+    
+        if (count($componentes) > 0 &&
+            (count($componentes) !== count($horasTrabajo) ||
+             count($componentes) !== count($precios) ||
+             count($componentes) !== count($textos))) {
             return redirect()->back()->withErrors(['error' => 'Los datos de los componentes no coinciden.']);
         }
-
-        // Validar que haya al menos un componente
-        if (empty($componentes)) {
-            return redirect()->back()->withErrors(['error' => 'Debe agregar al menos un componente.']);
-        }
-
-        // Obtener la bicicleta y su propietario
+    
         $bike = Bike::find($bikeId);
         if (!$bike) {
             return redirect()->back()->withErrors(['error' => 'Bicicleta no encontrada.']);
         }
-
-        // Generar token único para el presupuesto
+    
         $tokenPresupuesto = md5(Carbon::now()->timestamp . $bike->user_id);
-
-        // Crear el presupuesto con el propietario correcto
-        $presupuesto = Presupuesto::create([
+    
+        $presupuesto = Appointment::create([
             'bike_id' => $bikeId,
             'horas_total' => 0,
             'precio_total' => 0,
-            'user_id' => $bike->user_id, // ✅ Asignamos el usuario de la bicicleta
+            'user_id' => $bike->user_id,
             'token_presupuesto' => $tokenPresupuesto,
             'mensaje_enviado' => false,
+            'estimacion_reparacion' => '',
+            'estado' => count($componentes) > 0 ? 'presupuesto' : 'vacía',
+            'descuento' => 0, // se actualiza más abajo
         ]);
-
+    
         $totalHoras = 0;
         $totalPrecio = 0;
-
-        // Insertar cada componente en `presupuesto_items` y calcular totales
-        foreach ($componentes as $index => $componenteId) {
-            $horas = (int) $horasTrabajo[$index];
-            $precio = (float) $precios[$index];
-            $texto = $textos[$index] ?? '';
-
-            PresupuestoItem::create([
-                'presupuesto_id' => $presupuesto->id,
-                'componente_id' => $componenteId,
-                'horas_trabajo' => $horas,
-                'total_precio' => $precio,
-                'texto' => $texto,
+        $totalDescuento = 0;
+    
+        if (count($componentes) > 0) {
+            foreach ($componentes as $index => $componenteId) {
+                $horas = (int) $horasTrabajo[$index];
+                $precio = (float) $precios[$index];
+                $texto = $textos[$index] ?? '';
+                $descuento = isset($descuentos[$index]) ? (int) $descuentos[$index] : 0;
+    
+                AppointmentComponent::create([
+                    'appointment_id' => $presupuesto->id,
+                    'componente_id' => $componenteId,
+                    'horas_trabajo' => $horas,
+                    'total_precio' => $precio,
+                    'texto' => $texto,
+                    'descuento' => $descuento,
+                ]);
+    
+                $totalHoras += $horas;
+                $totalPrecio += max($precio - $descuento, 0);
+                $totalDescuento += $descuento;
+            }
+    
+            $presupuesto->update([
+                'horas_total' => $totalHoras,
+                'precio_total' => round($totalPrecio, 2),
+                'descuento' => $totalDescuento,
             ]);
-
-            // Acumular totales
-            $totalHoras += $horas;
-            $totalPrecio += $precio;
         }
-
-        // Actualizar los totales en la tabla presupuestos
-        $presupuesto->update([
-            'horas_total' => $totalHoras,
-            'precio_total' => round($totalPrecio, 2),
-        ]);
-
+    
         return redirect()->route('presupuestos.factura', ['id' => $presupuesto->id])
             ->with('success', 'Presupuesto guardado correctamente.');
     }
-
+    
+    
 
     public function factura($id)
     {
         // Obtener el presupuesto con la bicicleta y el usuario
-        $presupuesto = DB::table('presupuestos')
-            ->join('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
+        $presupuesto = DB::table('appointments')
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->join('users', 'bikes.user_id', '=', 'users.id')
-            ->where('presupuestos.id', $id)
+            ->where('appointments.id', $id)
             ->select(
-                'presupuestos.*',
+                'appointments.*',
                 'bikes.id as bicicleta_id',
                 'bikes.nombre as bicicleta_nombre',
                 'users.id as usuario_id',
@@ -152,31 +159,32 @@ class PresupuestoController extends Controller
         }
 
         // Obtener los ítems del presupuesto con los componentes
-        $items = DB::table('presupuesto_items')
-            ->join('components', 'presupuesto_items.componente_id', '=', 'components.id')
-            ->where('presupuesto_items.presupuesto_id', $id)
+        $items = DB::table('appointment_component')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $id)
             ->select([
-                'presupuesto_items.*',
+                'appointment_component.*',
                 'components.nombre as componente_nombre'
             ])
             ->get();
+            $iva = 21; // porcentaje
 
-        return view('presupuestos.factura', compact('presupuesto', 'items'));
+        return view('presupuestos.factura', compact('presupuesto', 'items','iva'));
     }
 
     public function descargarPDF($presupuestoId)
     {
-        $presupuesto = DB::table('presupuestos')
-            ->join('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
+        $presupuesto = DB::table('appointments')
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->join('users', 'bikes.user_id', '=', 'users.id')
-            ->where('presupuestos.id', $presupuestoId)
-            ->select('presupuestos.*', 'bikes.nombre as bicicleta_nombre', 'users.name as usuario_nombre')
+            ->where('appointments.id', $presupuestoId)
+            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'users.name as usuario_nombre')
             ->first();
 
-        $items = DB::table('presupuesto_items')
-            ->join('components', 'presupuesto_items.componente_id', '=', 'components.id')
-            ->where('presupuesto_items.presupuesto_id', $presupuestoId)
-            ->select('presupuesto_items.*', 'components.nombre as componente_nombre')
+        $items = DB::table('appointment_component')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $presupuestoId)
+            ->select('appointment_component.*', 'components.nombre as componente_nombre')
             ->get();
 
         // Si no se encuentra el presupuesto, retornar error 404
@@ -200,29 +208,30 @@ class PresupuestoController extends Controller
     public function edit($id)
     {
         // Obtener el presupuesto con los datos de la bicicleta y el usuario
-        $presupuesto = DB::table('presupuestos')
-            ->leftJoin('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
+        $presupuesto = DB::table('appointments')
+            ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->leftJoin('users', 'bikes.user_id', '=', 'users.id')
-            ->select('presupuestos.*', 'bikes.id as bike_id', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
-            ->where('presupuestos.id', $id)
+            ->select('appointments.*', 'bikes.id as bike_id', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
+            ->where('appointments.id', $id)
             ->first();
-
+        
         if (!$presupuesto) {
             abort(404);
         }
 
         // Obtener todos los ítems asociados a este presupuesto
-        $presupuesto_items = DB::table('presupuesto_items')
-            ->join('components', 'presupuesto_items.componente_id', '=', 'components.id')
-            ->where('presupuesto_items.presupuesto_id', $id)
+        $presupuesto_items = DB::table('appointment_component')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $id)
             ->select(
-                'presupuesto_items.id',
-                'presupuesto_items.presupuesto_id',
-                'presupuesto_items.componente_id',
-                'presupuesto_items.texto',
-                'presupuesto_items.total_precio', // Ahora obtenemos el precio del presupuesto_item
-                'presupuesto_items.horas_trabajo', // Ahora obtenemos las horas de trabajo editadas
-                'components.nombre as componente_nombre'
+                'appointment_component.id',
+                'appointment_component.appointment_id',
+                'appointment_component.componente_id',
+                'appointment_component.texto',
+                'appointment_component.total_precio', // Ahora obtenemos el precio del presupuesto_item
+                'appointment_component.horas_trabajo', // Ahora obtenemos las horas de trabajo editadas
+                'components.nombre as componente_nombre',
+                'appointment_component.descuento',
             )
             ->get();
 
@@ -245,63 +254,70 @@ class PresupuestoController extends Controller
             'horas_trabajo' => 'required|array',
             'precio' => 'required|array',
             'textos' => 'nullable|array',
+            'descuento' => 'required|array',
         ]);
+
 
         DB::beginTransaction();
         try {
-            DB::table('presupuestos')
+            DB::table('appointments')
                 ->where('id', $id)
                 ->update([
                     'bike_id' => $request->bike_id,
                     'updated_at' => now(),
                 ]);
 
-            $componentesActuales = DB::table('presupuesto_items')
-                ->where('presupuesto_id', $id)
+            $componentesActuales = DB::table('appointment_component')
+                ->where('appointment_id', $id)
                 ->pluck('id', 'componente_id')
                 ->toArray();
 
             $totalPresupuesto = 0;
+            $totalDescuento = 0;
             $totalHoras = 0;
 
             foreach ($request->componentes as $index => $componente_id) {
                 $horas_trabajo = (int) $request->horas_trabajo[$index];
                 $total_precio = (float) $request->precio[$index];
+                $total_descuento = (float) $request->descuento[$index];
 
                 $totalPresupuesto += $total_precio;
+                $totalDescuento += $total_descuento;
                 $totalHoras += $horas_trabajo;
 
                 $datosItem = [
-                    'presupuesto_id' => $id,
+                    'appointment_id' => $id,
                     'horas_trabajo' => $horas_trabajo,
                     'total_precio' => $total_precio,
+                    'descuento' => $total_descuento,
                     'texto' => isset($request->textos[$index]) ? $request->textos[$index] : '', // Usa cadena vacía si no está definido
                     'updated_at' => now(),
                 ];
 
                 if (isset($componentesActuales[$componente_id])) {
-                    DB::table('presupuesto_items')
+                    DB::table('appointment_component')
                         ->where('id', $componentesActuales[$componente_id])
                         ->update($datosItem);
                     unset($componentesActuales[$componente_id]);
                 } else {
                     $datosItem['componente_id'] = $componente_id;
                     $datosItem['created_at'] = now();
-                    DB::table('presupuesto_items')->insert($datosItem);
+                    DB::table('appointment_component')->insert($datosItem);
                 }
             }
 
             if (!empty($componentesActuales)) {
-                DB::table('presupuesto_items')
+                DB::table('appointment_component')
                     ->whereIn('id', $componentesActuales)
                     ->delete();
             }
 
-            DB::table('presupuestos')
+            DB::table('appointments')
                 ->where('id', $id)
                 ->update([
                     'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
+                    'descuento' => $totalDescuento,
                 ]);
 
             DB::commit();
@@ -325,85 +341,54 @@ class PresupuestoController extends Controller
         $request->validate([
             'estado' => 'required|in:aprobado,denegado',
         ]);
-
-        // Obtener el presupuesto y sus ítems
-        $presupuesto = DB::table('presupuestos')->where('id', $id)->first();
-
-        if (!$presupuesto) {
+    
+        // Obtener la cita existente
+        $cita = DB::table('appointments')->where('id', $id)->first();
+    
+        if (!$cita) {
             return [
                 'tipo' => 'error',
-                'mensaje' => 'Presupuesto no encontrado.'
+                'mensaje' => 'Cita no encontrada.'
             ];
         }
-
+    
         if ($request->estado === 'aprobado') {
             DB::beginTransaction(); // Iniciar transacción
-
+    
             try {
-                // Crear la cita
-                $appointmentId = DB::table('appointments')->insertGetId([
-                    'bike_id' => $presupuesto->bike_id,
-                    'presupuesto_id' => $presupuesto->id,
-                    'descripcion_problema' => 'Cita generada desde presupuesto aprobado',
-                    'tiempo_estimado' => $presupuesto->horas_total, // Convertir horas a minutos
-                    'estimacion_reparacion' => $presupuesto->precio_total,
+                // Actualizar el estado de la cita a 'pendiente' si está aprobada
+                DB::table('appointments')->where('id', $id)->update([
                     'estado' => 'pendiente',
-                    'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-
-                // Obtener los ítems del presupuesto
-                $presupuestoItems = DB::table('presupuesto_items')
-                    ->where('presupuesto_id', $presupuesto->id)
-                    ->get();
-
-                // Insertar los ítems en appointment_component
-                foreach ($presupuestoItems as $item) {
-                    DB::table('appointment_component')->insert([
-                        'appointment_id' => $appointmentId,
-                        'componente_id' => $item->componente_id,
-                        'texto' => $item->texto,
-                        'total_precio' => $item->total_precio,
-                        'horas_trabajo' => $item->horas_trabajo,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-
-                // Actualizar el estado del presupuesto
-                DB::table('presupuestos')->where('id', $id)->update([
-                    'estado' => 'aprobado',
-                    'updated_at' => now(),
-                ]);
-
+    
                 DB::commit(); // Confirmar transacción
-
+    
                 return [
                     'tipo' => 'success',
-                    'mensaje' => 'Presupuesto aprobado y cita creada.'
+                    'mensaje' => 'Cita actualizada a pendiente.'
                 ];
             } catch (\Exception $e) {
                 DB::rollBack(); // Revertir cambios en caso de error
-
                 return [
                     'tipo' => 'error',
-                    'mensaje' => 'Error al procesar la cita.'
+                    'mensaje' => 'Error al actualizar la cita.'
                 ];
             }
+        } elseif ($request->estado === 'denegado') {
+            // Si el estado es 'denegado', actualizar el estado de la cita
+            DB::table('appointments')->where('id', $id)->update([
+                'estado' => 'denegado',
+                'updated_at' => now(),
+            ]);
+    
+            return [
+                'tipo' => 'success',
+                'mensaje' => 'Presupuesto denegado.'
+            ];
         }
-
-        // Si es denegado, solo actualizar el estado del presupuesto
-        DB::table('presupuestos')->where('id', $id)->update([
-            'estado' => $request->estado,
-            'updated_at' => now(),
-        ]);
-
-        return [
-            'tipo' => 'success',
-            'mensaje' => 'Presupuesto actualizado correctamente.'
-        ];
     }
-
+    
 
 
 
@@ -428,12 +413,12 @@ class PresupuestoController extends Controller
         $token = $request->query('token');
 
         // Obtener presupuesto y verificar token
-        $presupuesto = DB::table('presupuestos')
-            ->join('bikes', 'presupuestos.bike_id', '=', 'bikes.id')
+        $presupuesto = DB::table('appointments')
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->join('users', 'bikes.user_id', '=', 'users.id')
-            ->where('presupuestos.token_presupuesto', $token)
-            ->where('presupuestos.id', $presupuestoId)
-            ->select('presupuestos.*', 'bikes.nombre as bicicleta_nombre', 'users.name as cliente_nombre') // Cambié usuario_nombre a cliente_nombre
+            ->where('appointments.token_presupuesto', $token)
+            ->where('appointments.id', $presupuestoId)
+            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'users.name as cliente_nombre') // Cambié usuario_nombre a cliente_nombre
             ->first();
 
         if (!$presupuesto) {
@@ -465,7 +450,7 @@ class PresupuestoController extends Controller
         }
 
         // Obtener presupuesto y verificar token
-        $presupuesto = DB::table('presupuestos')
+        $presupuesto = DB::table('appointments')
             ->where('id', $presupuestoId)
             ->where('token_presupuesto', $token)
             ->first();
@@ -489,4 +474,35 @@ class PresupuestoController extends Controller
             return view('presupuestos.denegada', ['mensaje' => '❌ Has rechazado el presupuesto. Si cambias de opinión, contáctanos.']);
         }
     }
+
+    public function destroy($id)
+{
+    // Iniciar una transacción para asegurarnos de que ambas tablas se actualicen correctamente
+    DB::beginTransaction();
+
+    try {
+        // Eliminar los componentes asociados a la cita
+        DB::table('appointment_component')->where('appointment_id', $id)->delete();
+
+        // Eliminar la cita
+        DB::table('appointments')->where('id', $id)->delete();
+
+        // Confirmar la transacción
+        DB::commit();
+
+        // Redirigir con éxito
+        return redirect()->route('presupuestos.index')
+            ->with('success', 'Cita y componentes asociados eliminados correctamente.');
+    } catch (\Exception $e) {
+        dd($e);
+        // Si algo falla, revertir la transacción
+        DB::rollback();
+
+        // Manejar el error y redirigir
+        return redirect()->route('presupuestos.index')
+            ->with('error', 'Ocurrió un error al eliminar la cita: ' . $e->getMessage());
+    }
+}
+
+    
 }

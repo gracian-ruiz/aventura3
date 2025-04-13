@@ -38,7 +38,7 @@
             </thead>
             <tbody class="divide-y divide-gray-300">
                 @foreach ($presupuestos as $presupuesto)
-                    <tr class="hover:bg-gray-100">
+                <tr class="hover:bg-gray-100 {{ $presupuesto->estado === 'denegado' ? 'bg-red-200' : '' }}{{ $presupuesto->estado === 'vacia' ? 'bg-yellow-200' : '' }}">
                         <td class="py-2 px-4">{{ $presupuesto->id }}</td>
                         <td class="py-2 px-4">{{ $presupuesto->user_nombre ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ $presupuesto->bike_nombre ?? 'N/A' }}</td>
@@ -50,7 +50,6 @@
                             </span>
                         </td> --}}
                         <td class="py-2 px-4 text-center">
-                            @if ($presupuesto->estado === 'pendiente')
                                 <form action="{{ route('presupuestos.actualizarEstado', $presupuesto->id) }}" method="POST" class="mb-1">
                                     @csrf
                                     @method('PATCH')
@@ -67,7 +66,13 @@
                                         Denegar
                                     </button>
                                 </form>
-                            @endif
+                                <form action="{{ route('presupuestos.destroy', $presupuesto->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este presupuesto?')" class="mt-2">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 w-full">
+                                        Eliminar
+                                    </button>
+                                </form>
                         </td>
                         <td class="py-2 px-4 text-center">
                             <div class="flex flex-col space-y-2">

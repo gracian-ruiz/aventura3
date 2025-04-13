@@ -30,6 +30,7 @@
                         <th class="border px-4 py-2">Nombre</th>
                         <th class="border px-4 py-2">Minutos Taller</th>
                         <th class="border px-4 py-2">Precio</th>
+                        <th class="border px-4 py-2">Descuento</th>
                         <th class="border px-4 py-2">Descripción</th>
                         <th class="border px-4 py-2">Acción</th>
                     </tr>
@@ -48,6 +49,9 @@
                                 <input type="number" name="precio[]" value="{{ old('precio.' . $loop->index, $item->total_precio) }}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
                             </td>
                             <td class="border px-4 py-2">
+                                <input type="number" name="descuento[]" value="{{ old('precio.' . $loop->index, $item->descuento) }}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                            </td>
+                            <td class="border px-4 py-2">
                                 <input type="text" name="textos[]" value="{{ $item->texto }}" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
                             </td>
                             <td class="border px-4 py-2">
@@ -61,7 +65,23 @@
             </table>
         </div>
 
-        <!-- Selección de Componentes (con Select2) -->
+        <!-- Botones para agregar componentes -->
+        <div class="mb-4">
+            <div class="flex flex-wrap space-x-4">
+                @foreach($components->take(15) as $component)
+                <button type="button" 
+                        class="add-component-btn bg-blue-500 text-black px-4 py-2 rounded-md hover:bg-blue-600 mb-2 font-bold" 
+                        data-id="{{ $component->id }}" 
+                        data-nombre="{{ $component->nombre }}"
+                        data-horas="{{ $component->hora_taller }}"
+                        data-precio="{{ $component->precio }}"
+                        title="{{ $component->nombre }}">
+                    {{ Str::limit($component->nombre, 20) }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+
         <div class="mb-4">
             <label class="block text-gray-700">Componentes</label>
             <div class="flex items-center">
@@ -98,25 +118,25 @@
 
 <script>
     $(document).ready(function() {
+        // Selección de componente con Select2
         $('.select2').select2({
             width: '100%',
             placeholder: "Selecciona un componente",
             allowClear: true
         });
 
-        $('#add-component').on('click', function() {
-            let selectedOption = $('#component-select option:selected');
-
-            if (!selectedOption.val()) return;
-
-            let componentId = selectedOption.val();
-            let componentNombre = selectedOption.data('nombre');
-            let componentHoras = selectedOption.data('horas') || 0;
-            let componentPrecio = selectedOption.data('precio') || 0;
+        // Lógica para agregar componentes al presupuesto
+        $('.add-component-btn').on('click', function() {
+            let componentId = $(this).data('id');
+            let componentNombre = $(this).data('nombre');
+            let componentHoras = $(this).data('horas') || 0;
+            let componentPrecio = $(this).data('precio') || 0;
+            let componentDesceunto = $(this).data('descuento') || 0;
 
             // Verificar si el componente ya está agregado
             if ($(`tr[data-id="${componentId}"]`).length > 0) return;
 
+            // Agregar nuevo componente a la tabla
             let newRow = `
                 <tr data-id="${componentId}">
                     <td class="border px-4 py-2">
@@ -128,6 +148,9 @@
                     </td>
                     <td class="border px-4 py-2">
                         <input type="number" name="precio[]" value="${componentPrecio}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                    </td>
+                    <td class="border px-4 py-2">
+                        <input type="number" name="descuento[]" value="${componentDesceunto}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
                     </td>
                     <td class="border px-4 py-2">
                         <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
@@ -142,13 +165,59 @@
 
             $('#component-list').append(newRow);
 
-            // Evento para eliminar la fila agregada
+            // Evento para eliminar fila
             $('.remove-component').off('click').on('click', function() {
                 $(this).closest('tr').remove();
             });
         });
 
-        // Evento para eliminar filas existentes
+        // Lógica para añadir componentes desde el select
+        $('#add-component').on('click', function() {
+            let selectedOption = $('#component-select option:selected');
+            let componentId = selectedOption.val();
+            let componentNombre = selectedOption.data('nombre');
+            let componentHoras = selectedOption.data('horas') || 0;
+            let componentPrecio = selectedOption.data('precio') || 0;
+            let componentDescuento = 0;
+
+            // Verificar si el componente ya está agregado
+            if ($(`tr[data-id="${componentId}"]`).length > 0) return;
+
+            // Agregar nuevo componente a la tabla
+            let newRow = `
+                <tr data-id="${componentId}">
+                    <td class="border px-4 py-2">
+                        <input type="hidden" name="componentes[]" value="${componentId}">
+                        ${componentNombre}
+                    </td>
+                    <td class="border px-4 py-2">
+                        <input type="number" name="horas_trabajo[]" value="${componentHoras}" min="0" step="0.1" class="w-full border rounded px-2 py-1">
+                    </td>
+                    <td class="border px-4 py-2">
+                        <input type="number" name="precio[]" value="${componentPrecio}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                    </td>
+                    <td class="border px-4 py-2">
+                        <input type="number" name="descuento[]" value="${componentDescuento}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                    </td>
+                    <td class="border px-4 py-2">
+                        <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
+                    </td>
+                    <td class="border px-4 py-2">
+                        <button type="button" class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `;
+            $('#component-list').append(newRow);
+
+            // Evento para eliminar fila
+            $('.remove-component').off('click').on('click', function() {
+                $(this).closest('tr').remove();
+            });
+        });
+
+        // Eliminar fila de componentes existentes
         $('.remove-component').on('click', function() {
             $(this).closest('tr').remove();
         });

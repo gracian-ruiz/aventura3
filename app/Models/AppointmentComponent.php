@@ -18,7 +18,8 @@ class AppointmentComponent extends Model
         'total_precio',
         'horas_trabajo',
         'checked',
-        'usuario_taller_id'
+        'usuario_taller_id',
+        'descuento'
     ];
 
     public function appointment()

@@ -40,7 +40,7 @@
                     <th class="py-2 px-4 text-left">Usuario</th>
                     <th class="py-2 px-4 text-left">Componentes</th>
                     <th class="py-2 px-4 text-left">Prioridad</th>
-                    <th class="py-2 px-4 text-left">Tiempo Estimado</th>
+                    <th class="py-2 px-4 text-left">Tiempo de Reparacion</th>
                     <th class="py-2 px-4 text-left">Fecha Creación</th>
                     <th class="py-2 px-4 text-left">Fecha Asignada</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
@@ -64,7 +64,7 @@
                                 {{ ucfirst($appointment->prioridad) }}
                             </span>
                         </td>
-                        <td class="py-2 px-4">{{ $appointment->tiempo_estimado }} min</td>
+                        <td class="py-2 px-4">{{ $appointment->horas_total }} min</td>
                         <td class="py-2 px-4">
                             {{ \Carbon\Carbon::parse($appointment->created_at)->addHour()->format('d/m/Y H:i') }}
                         </td>

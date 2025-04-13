@@ -29,7 +29,7 @@
         <div class="w-full flex flex-col items-center">
             <!-- Logo del taller -->
             <div class="mt-6">
-                <img src="{{ asset('images/logo_taller.jpeg') }}" alt="Logo Taller" class="h-24 w-auto">
+                <img src="{{ asset('images/logo_taller_1.png') }}" alt="Logo Taller" class="h-24 w-auto">
             </div>
 
             <!-- Imagen de fondo con enlace -->

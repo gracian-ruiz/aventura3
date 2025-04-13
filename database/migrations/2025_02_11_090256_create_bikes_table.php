@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->string('nombre');
             $table->string('marca');
             $table->year('anio_modelo');
+            $table->integer('kilometros')->default(0);
             $table->timestamps();
         });
     }
