@@ -99,7 +99,7 @@ class RecordatorioController extends Controller
     
         $mensaje = "✅ ¡Hola {$user->name}! Tu bicicleta {$bike->nombre} ya está lista.
 \n"
-                 . "Puedes pasar a recogerla cuando quieras. ¡Gracias por confiar en nosotros! 🚴";
+                 . " Puedes pasar a recogerla en nuestro horario habitual. Gracias! 🚴";
     
         $message = $twilio->messages->create(
             "whatsapp:+34{$user->telefono}", 
