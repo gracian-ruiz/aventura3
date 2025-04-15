@@ -138,6 +138,8 @@ class AppointmentController extends Controller
             'horas_trabajo' => 'required|array',
             'precio' => 'required|array',
             'textos' => 'nullable|array',
+            'prioridad' => 'required|in:normal,urgente',
+            
         ]);
 
         DB::beginTransaction();
@@ -146,6 +148,7 @@ class AppointmentController extends Controller
                 ->where('id', $id)
                 ->update([
                     'bike_id' => $request->bike_id,
+                    'prioridad' => $request->prioridad,
                     'updated_at' => now(),
                 ]);
 
