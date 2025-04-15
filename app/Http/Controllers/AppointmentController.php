@@ -139,9 +139,9 @@ class AppointmentController extends Controller
             'precio' => 'required|array',
             'textos' => 'nullable|array',
             'prioridad' => 'required|in:normal,urgente',
-            
+            'descuento' => 'nullable|array', // Validación de descuentos
         ]);
-
+    
         DB::beginTransaction();
         try {
             DB::table('appointments')
@@ -151,30 +151,32 @@ class AppointmentController extends Controller
                     'prioridad' => $request->prioridad,
                     'updated_at' => now(),
                 ]);
-
+    
             $componentesActuales = DB::table('appointment_component')
                 ->where('appointment_id', $id)
                 ->pluck('id', 'componente_id')
                 ->toArray();
-
+    
             $totalPresupuesto = 0;
             $totalHoras = 0;
-
+    
             foreach ($request->componentes as $index => $componente_id) {
                 $horas_trabajo = (int) $request->horas_trabajo[$index];
                 $total_precio = (float) $request->precio[$index];
-
+                $descuento = isset($request->descuento[$index]) ? (float) $request->descuento[$index] : 0; // Obtener descuento
+    
                 $totalPresupuesto += $total_precio;
                 $totalHoras += $horas_trabajo;
-
+    
                 $datosItem = [
                     'appointment_id' => $id,
                     'horas_trabajo' => $horas_trabajo,
                     'total_precio' => $total_precio,
-                    'texto' => isset($request->textos[$index]) ? $request->textos[$index] : '', // Usa cadena vacía si no está definido
+                    'descuento' => $descuento, // Incluir descuento
+                    'texto' => isset($request->textos[$index]) ? $request->textos[$index] : '', // Texto del trabajo
                     'updated_at' => now(),
                 ];
-
+    
                 if (isset($componentesActuales[$componente_id])) {
                     DB::table('appointment_component')
                         ->where('id', $componentesActuales[$componente_id])
@@ -186,28 +188,28 @@ class AppointmentController extends Controller
                     DB::table('appointment_component')->insert($datosItem);
                 }
             }
-
+    
             if (!empty($componentesActuales)) {
                 DB::table('appointment_component')
                     ->whereIn('id', $componentesActuales)
                     ->delete();
             }
-
+    
             DB::table('appointments')
                 ->where('id', $id)
                 ->update([
                     'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
                 ]);
-
+    
             DB::commit();
-
+    
             return redirect()->route('appointments.index')->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al actualizar el presupuesto: ' . $e->getMessage());
         }
-    }
+    }    
 
 
     public function edit($id)
@@ -233,6 +235,7 @@ class AppointmentController extends Controller
                 'appointment_component.appointment_id',
                 'appointment_component.componente_id',
                 'appointment_component.texto',
+                'appointment_component.descuento',
                 'appointment_component.total_precio', // Ahora obtenemos el precio del presupuesto_item
                 'appointment_component.horas_trabajo', // Ahora obtenemos las horas de trabajo editadas
                 'components.nombre as componente_nombre'

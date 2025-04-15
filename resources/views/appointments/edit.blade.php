@@ -39,32 +39,50 @@
                         <th class="border px-4 py-2">Nombre</th>
                         <th class="border px-4 py-2">Minutos Taller</th>
                         <th class="border px-4 py-2">Precio</th>
+                        <th class="border px-4 py-2">Descuento</th>
                         <th class="border px-4 py-2">Descripción</th>
                         <th class="border px-4 py-2">Acción</th>
                     </tr>
                 </thead>
                 <tbody id="component-list">
                     @foreach($presupuesto_items as $item)
-                        <tr data-id="{{ $item->componente_id }}">
-                            <td class="border px-4 py-2">
-                                <input type="hidden" name="componentes[]" value="{{ $item->componente_id }}">
-                                {{ $item->componente_nombre }}
-                            </td>
-                            <td class="border px-4 py-2">
-                                <input type="number" name="horas_trabajo[]" value="{{ $item->horas_trabajo }}" min="0" step="0.1" class="w-full border rounded px-2 py-1">
-                            </td>
-                            <td class="border px-4 py-2">
-                                <input type="number" name="precio[]" value="{{ old('precio.' . $loop->index, $item->total_precio) }}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
-                            </td>
-                            <td class="border px-4 py-2">
-                                <input type="text" name="textos[]" value="{{ $item->texto }}" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
-                            </td>
-                            <td class="border px-4 py-2">
-                                <button type="button" class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
-                                    Eliminar
-                                </button>
-                            </td>
-                        </tr>
+                    <tr data-id="{{ $item->componente_id }}">
+                        <td class="border px-2 py-2">
+                            <input type="hidden" name="componentes[]" value="{{ $item->componente_id }}">
+                            {{ $item->componente_nombre }}
+                        </td>
+                    
+                        <!-- Horas de trabajo: más estrecho -->
+                        <td class="border px-2 py-2 w-20">
+                            <input type="number" name="horas_trabajo[]" value="{{ $item->horas_trabajo }}" min="0" step="0.1"
+                                class="w-full border rounded px-2 py-1 text-sm">
+                        </td>
+                    
+                        <!-- Precio: más estrecho -->
+                        <td class="border px-2 py-2 w-20">
+                            <input type="number" name="precio[]" value="{{ old('precio.' . $loop->index, $item->total_precio) }}" min="0" step="0.01"
+                                class="w-full border rounded px-2 py-1 text-sm">
+                        </td>
+                    
+                        <!-- Descuento: campo añadido -->
+                        <td class="border px-2 py-2 w-20">
+                            <input type="number" name="descuento[]" value="{{ old('descuento.' . $loop->index, $item->descuento) }}" min="0" step="0.01"
+                                class="w-full border rounded px-2 py-1 text-sm">
+                        </td>
+                    
+                        <!-- Descripción del trabajo más amplia -->
+                        <td class="border px-2 py-2 w-96">
+                            <input type="text" name="textos[]" value="{{ $item->texto }}" placeholder="Descripción del trabajo"
+                                class="w-full border rounded px-2 py-1 text-sm">
+                        </td>
+                    
+                        <td class="border px-2 py-2">
+                            <button type="button"
+                                class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>                    
                     @endforeach
                 </tbody>
             </table>

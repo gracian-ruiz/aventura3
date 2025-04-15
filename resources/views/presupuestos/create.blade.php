@@ -62,7 +62,7 @@
                         <th class="border px-4 py-2">Nombre</th>
                         <th class="border px-4 py-2">Minutos Taller</th>
                         <th class="border px-4 py-2">Precio</th>
-                        <th class="border px-4 py-2">Descuento (€)</th>
+                        <th class="border px-4 py-2">Descuento</th>
                         <th class="border px-4 py-2">Descripción</th>
                         <th class="border px-4 py-2">Acción</th>
                     </tr>
@@ -137,7 +137,7 @@ $(document).ready(function() {
             <tr data-id="${componentId}" data-nombre="${nombre}">
                 <td class="border px-4 py-2">${nombre}</td>
                 <td class="border px-4 py-2">
-                    <input type="number" name="horas_trabajo[]" value="${horas}" min="0" step="0.1" class="w-full border rounded px-2 py-1">
+                    <input type="number" name="horas_trabajo[]" value="${horas}" min="0" step="0.1" class="w-20 border rounded px-2 py-1">
                 </td>
                 <td class="border px-4 py-2">
                     <input type="number" name="precios[]" value="${precio}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
@@ -146,7 +146,7 @@ $(document).ready(function() {
                     <input type="number" name="descuentos[]" value="0" min="0" step="1" class="w-full border rounded px-2 py-1" placeholder="Descuento €">
                 </td>
                 <td class="border px-4 py-2">
-                    <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
+                    <textarea name="textos[]" placeholder="Descripción del trabajo" class="w-72 h-16 border rounded px-2 py-1 resize-y"></textarea>
                 </td>
                 <td class="border px-4 py-2">
                     <button type="button" class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
@@ -155,6 +155,7 @@ $(document).ready(function() {
                 </td>
                 <input type="hidden" name="componentes[]" value="${componentId}">
             </tr>`;
+
 
         tableBody.append(newRow);
 

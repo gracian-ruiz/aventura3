@@ -37,29 +37,44 @@
                 </thead>
                 <tbody id="component-list">
                     @foreach($presupuesto_items as $item)
-                        <tr data-id="{{ $item->componente_id }}">
-                            <td class="border px-4 py-2">
-                                <input type="hidden" name="componentes[]" value="{{ $item->componente_id }}">
-                                {{ $item->componente_nombre }}
-                            </td>
-                            <td class="border px-4 py-2">
-                                <input type="number" name="horas_trabajo[]" value="{{ $item->horas_trabajo }}" min="0" step="0.1" class="w-full border rounded px-2 py-1">
-                            </td>
-                            <td class="border px-4 py-2">
-                                <input type="number" name="precio[]" value="{{ old('precio.' . $loop->index, $item->total_precio) }}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
-                            </td>
-                            <td class="border px-4 py-2">
-                                <input type="number" name="descuento[]" value="{{ old('precio.' . $loop->index, $item->descuento) }}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
-                            </td>
-                            <td class="border px-4 py-2">
-                                <input type="text" name="textos[]" value="{{ $item->texto }}" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
-                            </td>
-                            <td class="border px-4 py-2">
-                                <button type="button" class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
-                                    Eliminar
-                                </button>
-                            </td>
-                        </tr>
+                    <tr data-id="{{ $item->componente_id }}">
+                        <td class="border px-2 py-2">
+                            <input type="hidden" name="componentes[]" value="{{ $item->componente_id }}">
+                            {{ $item->componente_nombre }}
+                        </td>
+                    
+                        <!-- Horas de trabajo: más estrecho -->
+                        <td class="border px-2 py-2 w-20">
+                            <input type="number" name="horas_trabajo[]" value="{{ $item->horas_trabajo }}" min="0" step="0.1"
+                                class="w-full border rounded px-2 py-1 text-sm">
+                        </td>
+                    
+                        <!-- Precio: más estrecho -->
+                        <td class="border px-2 py-2 w-24">
+                            <input type="number" name="precio[]" value="{{ old('precio.' . $loop->index, $item->total_precio) }}" min="0" step="0.01"
+                                class="w-full border rounded px-2 py-1 text-sm">
+                        </td>
+                    
+                        <!-- Descuento: más estrecho -->
+                        <td class="border px-2 py-2 w-24">
+                            <input type="number" name="descuento[]" value="{{ old('precio.' . $loop->index, $item->descuento) }}" min="0" step="0.01"
+                                class="w-full border rounded px-2 py-1 text-sm">
+                        </td>
+                    
+                        <!-- Descripción más amplia -->
+                        <td class="border px-2 py-2 w-96">
+                            <textarea name="textos[]" placeholder="Descripción del trabajo"
+                                class="w-full h-20 border rounded px-2 py-1 resize-y text-sm">{{ $item->texto }}</textarea>
+                        </td>
+                    
+                        <td class="border px-2 py-2">
+                            <button type="button"
+                                class="remove-component px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                    
                     @endforeach
                 </tbody>
             </table>
@@ -131,7 +146,7 @@
             let componentNombre = $(this).data('nombre');
             let componentHoras = $(this).data('horas') || 0;
             let componentPrecio = $(this).data('precio') || 0;
-            let componentDesceunto = $(this).data('descuento') || 0;
+            let componentDescuento = $(this).data('descuento') || 0;
 
             // Verificar si el componente ya está agregado
             if ($(`tr[data-id="${componentId}"]`).length > 0) return;
@@ -150,7 +165,7 @@
                         <input type="number" name="precio[]" value="${componentPrecio}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
                     </td>
                     <td class="border px-4 py-2">
-                        <input type="number" name="descuento[]" value="${componentDesceunto}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                        <input type="number" name="descuento[]" value="${componentDescuento}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
                     </td>
                     <td class="border px-4 py-2">
                         <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
