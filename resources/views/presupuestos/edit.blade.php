@@ -83,7 +83,9 @@
         <!-- Botones para agregar componentes -->
         <div class="mb-4">
             <div class="flex flex-wrap space-x-4">
-                @foreach($components->take(15) as $component)
+                @foreach ($components->filter(function($component) {
+                    return $component->orden > 0; // Solo mostrar componentes con orden > 0
+                })->sortBy('orden') as $component) <!-- Ordenar por 'orden' -->
                 <button type="button" 
                         class="add-component-btn bg-blue-500 text-black px-4 py-2 rounded-md hover:bg-blue-600 mb-2 font-bold" 
                         data-id="{{ $component->id }}" 

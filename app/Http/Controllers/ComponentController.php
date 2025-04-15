@@ -32,14 +32,14 @@ class ComponentController extends Controller
             'fecha_revision' => 'required|integer|min:1',
             'hora_taller' => 'required|integer|min:0', // Asegurar que se recibe
             'precio' => 'required|numeric|min:0', // Asegurar que se recibe y es un número válido
+            'orden' => 'nullable|integer|min:0', // Validar el campo 'orden' (puede ser nulo)
         ]);
     
+        // Crear el componente, incluyendo el campo 'orden'
         Component::create($validated);
     
         return redirect()->route('components.index')->with('success', '✅ Componente creado correctamente.');
     }
-    
-    
 
     public function edit(Component $component)
     {
@@ -52,15 +52,16 @@ class ComponentController extends Controller
             'nombre' => 'required|string|max:255',
             'fecha_preaviso' => 'required|integer|min:0',
             'fecha_revision' => 'required|integer|min:1',
-            'hora_taller' => 'required', // Nueva validación
-            'precio' => 'required', // Nueva validación
+            'hora_taller' => 'required|integer|min:0', // Asegurar que se recibe
+            'precio' => 'required|numeric|min:0', // Asegurar que se recibe
+            'orden' => 'nullable|integer|min:0', // Validar el campo 'orden' (puede ser nulo)
         ]);
     
+        // Actualizar el componente, incluyendo el campo 'orden'
         $component->update($validated);
     
         return redirect()->route('components.index')->with('success', '✅ Componente actualizado correctamente.');
     }
-    
 
     public function destroy(Component $component)
     {

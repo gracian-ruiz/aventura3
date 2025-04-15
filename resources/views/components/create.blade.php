@@ -29,7 +29,12 @@
 
         <div class="mb-4">
             <label for="precio" class="block text-gray-700">Precio (€)</label>
-            <input type="number"  name="precio" id="precio" class="w-full border px-4 py-2 rounded-md" placeholder="Ej: 50.00" required>
+            <input type="number" name="precio" id="precio" class="w-full border px-4 py-2 rounded-md" placeholder="Ej: 50.00" required>
+        </div>
+
+        <div class="mb-4">
+            <label for="orden" class="block text-gray-700">Orden</label>
+            <input type="number" name="orden" id="orden" class="w-full border px-4 py-2 rounded-md" placeholder="Ej: 1">
         </div>
 
         <div class="flex justify-end">
