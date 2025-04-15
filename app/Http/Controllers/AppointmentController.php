@@ -511,26 +511,33 @@ class AppointmentController extends Controller
             'componentes' => 'array',
             'componentes.*.id' => 'exists:components,id',
             'componentes.*.checked' => 'boolean',
+            'kilometros' => 'nullable|numeric|min:0', // Validar los kilómetros si vienen
         ]);
     
         $usuarioTallerId = auth()->id(); // Obtener el ID del usuario autenticado
     
         // Actualizar el estado de los componentes de la cita
         foreach ($request->componentes as $component) {
-            $checked = isset($component['checked']) ? true : false; // Establecer como true si se envió 'checked'
+            $checked = isset($component['checked']) ? true : false;
     
             DB::table('appointment_component')
                 ->where('appointment_id', $appointment->id)
                 ->where('componente_id', $component['id'])
                 ->update([
                     'checked' => $checked,
-                    'usuario_taller_id' => $checked ? $usuarioTallerId : null // Solo actualizar si está marcado
+                    'usuario_taller_id' => $checked ? $usuarioTallerId : null
                 ]);
         }
     
-        // Redirigir con un mensaje de éxito
+        // Actualizar los kilómetros si se enviaron
+        if ($request->filled('kilometros')) {
+            $appointment->bike->kilometros = $request->input('kilometros');
+            $appointment->bike->save();
+        }
+    
         return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
     }
+    
     
     
     

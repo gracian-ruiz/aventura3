@@ -33,6 +33,19 @@
                 </div>
             @endforeach
         </div>
+        <div class="mt-6">
+            <label class="block text-gray-700 font-semibold mb-1">Kilómetros anteriores:</label>
+            <span class="block mb-2 text-blue-700 font-medium">
+                {{ $appointment->bike->kilometros ?? 'No registrados' }} km
+            </span>
+        
+            <label for="kilometros" class="block text-gray-700 mb-1">Kilómetros actuales de la bicicleta</label>
+            <input type="number" name="kilometros" id="kilometros"
+                   class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Introduce los kilómetros actuales"
+                   min="0" value="{{ old('kilometros') }}">
+        </div>
+        
 
         <div class="mt-6">
             <button type="submit" class="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">

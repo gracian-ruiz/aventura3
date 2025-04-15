@@ -16,7 +16,7 @@
                 @foreach($bikes as $bike)
                     <option value="{{ $bike->id }}" 
                         {{ $presupuesto->bike_id == $bike->id ? 'selected' : '' }}>
-                        {{ $bike->nombre }} ({{ $bike->marca }})
+                        {{ $bike->nombre }} ({{ $bike->marca }})------km{{ $bike->kilometros }}
                     </option>
                 @endforeach
             </select>
