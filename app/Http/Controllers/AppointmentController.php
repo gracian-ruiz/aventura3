@@ -30,7 +30,7 @@ class AppointmentController extends Controller
                     $query->whereHas('bike', function ($q) use ($search) {
                         $q->where('nombre', 'like', '%' . $search . '%') // Filtrar por nombre de la bicicleta
                           ->orWhereHas('user', function ($qq) use ($search) {
-                              $qq->where('nombre', 'like', '%' . $search . '%'); // Filtrar por nombre del usuario
+                              $qq->where('name', 'like', '%' . $search . '%'); // Filtrar por nombre del usuario
                           });
                     });
                 }
