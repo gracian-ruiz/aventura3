@@ -124,7 +124,7 @@ class AppointmentController extends Controller
         ]);
     
         // Llamar al controlador de recordatorios para enviar mensaje de WhatsApp
-        app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
+        //app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
     
         return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
     }
