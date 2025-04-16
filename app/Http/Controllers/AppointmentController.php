@@ -22,33 +22,37 @@ class AppointmentController extends Controller
         $this->recalcularFechasAsignadas();
         $search = $request->input('search'); // Obtén el término de búsqueda desde el input
 
+        $search = $request->input('search');
+
         $appointments = Appointment::with('bike.user', 'componentes')
             ->whereIn('estado', ['pendiente', 'en proceso'])
-            // Filtrar por nombre de la bicicleta o nombre del usuario
             ->where(function ($query) use ($search) {
                 if ($search) {
                     $query->whereHas('bike', function ($q) use ($search) {
-                        $q->where('nombre', 'like', '%' . $search . '%') // Filtrar por nombre de la bicicleta
+                        $q->where('nombre', 'like', '%' . $search . '%')
                           ->orWhereHas('user', function ($qq) use ($search) {
-                              $qq->where('name', 'like', '%' . $search . '%'); // Filtrar por nombre del usuario
+                              $qq->where('nombre', 'like', '%' . $search . '%');
                           });
                     });
                 }
             })
             ->orderByRaw('
                 CASE 
+                    -- EN PROCESO
                     WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
                     WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
                     WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
                     WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
-                    WHEN estado = "pendiente" AND horas_total < 30 THEN 5
-                    ELSE 6
+                    -- PENDIENTE
+                    WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total < 30 THEN 5
+                    WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total >= 30 THEN 6
+                    WHEN estado = "pendiente" AND prioridad = "normal" AND horas_total < 30 THEN 7
+                    ELSE 8
                 END
-            ') // Ordenar por prioridad y horas totales
-            ->orderBy('horas_total', 'asc') // Luego por horas totales
-            ->paginate(8); // Puedes quitar paginate para ver todos los resultados
-         // Puedes quitar paginate para ver todos los resultados
-     // Puedes quitar paginate para ver todos los resultados
+            ')
+            ->orderBy('horas_total', 'asc')
+            ->paginate(8);
+        
     
     
 
