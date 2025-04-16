@@ -20,32 +20,37 @@ class AppointmentController extends Controller
 
         // Recalcular siempre antes de mostrar la vista
         $this->recalcularFechasAsignadas();
+        $search = $request->input('search'); // Obtén el término de búsqueda desde el input
 
         $appointments = Appointment::with('bike.user', 'componentes')
-            ->whereIn('estado', ['pendiente', 'en proceso']) // Asegurar que en proceso aparece
-            ->when($search, function ($query, $search) {
-                $query->whereHas('bike', function ($q) use ($search) {
-                    $q->where('nombre', 'like', "%{$search}%");
-                })
-                    ->orWhereHas('bike.user', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('componentes', function ($q) use ($search) {
-                        $q->where('nombre', 'like', "%{$search}%");
+            ->whereIn('estado', ['pendiente', 'en proceso'])
+            // Filtrar por nombre de la bicicleta o nombre del usuario
+            ->where(function ($query) use ($search) {
+                if ($search) {
+                    $query->whereHas('bike', function ($q) use ($search) {
+                        $q->where('nombre', 'like', '%' . $search . '%') // Filtrar por nombre de la bicicleta
+                          ->orWhereHas('user', function ($qq) use ($search) {
+                              $qq->where('nombre', 'like', '%' . $search . '%'); // Filtrar por nombre del usuario
+                          });
                     });
+                }
             })
-            ->orderByRaw("
-            CASE 
-                WHEN estado = 'en proceso' AND prioridad = 'urgente' THEN 0  -- Urgentes en proceso primero
-                WHEN estado = 'en proceso' THEN 1  -- Luego las demás en proceso
-                WHEN prioridad = 'urgente' THEN 2  -- Luego urgentes en pendiente
-                WHEN tiempo_estimado < 31 THEN 3  -- Luego las de menos de 30 minutos
-                ELSE 4 
-            END
-        ")
-            ->orderBy('fecha_asignada', 'asc')
-            ->orderBy('created_at', 'asc')
-            ->paginate(8);
+            ->orderByRaw('
+                CASE 
+                    WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
+                    WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
+                    WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
+                    WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
+                    WHEN estado = "pendiente" AND horas_total < 30 THEN 5
+                    ELSE 6
+                END
+            ') // Ordenar por prioridad y horas totales
+            ->orderBy('horas_total', 'asc') // Luego por horas totales
+            ->paginate(8); // Puedes quitar paginate para ver todos los resultados
+         // Puedes quitar paginate para ver todos los resultados
+     // Puedes quitar paginate para ver todos los resultados
+    
+    
 
 
         return view('appointments.index', compact('appointments', 'search', 'estado'));
