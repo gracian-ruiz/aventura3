@@ -49,7 +49,7 @@
             <tbody class="divide-y divide-gray-300">
                 @foreach ($appointments as $appointment)
                     <tr class="hover:bg-gray-100 {{ $appointment->estado == 'en proceso' ? 'bg-yellow-200' : '' }}">
-                        <td class="py-2 px-4">{{ $appointment->bike->nombre }}</td>
+                        <td class="py-2 px-4">{{ $appointment->bike->marca }} {{ $appointment->bike->nombre }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
                         <td class="py-2 px-4">
                             @if($appointment->componentes->isNotEmpty())
