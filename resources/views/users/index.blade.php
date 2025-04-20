@@ -42,6 +42,7 @@
                     <th class="py-2 px-4 text-left">Nombre</th>
                     <th class="py-2 px-4 text-left">Email</th>
                     <th class="py-2 px-4 text-left">Teléfono</th>
+                    <th class="py-2 px-4 text-left">Bicicletas</th>
                     <th class="py-2 px-4 text-left">Presupuesto</th>
                     @if(Auth::user()->role === 'admin')
                         <th class="py-2 px-4 text-center">Acciones</th>
@@ -55,6 +56,18 @@
                         <td class="py-2 px-4">{{ $user->name }}</td>
                         <td class="py-2 px-4">{{ $user->email }}</td>
                         <td class="py-2 px-4">{{ $user->telefono }}</td>
+                        <td class="py-2 px-4">
+                            @if($user->bikes->isEmpty())
+                                <span class="text-gray-500 italic">Sin bicicletas</span>
+                            @else
+                                <ul class="list-disc list-inside">
+                                    @foreach($user->bikes as $bike)
+                                        <li>{{ $bike->marca }} {{ $bike->nombre }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </td>
+                        
                         <td>
                             <a href="{{ route('presupuestos.create', $user->id) }}" class="btn custom-btn">
                                 Crear Presupuesto

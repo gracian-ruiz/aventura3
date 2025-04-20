@@ -21,16 +21,22 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $search = $request->input('search'); // Obtiene el valor del buscador
+        $search = $request->input('search');
     
-        // Filtra por nombre o email si se ingresó un término de búsqueda
-        $users = User::when($search, function ($query) use ($search) {
-            return $query->where('name', 'LIKE', "%{$search}%")
-                         ->orWhere('email', 'LIKE', "%{$search}%");
-        })->paginate(5); // Cambia el número de registros por página según lo que prefieras
+        $users = User::with('bikes')
+            ->when($search, function ($query) use ($search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%")
+                      ->orWhere('email', 'LIKE', "%{$search}%")
+                      ->orWhere('telefono', 'LIKE', "%{$search}%"); // <-- Nuevo filtro por teléfono
+                });
+            })
+            ->paginate(5);
     
         return view('users.index', compact('users', 'search'));
     }
+    
+    
     
 
     public function create()
