@@ -44,6 +44,11 @@
         </div>
 
         <div class="mb-4">
+            <label for="color" class="block text-gray-700">Color</label>
+            <input type="text" name="color" id="color" class="w-full border px-4 py-2 rounded-md" required>
+        </div>
+
+        <div class="mb-4">
             <label for="anio_modelo" class="block text-gray-700">Año Modelo</label>
             <input type="number" name="anio_modelo" id="anio_modelo" class="w-full border px-4 py-2 rounded-md" required min="1900" max="{{ date('Y') }}">
         </div>

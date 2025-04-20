@@ -13,7 +13,7 @@
             <select name="bike_id" id="bike-select" class="w-full border px-4 py-2 rounded-md select2">
                 <option value="">Selecciona una bicicleta</option>
                 @foreach($bikes as $bike)
-                    <option value="{{ $bike->id }}">{{ $bike->nombre }} ({{ $bike->marca }})------km{{ $bike->kilometros }}</option>
+                    <option value="{{ $bike->id }}">({{ $bike->marca }}) {{ $bike->nombre }} {{ $bike->color }}------km{{ $bike->kilometros }}</option>
                 @endforeach
             </select>
             <p id="bike-error" class="text-red-500 text-sm mt-1 hidden">Debes seleccionar una bicicleta.</p>

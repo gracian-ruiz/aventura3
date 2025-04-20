@@ -44,18 +44,21 @@ class BikeController extends Controller
             'marca' => 'required|string|max:255',
             'anio_modelo' => 'required|integer|min:1900|max:' . date('Y'),
             'kilometros' => 'nullable|integer|min:0',
+            'color' => 'nullable|string|max:100', // Validación para color
         ]);
-
+    
         Bike::create([
             'user_id' => $request->user_id,
             'nombre' => $request->nombre,
             'marca' => $request->marca,
             'anio_modelo' => $request->anio_modelo,
             'kilometros' => $request->kilometros ?? 0,
+            'color' => $request->color, // Añadido
         ]);
-
+    
         return redirect()->route('bikes.index')->with('success', '🚴‍♂️ Bicicleta añadida correctamente.');
     }
+    
 
     /**
      * Mostrar formulario de edición.
@@ -77,18 +80,21 @@ class BikeController extends Controller
             'marca' => 'required|string|max:255',
             'anio_modelo' => 'required|integer|min:1900|max:' . date('Y'),
             'kilometros' => 'nullable|integer|min:0',
+            'color' => 'nullable|string|max:100', // Validación para color
         ]);
-
+    
         $bike->update([
             'user_id' => $request->user_id,
             'nombre' => $request->nombre,
             'marca' => $request->marca,
             'anio_modelo' => $request->anio_modelo,
             'kilometros' => $request->kilometros ?? $bike->kilometros,
+            'color' => $request->color, // Se añade aquí también
         ]);
-
+    
         return redirect()->route('bikes.index')->with('success', '🚴‍♂️ Bicicleta actualizada correctamente.');
     }
+    
 
     /**
      * Eliminar bicicleta.

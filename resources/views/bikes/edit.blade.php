@@ -51,6 +51,12 @@
             <input type="number" name="anio_modelo" id="anio_modelo" class="w-full border px-4 py-2 rounded-md" value="{{ $bike->anio_modelo }}" required min="1900" max="{{ date('Y') }}">
         </div>
 
+        <!-- Campo de Color -->
+        <div class="mb-4">
+            <label for="color" class="block text-gray-700">Color</label>
+            <input type="text" name="color" id="color" class="w-full border px-4 py-2 rounded-md" value="{{ old('color', $bike->color) }}" maxlength="100">
+        </div>
+
         <!-- Nuevo campo de Kilómetros -->
         <div class="mb-4">
             <label for="kilometros" class="block text-gray-700">Kilómetros</label>

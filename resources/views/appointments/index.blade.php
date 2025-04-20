@@ -8,7 +8,7 @@
 @endif
 
 <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
-    <h1 class="text-2xl font-bold text-center mb-4">Citas Pendientes</h1>
+    <h1 class="text-2xl font-bold text-center mb-4">Orden Pendientes para reparar</h1>
 
     <!-- Buscador -->
     <form action="{{ route('appointments.index') }}" method="GET" class="mb-4 flex items-center">
@@ -49,7 +49,7 @@
             <tbody class="divide-y divide-gray-300">
                 @foreach ($appointments as $appointment)
                     <tr class="hover:bg-gray-100 {{ $appointment->estado == 'en proceso' ? 'bg-yellow-200' : '' }}">
-                        <td class="py-2 px-4">{{ $appointment->bike->marca }} {{ $appointment->bike->nombre }}</td>
+                        <td class="py-2 px-4">{{ $appointment->bike->marca }} {{ $appointment->bike->nombre }} {{ $appointment->bike->color }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
                         <td class="py-2 px-4">
                             @if($appointment->componentes->isNotEmpty())
