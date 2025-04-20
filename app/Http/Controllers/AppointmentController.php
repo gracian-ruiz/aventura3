@@ -64,28 +64,48 @@ class AppointmentController extends Controller
     {
         // Obtener los componentes de la cita
         $data = DB::table('appointment_component')
-        ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
-        ->join('components', 'appointment_component.componente_id', '=', 'components.id')
-        ->where('appointment_component.appointment_id', $appointment->id)
-        ->select(
-            'appointment_component.id as ac_id',
-            'appointment_component.checked',
-            'appointment_component.texto',
-            'appointment_component.total_precio',
-            'appointment_component.horas_trabajo',
-            'components.nombre as componente_nombre',
-            'appointments.estado as appointment_estado',
-            // ...añade los que necesites con alias
-        )
-        ->get();
+            ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $appointment->id)
+            ->select(
+                'appointment_component.id as ac_id',
+                'appointment_component.checked',
+                'appointment_component.texto',
+                'appointment_component.total_precio',
+                'appointment_component.horas_trabajo',
+                'components.nombre as componente_nombre',
+                'appointments.estado as appointment_estado'
+            )
+            ->get();
     
-       
         // Verificar si hay componentes sin marcar como completados
         $faltanComponentes = $data->contains(function ($item) {
-            return !$item->checked; // Si hay al menos un componente sin marcar, devuelve true
+            return !$item->checked;
         });
-        return view('appointments.confirm', compact('appointment', 'data', 'faltanComponentes'));
+    
+        // Obtener información del usuario y bicicleta
+        $user = $appointment->bike->user;
+        $bike = $appointment->bike;
+    
+        // Generar mensaje de finalización
+        $mensaje = "✅ ¡Hola {$user->name}! Tu bicicleta {$bike->nombre} ya está lista.\n"
+                 . "Puedes pasar a recogerla en nuestro horario habitual. ¡Gracias! 🚴";
+    
+        // Teléfono y nombre del cliente para la vista
+        $telefono = $user->telefono ?? 'No disponible';
+        $nombre = $user->name;
+    
+        // Pasar todo a la vista
+        return view('appointments.confirm', compact(
+            'appointment',
+            'data',
+            'faltanComponentes',
+            'mensaje',
+            'telefono',
+            'nombre'
+        ));
     }
+    
     
     public function complete(Request $request, Appointment $appointment)
     {

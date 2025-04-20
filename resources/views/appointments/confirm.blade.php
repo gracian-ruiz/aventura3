@@ -76,6 +76,17 @@
             </div>
         @endif
 
+        @if (!$faltanComponentes)
+            <div class="bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-lg mt-8">
+                <h2 class="text-lg font-semibold mb-2">✅ Mensaje de confirmación para el cliente:</h2>
+                <p class="whitespace-pre-line">{{ $mensaje }}</p>
+
+                <p class="mt-2">📞 <strong>Teléfono:</strong> {{ $telefono }}</p>
+                <p>👤 <strong>Cliente:</strong> {{ $nombre }}</p>
+            </div>
+        @endif
+
+
         <!-- Botones -->
         <div class="flex justify-between mt-6">
             <a href="{{ route('appointments.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
