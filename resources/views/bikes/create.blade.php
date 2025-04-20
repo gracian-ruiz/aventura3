@@ -34,7 +34,7 @@
         </script>
 
         <div class="mb-4">
-            <label for="nombre" class="block text-gray-700">Nombre</label>
+            <label for="nombre" class="block text-gray-700">Modelo</label>
             <input type="text" name="nombre" id="nombre" class="w-full border px-4 py-2 rounded-md" required>
         </div>
 
