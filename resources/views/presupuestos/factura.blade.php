@@ -74,6 +74,14 @@
     </a>            
 </div>
 
+<br>
+<!-- Mensaje para enviar al cliente -->
+<div class="alert alert-info mt-5 p-4" style="font-size: 1.3rem; line-height: 1.8; background-color: #e9f7fe; border-left: 6px solid #17a2b8;">
+    <strong>Mensaje para enviar al cliente:</strong><br><br>
+    {!! nl2br(e($mensaje)) !!}
+</div>
+
+
 <style>
     .table-responsive {
         margin-top: 20px;

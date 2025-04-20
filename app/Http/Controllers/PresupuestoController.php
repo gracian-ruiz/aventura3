@@ -152,13 +152,12 @@ class PresupuestoController extends Controller
                 'users.email as usuario_email'
             )
             ->first();
-
-        // Si no se encuentra el presupuesto, retornar error 404
+    
         if (!$presupuesto) {
             abort(404, 'Presupuesto no encontrado');
         }
-
-        // Obtener los ítems del presupuesto con los componentes
+    
+        // Obtener los ítems del presupuesto
         $items = DB::table('appointment_component')
             ->join('components', 'appointment_component.componente_id', '=', 'components.id')
             ->where('appointment_component.appointment_id', $id)
@@ -167,10 +166,22 @@ class PresupuestoController extends Controller
                 'components.nombre as componente_nombre'
             ])
             ->get();
-            $iva = 21; // porcentaje
-
-        return view('presupuestos.factura', compact('presupuesto', 'items','iva'));
+    
+        $iva = 21;
+    
+        // Construcción del link con token
+        $presupuestoId = $presupuesto->id;
+        $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
+    
+        // Crear el mensaje para enviar al cliente
+        $mensaje = "📄 ¡Hola {$presupuesto->usuario_nombre}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
+                 . "📎 Adjuntamos el PDF con los detalles.\n\n"
+                 . "🔗 Puedes confirmar el presupuesto pinchando aquí: si no estás de acuerdo dime qué quieres que hagamos y te mando nuevo presupuesto. Gracias: {$presupuestoUrl}";
+             
+        return view('presupuestos.factura', compact('presupuesto', 'items', 'iva', 'mensaje'));
     }
+    
+    
 
     public function descargarPDF($presupuestoId)
     {
