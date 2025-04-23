@@ -210,7 +210,7 @@ class PresupuestoController extends Controller
 
 
         // Generar el nombre del archivo PDF
-        $nombreArchivo = "Factura_{$presupuesto->usuario_nombre}_{$presupuesto->bicicleta_nombre}_" .
+        $nombreArchivo = "Presupuesto_{$presupuesto->usuario_nombre}_{$presupuesto->bicicleta_nombre}_" .
             date('Y-m-d', strtotime($presupuesto->created_at)) . ".pdf";
 
         // Generar PDF
