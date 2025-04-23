@@ -75,11 +75,34 @@
 </div>
 
 <br>
+<button onclick="copiarMensaje()" class="btn btn-sm btn-outline-primary position-absolute" style="top: 10px; right: 10px;background: red;">
+    COPIAR TEXTO AQUI PARA PONERSELO AL CLIENTE
+</button>
 <!-- Mensaje para enviar al cliente -->
-<div class="alert alert-info mt-5 p-4" style="font-size: 1.3rem; line-height: 1.8; background-color: #e9f7fe; border-left: 6px solid #17a2b8;">
+<div class="alert alert-info mt-5 p-4 relative" style="font-size: 1.3rem; line-height: 1.8; background-color: #e9f7fe; border-left: 6px solid #17a2b8;">
     <strong>Mensaje para enviar al cliente:</strong><br><br>
-    {!! nl2br(e($mensaje)) !!}
+    <div id="mensaje-cliente">
+        {!! nl2br(e($mensaje)) !!}
+    </div>
+    <!-- Botón copiar -->
 </div>
+
+<!-- Script para copiar -->
+<script>
+    function copiarMensaje() {
+        const mensaje = document.getElementById('mensaje-cliente').innerText;
+
+        navigator.clipboard.writeText(mensaje)
+            .then(() => {
+               
+            })
+            .catch(err => {
+                console.error('Error al copiar: ', err);
+                alert('No se pudo copiar el mensaje ❌');
+            });
+    }
+</script>
+
 
 
 <style>

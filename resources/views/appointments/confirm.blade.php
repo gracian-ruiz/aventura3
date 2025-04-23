@@ -26,6 +26,14 @@
         </ul>
     </div>
 
+    <!-- Botón copiar mensaje -->
+    @if (!$faltanComponentes)
+        <button type="button" id="btn-copiar-mensaje"
+            class="btn btn-sm btn-outline-primary fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded shadow-md z-50 hover:bg-red-700 transition">
+            📋 Copiar mensaje al cliente
+        </button>
+    @endif
+
     <!-- Revisiones a Generar -->
     <form action="{{ route('appointments.complete', $appointment->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6" id="appointment-form">
         @csrf
@@ -79,13 +87,12 @@
         @if (!$faltanComponentes)
             <div class="bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-lg mt-8">
                 <h2 class="text-lg font-semibold mb-2">✅ Mensaje de confirmación para el cliente:</h2>
-                <p class="whitespace-pre-line">{{ $mensaje }}</p>
+                <p id="mensaje-cliente" class="whitespace-pre-line">{{ $mensaje }}</p>
 
                 <p class="mt-2">📞 <strong>Teléfono:</strong> {{ $telefono }}</p>
                 <p>👤 <strong>Cliente:</strong> {{ $nombre }}</p>
             </div>
         @endif
-
 
         <!-- Botones -->
         <div class="flex justify-between mt-6">
@@ -102,7 +109,7 @@
     </form>
 </div>
 
-<!-- Script para manejar la visualización de la fecha opcional -->
+<!-- Script para mostrar campos de fecha opcional -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const tipoFechaRadios = document.querySelectorAll('input[type="radio"][name^="tipo_fecha"]');
@@ -110,15 +117,32 @@ document.addEventListener("DOMContentLoaded", function() {
     tipoFechaRadios.forEach(radio => {
         radio.addEventListener("change", function() {
             const componenteId = this.name.replace("tipo_fecha[", "").replace("]", "");
-            const fechaOpcionalContainer = document.querySelector(`input[name="proxima_revision[${componenteId}]"]`).closest('.fecha-opcional-container');
-
-            if (this.value === "opcional") {
-                fechaOpcionalContainer.classList.remove("hidden");
-            } else {
-                fechaOpcionalContainer.classList.add("hidden");
+            const fechaInput = document.querySelector(`input[name="proxima_revision[${componenteId}]"]`);
+            if (fechaInput) {
+                const container = fechaInput.closest('.fecha-opcional-container');
+                if (this.value === "opcional") {
+                    container.classList.remove("hidden");
+                } else {
+                    container.classList.add("hidden");
+                }
             }
         });
     });
+
+    // Copiar mensaje al cliente
+    const btnCopiar = document.getElementById('btn-copiar-mensaje');
+    if (btnCopiar) {
+        btnCopiar.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const mensaje = document.getElementById('mensaje-cliente')?.innerText;
+            if (mensaje) {
+                navigator.clipboard.writeText(mensaje)
+                    .then(() => console.log("✅ Mensaje copiado al portapapeles"))
+                    .catch(err => alert("❌ No se pudo copiar el mensaje"));
+            }
+        });
+    }
 });
 </script>
 @endsection
