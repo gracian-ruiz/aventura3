@@ -22,8 +22,8 @@ class PresupuestoController extends Controller
             ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->leftJoin('users', 'bikes.user_id', '=', 'users.id')
             ->select('appointments.*', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
-            ->whereIn('appointments.estado', ['presupuesto', 'denegado','vacia']); // Filtrar solo los pendientes
-
+            ->whereIn('appointments.estado', ['presupuesto', 'denegado','vacia']);
+    
         // Aplicar filtro de búsqueda
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
@@ -32,12 +32,15 @@ class PresupuestoController extends Controller
                     ->orWhere('bikes.nombre', 'like', "%$search%");
             });
         }
+    
+        // Ordenar primero por prioridad (urgente primero), luego por fecha de creación (más reciente primero)
+        $query->orderByRaw("CASE WHEN appointments.prioridad = 'urgente' THEN 0 ELSE 1 END")
+              ->orderBy('appointments.created_at', 'asc');
+    
+        $presupuestos = $query->paginate(10)->appends(['search' => $request->search]);
         
-        $presupuestos = $query->paginate(10)->appends(['search' => $request->search]); // Mantiene el término en la paginación
-
         return view('presupuestos.index', compact('presupuestos'));
-    }
-
+    }    
 
     public function create($userId)
     {
@@ -93,6 +96,7 @@ class PresupuestoController extends Controller
             'user_id' => $bike->user_id,
             'token_presupuesto' => $tokenPresupuesto,
             'mensaje_enviado' => false,
+            'prioridad' => $request->prioridad,
             'estimacion_reparacion' => '',
             'estado' => count($componentes) > 0 ? 'presupuesto' : 'vacía',
             'descuento' => 0, // se actualiza más abajo
@@ -329,6 +333,7 @@ class PresupuestoController extends Controller
                     'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
                     'descuento' => $totalDescuento,
+                    'prioridad' => $request->prioridad
                 ]);
 
             DB::commit();

@@ -22,6 +22,15 @@
             </select>
         </div>
 
+                        <!-- Prioridad de la Cita -->
+                        <div class="mb-4">
+                            <label for="prioridad" class="block text-gray-700">Prioridad</label>
+                            <select name="prioridad" class="w-full border px-4 py-2 rounded-md" required>
+                                <option value="normal" {{ $presupuesto->prioridad == 'normal' ? 'selected' : '' }}>Normal</option>
+                                <option value="urgente" {{ $presupuesto->prioridad == 'urgente' ? 'selected' : '' }}>Urgente</option>
+                            </select>
+                        </div>
+
         <!-- Tabla de Componentes -->
         <div class="mb-4">
             <table class="w-full border-collapse border border-gray-300">
