@@ -16,15 +16,23 @@ class AlquilerController extends Controller
 {
 
 
-    public function index()
+    public function index(Request $request)
     {
-        $alquileres = Alquiler::with('usuario')
-            ->whereIn('estado', ['Activo', 'Reservado'])  // Filtra por ambos estados
-            ->latest()
-            ->paginate(10);
-
+        $query = Alquiler::with('usuario')->whereIn('estado', ['Activo', 'Reservado']);
+    
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->whereHas('usuario', function ($q) use ($searchTerm) {
+                $q->where('nombre', 'like', '%' . $searchTerm . '%');
+            });
+        }
+    
+        $alquileres = $query->latest()->paginate(10)->withQueryString();
+    
         return view('alquiler.alquileres.index', compact('alquileres'));
     }
+
+    
     public function finalizado()
     {
         $alquileres = Alquiler::with('usuario')

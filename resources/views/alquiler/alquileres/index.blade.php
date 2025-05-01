@@ -11,6 +11,21 @@
         </div>
     @endif
 
+    <!-- Formulario de búsqueda -->
+    <form method="GET" action="{{ route('alquileres.index') }}" class="mb-4 flex justify-end">
+        <input
+            type="text"
+            name="search"
+            value="{{ request('search') }}"
+            placeholder="Buscar por nombre de usuario"
+            class="border border-gray-300 rounded-l px-4 py-2 w-64"
+        >
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700">
+            Buscar
+        </button>
+    </form>
+
+
     <!-- Tabla de Alquileres -->
     <div class="overflow-x-auto mt-6">
         <table class="min-w-full bg-white shadow-md rounded-lg">
