@@ -51,6 +51,7 @@
             <span class="text-muted">Sin observaciones</span>
         @endif
     </div>
+    <br>
     
 
     <!-- Lista de materiales -->
