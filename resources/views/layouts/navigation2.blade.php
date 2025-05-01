@@ -12,14 +12,10 @@
             <!-- Menú de Navegación (Escritorio) -->
             <div class="hidden md:flex space-x-8">
                 @if(Auth::user()->role === 'admin')
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">Usuarios</x-nav-link>
-                    <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-nav-link>
-                    <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Orden de taller</x-nav-link>
-                    <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-nav-link>
-                    <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">Bicicletas</x-nav-link>
-                    <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-nav-link>
-                    <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">Mensajes</x-nav-link>
-                    <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">Histórico Citas</x-nav-link>
+                    <x-nav-link :href="route('usuarios_alquiler.index')" :active="request()->routeIs('usuarios_alquiler.index')">Usuarios</x-nav-link>
+                    <x-nav-link :href="route('material.index')" :active="request()->routeIs('material.index')">Material</x-nav-link>
+                    <x-nav-link :href="route('alquileres.index')" :active="request()->routeIs('alquileres.index')">Alquileres</x-nav-link>
+                    <x-nav-link :href="route('alquileres.finalizado')" :active="request()->routeIs('alquileres.finalizado')">Alquileres finalizado</x-nav-link>
                 @endif
             </div>
 
@@ -42,8 +38,8 @@
                             <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
                                 Cerrar sesión
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('usuarios_alquiler.index')">
-                                Usuarios Alquiler
+                            <x-dropdown-link :href="route('users.index')">
+                                Taller
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -92,9 +88,10 @@
                     <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
                         Cerrar sesión
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('usuarios_alquiler.index')">
-                        Usuarios Alquiler
+                    <x-responsive-nav-link :href="route('users.index')">
+                        Taller
                     </x-responsive-nav-link>
+                    
                 </form>
             </div>
         </div>

@@ -1,0 +1,64 @@
+@extends('layouts.app2')
+
+@section('content')
+<div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
+    <h1 class="text-2xl font-bold text-center mb-6">Listado de Alquileres Finalizado</h1>
+
+    <!-- Mensaje de éxito -->
+    @if (session('success'))
+        <div class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <!-- Tabla de Alquileres -->
+    <div class="overflow-x-auto mt-6">
+        <table class="min-w-full bg-white shadow-md rounded-lg">
+            <thead class="bg-gray-800 text-white">
+                <tr>
+                    <th class="py-2 px-4 text-left">ID</th>
+                    <th class="py-2 px-4 text-left">Usuario</th>
+                    <th class="py-2 px-4 text-left">Fecha inicio</th>
+                    <th class="py-2 px-4 text-left">Fecha fin</th>
+                    <th class="py-2 px-4 text-left">Días</th>
+                    <th class="py-2 px-4 text-left">Estado</th>
+                    <th class="py-2 px-4 text-left">Total (€)</th>
+                    <th class="py-2 px-4 text-left">Acciones</th>
+                    <th class="py-2 px-4 text-left">Ver</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-300">
+                @forelse($alquileres as $alquiler)
+                <tr class="hover:bg-gray-100">
+                    <td class="py-2 px-4">{{ $alquiler->id }}</td>
+                    <td class="py-2 px-4">{{ $alquiler->usuario->nombre ?? '—' }}</td>
+                    <td class="py-2 px-4">{{ $alquiler->fecha_inicio }}</td>
+                    <td class="py-2 px-4">{{ $alquiler->fecha_fin }}</td>
+                    <td class="py-2 px-4">{{ $alquiler->total_dias }}</td>
+                    <td class="py-2 px-4 capitalize">{{ $alquiler->estado }}</td>
+                    <td class="py-2 px-4">{{ number_format($alquiler->total_precio, 2) }} €</td>
+                    <td class="py-2 px-4">
+                        <a href="{{ route('alquileres.edit', $alquiler) }}" class="text-blue-600 hover:underline">Editar</a>
+                    </td>
+                    <td class="py-2 px-4">
+                        <a href="{{ route('alquileres.show', $alquiler->id) }}"class="text-blue-600 hover:underline">Ver</a>
+                    </td>                
+                </tr> 
+            
+                @empty
+                    <tr>
+                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                            No hay alquileres registrados.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="mt-6">
+        {{ $alquileres->links() }}
+    </div>
+</div>
+@endsection

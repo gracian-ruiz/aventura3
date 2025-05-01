@@ -1,0 +1,379 @@
+<?php
+
+namespace App\Http\Controllers\Alquiler;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Alquiler;
+use App\Models\Material;
+use App\Models\AlquilerMaterial;
+use App\Models\UsuarioAlquiler;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+
+class AlquilerController extends Controller
+{
+
+
+    public function index()
+    {
+        $alquileres = Alquiler::with('usuario')
+            ->whereIn('estado', ['Activo', 'Reservado'])  // Filtra por ambos estados
+            ->latest()
+            ->paginate(10);
+
+        return view('alquiler.alquileres.index', compact('alquileres'));
+    }
+    public function finalizado()
+    {
+        $alquileres = Alquiler::with('usuario')
+            ->whereIn('estado', ['finalizado'])  // Filtra por ambos estados
+            ->latest()
+            ->paginate(10);
+
+        return view('alquiler.alquileres.finalizado', compact('alquileres'));
+    }
+
+
+
+    public function create(UsuarioAlquiler $usuario_alquiler)
+    {
+        $materiales = Material::where('stock_disponible', '>', 0)
+            ->whereIn('estado', ['disponible', 'reservado'])
+            ->orderBy('nombre')
+            ->get();
+
+        return view('alquiler.alquileres.create', compact('usuario_alquiler', 'materiales'));
+    }
+
+    public function store(Request $request, UsuarioAlquiler $usuario_alquiler)
+    { 
+        $request->validate([
+            'usuario_id' => 'required|exists:usuarios_alquiler,id',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'materiales' => 'required|array|min:1',
+        ]);
+
+        $materialesSeleccionados = array_filter($request->input('materiales'), function ($material) {
+            return isset($material['selected']) && $material['selected'] === 'on';
+        });
+
+        if (empty($materialesSeleccionados)) {
+            return back()->withErrors(['materiales' => 'Debes seleccionar al menos un material.'])->withInput();
+        }
+
+        foreach ($materialesSeleccionados as $index => $material) {
+            $request->validate([
+                "materiales.$index.precio_unitario" => 'required|numeric|min:0',
+                "materiales.$index.descuento" => 'required|numeric|min:0',
+            ]);
+        }
+
+        // --------- Cálculo del total_precio ----------
+        $totalPrecio = 0;
+        $descuentoTotal = 0;
+        foreach ($materialesSeleccionados as $material) {
+            $precioUnitario = $material['precio_unitario'];
+            $descuento = $material['descuento'];
+
+            $subtotal = $precioUnitario - $descuento;
+            $totalPrecio += $subtotal;
+            $descuentoTotal += $descuento;
+        }
+        // ---------------------------------------------
+
+        // Crear el alquiler
+        $alquiler = Alquiler::create([
+            'usuario_id' => $request->input('usuario_id'),
+            'fecha_inicio' => $request->input('fecha_inicio'),
+            'fecha_fin' => $request->input('fecha_fin'),
+            'total_precio' => $totalPrecio,
+            'descuento' => $descuentoTotal,
+            'observaciones' => $request->input('observaciones'),
+            'estado' => $request->input('estado'),
+        ]);
+
+        // Asociar materiales seleccionados al alquiler
+        foreach ($materialesSeleccionados as $material) {
+            $alquiler->materiales()->attach(
+                $material['id'],
+                [
+                    'fecha_inicio' => $request->input('fecha_inicio'),
+                    'fecha_fin' => $request->input('fecha_fin'),
+                    'precio_unitario' => $material['precio_unitario'],
+                    'descuento' => $material['descuento'],
+                    'subtotal' => ($material['precio_unitario'] - $material['descuento']) ,
+                ]
+            );
+        }
+
+        return redirect()->route('alquileres.index')->with('success', 'Alquiler creado exitosamente.');
+    }
+
+
+
+
+    public function bicicletasDisponibles(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
+        $tiposMateriales = $request->input('tipos_materiales', []);
+        $tallasSeleccionadas = $request->input('tallas', []);
+        $combinaciones = $request->input('tipo_talla', []); // ['mtb-m', 'mtb-xl', ...]
+    
+        // Validación rápida de fechas
+        if (!$fechaInicio || !$fechaFin) {
+            return response()->json(['error' => 'Fechas no válidas'], 422);
+        }
+    
+        // Calcular número de días de alquiler
+        $dias = Carbon::parse($fechaInicio)->diffInDays(Carbon::parse($fechaFin)) + 1;
+
+    
+        // Buscar materiales ocupados
+        $materialesOcupados = DB::table('alquiler_material')
+            ->join('alquileres', 'alquiler_material.alquiler_id', '=', 'alquileres.id')
+            ->where(function ($query) use ($fechaInicio, $fechaFin) {
+                $query->whereBetween('alquiler_material.fecha_inicio', [$fechaInicio, $fechaFin])
+                      ->orWhereBetween('alquiler_material.fecha_fin', [$fechaInicio, $fechaFin])
+                      ->orWhere(function ($query2) use ($fechaInicio, $fechaFin) {
+                          $query2->where('alquiler_material.fecha_inicio', '<=', $fechaInicio)
+                                 ->where('alquiler_material.fecha_fin', '>=', $fechaFin);
+                      });
+            })
+            ->where('alquileres.estado', '!=', 'finalizado')
+            ->pluck('alquiler_material.material_id');
+    
+        $materiales = collect();
+    
+        if (!empty($combinaciones)) {
+            foreach ($combinaciones as $comb) {
+                [$tipo, $talla] = explode('-', $comb);
+    
+                $query = Material::query()
+                    ->where('tipo', $tipo)
+                    ->where('talla', $talla)
+                    ->whereNotIn('id', $materialesOcupados);
+    
+                $materiales = $materiales->merge($query->get());
+            }
+        } else {
+            $materiales = Material::whereNotIn('id', $materialesOcupados);
+    
+            if (!empty($tiposMateriales)) {
+                $materiales = $materiales->whereIn('tipo', $tiposMateriales);
+            }
+    
+            if (!empty($tallasSeleccionadas)) {
+                $materiales = $materiales->whereIn('talla', $tallasSeleccionadas);
+            }
+    
+            $materiales = $materiales->get();
+        }
+    
+        // Añadir precio total al resultado
+        $materialesConPrecio = $materiales->map(function ($material) use ($dias) {
+            $material->precio_total = $material->precio_dia * $dias;
+            return $material;
+        });
+    
+        return response()->json($materialesConPrecio->unique('id')->values());
+    }
+    
+
+
+
+    public function edit(Alquiler $alquiler)
+    {
+        // Cargar materiales ya asignados al alquiler
+        $alquiler->load('materiales');
+        $usuario_alquiler = $alquiler->usuario; // Asumiendo que tienes relación alquiler -> usuario
+
+        // Obtener todos los materiales disponibles
+        $materialesDisponibles = Material::all(); // Puedes modificar esto si tienes algún filtro específico
+
+        // Pasar los datos a la vista
+        return view('alquiler.alquileres.edit', compact('alquiler', 'materialesDisponibles', 'usuario_alquiler'));
+    }
+
+
+
+    public function update(Request $request, Alquiler $alquiler)
+    {
+        $request->validate([
+            'estado' => 'required|in:reservado,activo',
+            'total_precio' => 'nullable|numeric|min:0',
+            'descuento' => 'nullable|numeric|min:0|max:100',
+            'observaciones' => 'nullable|string|max:1000',
+        ]);
+    
+        $alquiler->update([
+            'estado' => $request->estado,
+            'total_precio' => $request->total_precio,
+            'descuento' => $request->descuento,
+            'observaciones' => $request->observaciones,
+        ]);
+    
+        return redirect()->route('alquileres.index')->with('success', 'Alquiler actualizado correctamente.');
+    }
+    
+
+    public function destroy($id)
+    {
+        $alquiler = Alquiler::findOrFail($id);
+    
+        // Eliminar materiales asociados al alquiler
+        DB::table('alquiler_material')->where('alquiler_id', $alquiler->id)->delete();
+    
+        // Luego eliminamos el alquiler
+        $alquiler->delete();
+    
+        return redirect()->route('alquileres.index')->with('success', 'Alquiler y materiales eliminados correctamente.');
+    }
+    
+    
+
+    public function eliminarMaterial($pivotId)
+    {
+        $pivot = DB::table('alquiler_material')->where('id', $pivotId)->first();
+    
+        if (!$pivot) {
+            return back()->with('error', 'Material no encontrado.');
+        }
+    
+        // Obtener el alquiler y actualizar precios
+        $alquiler = Alquiler::findOrFail($pivot->alquiler_id);
+    
+        $alquiler->total_precio -= $pivot->subtotal;
+        $alquiler->descuento -= $pivot->descuento;
+    
+        $alquiler->total_precio = max(0, $alquiler->total_precio);
+        $alquiler->descuento = max(0, $alquiler->descuento);
+    
+        $alquiler->save();
+    
+        // Eliminar el registro de la tabla intermedia
+        DB::table('alquiler_material')->where('id', $pivotId)->delete();
+    
+        return redirect()
+            ->route('alquileres.edit', $alquiler->id)
+            ->with('success', 'Material eliminado correctamente.');
+    }
+    
+
+
+
+    public function addMateriales(Request $request, Alquiler $alquiler)
+    {
+        $request->validate([
+            'materiales' => 'required|array|min:1',
+        ]);
+
+        // Filtrar materiales seleccionados
+        $materialesSeleccionados = array_filter($request->input('materiales'), function ($material) {
+            return isset($material['selected']) && $material['selected'] === 'on';
+        });
+
+        if (empty($materialesSeleccionados)) {
+            return back()->withErrors(['materiales' => 'Debes seleccionar al menos un material.'])->withInput();
+        }
+
+        // Inicializar las variables de total solo para el material nuevo
+        $totalPrecioNuevo = 0;
+        $totalDescuentoNuevo = 0;
+
+        // Validar y asociar los materiales seleccionados al alquiler
+        foreach ($materialesSeleccionados as $index => $material) {
+            $request->validate([
+                "materiales.$index.precio_unitario" => 'required|numeric|min:0',
+                "materiales.$index.descuento" => 'required|numeric|min:0',
+            ]);
+
+            // Calcular subtotal por material
+            $precioUnitario = $material['precio_unitario'];
+            $descuento = $material['descuento'];
+
+            $subtotal = ($precioUnitario) - $descuento;
+
+            // Actualizar los totales solo para los materiales nuevos
+            $totalPrecioNuevo += $subtotal;
+            $totalDescuentoNuevo += $descuento;
+
+            // Asociar el material al alquiler
+            $alquiler->materiales()->attach(
+                $material['id'],
+                [
+                    'precio_unitario' => $precioUnitario,
+                    'descuento' => $descuento,
+                    'subtotal' => $subtotal,
+                    'fecha_inicio' => $request->input('fecha_inicio'),
+                    'fecha_fin' => $request->input('fecha_fin'),
+                ]
+            );
+        }
+
+        // Actualizar el alquiler solo con los totales nuevos
+        $alquiler->total_precio += $totalPrecioNuevo; // Se suma al total existente
+        $alquiler->descuento += $totalDescuentoNuevo; // Se suma al descuento existente
+
+        // Guardar los cambios en el alquiler
+        $alquiler->save();
+
+        return redirect()->route('alquileres.edit', $alquiler->id)->with('success', 'Materiales añadidos correctamente.');
+    }
+
+    public function show($id)
+    {
+        $alquiler = Alquiler::with('materiales')->findOrFail($id);
+
+        return view('alquiler.alquileres.show', compact('alquiler'));
+    }
+
+    public function devolverMaterial($pivotId)
+    {
+        DB::table('alquiler_material')
+            ->where('id', $pivotId)
+            ->update(['estado' => 'finalizado']);
+    
+        return back()->with('success', 'Material marcado como devuelto.');
+    }
+    
+
+
+
+    public function finalizar(Request $request, $id)
+    {
+        $alquiler = Alquiler::with('materiales')->findOrFail($id);
+
+        if ($alquiler->estado === 'reservado') {
+            // Cambiar solo el estado del alquiler a "activo"
+            $alquiler->estado = 'activo';
+            $alquiler->save();
+
+            return redirect()->route('alquileres.show', $alquiler->id)
+                ->with('success', 'La reserva ha sido activada correctamente.');
+        }
+
+        if ($alquiler->estado === 'activo') {
+            // Cambiar el estado del alquiler a "finalizado"
+            $alquiler->estado = 'finalizado';
+            $alquiler->save();
+
+            // Finalizar los materiales vinculados al alquiler
+            foreach ($alquiler->materiales as $material) {
+                if ($material->pivot->estado !== 'finalizado') {
+                    $material->pivot->estado = 'finalizado';
+                    $material->pivot->save();
+                }
+            }
+
+            return redirect()->route('alquileres.show', $alquiler->id)
+                ->with('success', 'El alquiler y sus materiales han sido finalizados.');
+        }
+
+        return redirect()->route('alquileres.show', $alquiler->id)
+            ->with('warning', 'No se pudo actualizar el estado del alquiler.');
+    }
+}

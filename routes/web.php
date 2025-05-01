@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Alquiler\AlquilerController;
+use App\Http\Controllers\Alquiler\MaterialController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -10,10 +12,10 @@ use App\Http\Controllers\RecordatorioController;
 use App\Http\Controllers\AvisoEnviadoController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PresupuestoController;
+use App\Http\Controllers\Alquiler\UsuarioAlquilerController;
 use App\Http\Controllers\WhatsappController;
 use App\Models\Bike;
-
-
+use App\Models\Material;
 
 /*
 |--------------------------------------------------------------------------
@@ -120,6 +122,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
 
+
+
+
+    
+
+
+
+
+
     Route::resource('presupuestos', PresupuestoController::class);
     Route::get('/bikes/by-user/{userId}', function ($userId) {
         return response()->json(Bike::where('user_id', $userId)->get());
@@ -137,6 +148,82 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/presupuesto/{clienteId}/{presupuestoId}/enviar', [WhatsAppController::class, 'enviarPresupuestoWhatsApp'])
     ->name('presupuesto.enviar');
+
+
+
+
+    //ALQUILER
+
+
+    // Listado de usuarios de alquiler
+    Route::get('/usuarios_alquiler', [UsuarioAlquilerController::class, 'index'])->name('usuarios_alquiler.index');
+    
+    // Formulario para crear nuevo usuario de alquiler
+    Route::get('/usuarios_alquiler/create', [UsuarioAlquilerController::class, 'create'])->name('usuarios_alquiler.create');
+    
+    // Guardar nuevo usuario de alquiler
+    Route::post('/usuarios_alquiler', [UsuarioAlquilerController::class, 'store'])->name('usuarios_alquiler.store');
+    
+    // Ver usuario de alquiler específico (opcional)
+    Route::get('/usuarios_alquiler/{usuario_alquiler}', [UsuarioAlquilerController::class, 'show'])->name('usuarios_alquiler.show');
+    
+    // Formulario para editar usuario de alquiler
+    Route::get('/usuarios_alquiler/{usuario_alquiler}/edit', [UsuarioAlquilerController::class, 'edit'])->name('usuarios_alquiler.edit');
+    
+    // Actualizar usuario de alquiler
+    Route::put('/usuarios_alquiler/{usuario_alquiler}', [UsuarioAlquilerController::class, 'update'])->name('usuarios_alquiler.update');
+    
+    // Eliminar usuario de alquiler
+    Route::delete('/usuarios_alquiler/{usuario_alquiler}', [UsuarioAlquilerController::class, 'destroy'])->name('usuarios_alquiler.destroy');
+    
+    Route::resource('material', MaterialController::class);
+
+    Route::get('usuarios/{usuario_alquiler}/alquileres/create', [AlquilerController::class, 'create'])->name('alquiler.create');
+
+    Route::post('usuarios/{usuario_alquiler}/alquileres', [AlquilerController::class, 'store'])->name('alquiler.store');
+
+    Route::get('/alquileres', [\App\Http\Controllers\Alquiler\AlquilerController::class, 'index'])->name('alquileres.index');
+
+
+
+    // Ruta para obtener materiales disponibles
+Route::get('/alquileres/materiales-disponibles', [AlquilerController::class, 'bicicletasDisponibles']);
+
+Route::get('/alquileres/{alquiler}/edit', [AlquilerController::class, 'edit'])->name('alquileres.edit');
+Route::put('/alquileres/{alquiler}', [AlquilerController::class, 'update'])->name('alquileres.update');
+
+Route::delete('/alquileres/materiales/{pivotId}', [AlquilerController::class, 'eliminarMaterial'])
+    ->name('alquileres.materiales.destroy');
+
+
+Route::post('/alquileres/{alquiler}/materiales', [AlquilerController::class, 'añadirMaterial'])
+->name('alquileres.materiales.store');
+
+Route::get('/alquileres/finalizado', [\App\Http\Controllers\Alquiler\AlquilerController::class, 'finalizado'])->name('alquileres.finalizado');
+
+
+
+
+// Ruta para obtener materiales disponibles
+// web.php
+Route::post('/alquileres/{alquiler}/materiales', [AlquilerController::class, 'addMateriales'])->name('alquileres.addMateriales');
+
+Route::get('/alquileres/{id}', [AlquilerController::class, 'show'])->name('alquileres.show');
+Route::patch('alquileres/material/{pivotId}/devolver', [AlquilerController::class, 'devolverMaterial'])
+    ->name('alquileres.material.devolver');
+
+Route::patch('/alquileres/{alquiler}/finalizar', [AlquilerController::class, 'finalizar'])->name('alquileres.finalizar');
+
+Route::delete('/alquileres/{alquiler}', [AlquilerController::class, 'destroy'])->name('alquileres.destroy');
+
+
+
+
+
+
+
+
+
 
 });
 
