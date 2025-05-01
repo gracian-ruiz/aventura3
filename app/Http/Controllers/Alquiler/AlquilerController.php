@@ -43,9 +43,11 @@ class AlquilerController extends Controller
             });
         }
     
-        $alquileres = $query->latest()->paginate(10)->withQueryString();
-    
+        $alquileres = $query->latest()->paginate(10);
+        $alquileres->appends(request()->query()); // ✅ mantiene los filtros en la paginación
+        
         return view('alquiler.alquileres.finalizado', compact('alquileres'));
+        
     }
     
 
