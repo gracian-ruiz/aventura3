@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
         params.append('fecha_fin', fechaFin);
         combinaciones.forEach(comb => params.append('tipo_talla[]', comb));
 
-        fetch(`/alquileres/materiales-disponibles?${params.toString()}`)
+        fetch(`/public/alquileres/materiales-disponibles?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
