@@ -12,17 +12,16 @@
     @endif
 
     <!-- Formulario de búsqueda -->
-    <form method="GET" action="{{ route('alquileres.index') }}" class="mb-4 flex justify-end">
-        <input
-            type="text"
-            name="search"
-            value="{{ request('search') }}"
-            placeholder="Buscar por nombre de usuario"
-            class="border border-gray-300 rounded-l px-4 py-2 w-64"
-        >
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700">
-            Buscar
-        </button>
+    <form method="GET" action="{{ route('alquileres.index') }}" class="mb-4">
+        <div class="flex justify-between">
+            <input type="text" name="search" value="{{ request('search') }}" 
+                placeholder="Buscar usuario de alquiler por nombre o teléfono..."
+                class="border px-4 py-2 rounded-md w-2/3">
+
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                Buscar
+            </button>
+        </div>
     </form>
 
 
