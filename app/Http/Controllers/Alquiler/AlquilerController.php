@@ -33,15 +33,21 @@ class AlquilerController extends Controller
     }
 
     
-    public function finalizado()
+    public function finalizado(Request $request)
     {
-        $alquileres = Alquiler::with('usuario')
-            ->whereIn('estado', ['finalizado'])  // Filtra por ambos estados
-            ->latest()
-            ->paginate(10);
-
+        $query = Alquiler::with('usuario')->where('estado', 'finalizado');
+    
+        if ($request->has('search')) {
+            $query->whereHas('usuario', function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->search . '%');
+            });
+        }
+    
+        $alquileres = $query->latest()->paginate(10)->withQueryString();
+    
         return view('alquiler.alquileres.finalizado', compact('alquileres'));
     }
+    
 
 
 
