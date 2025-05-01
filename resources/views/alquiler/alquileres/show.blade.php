@@ -43,6 +43,15 @@
             </div>
         </div>
     </div>
+    <div class="col-md-12 mt-3" style="background: red">
+        <strong>📝 Notas:</strong><br>
+        @if($alquiler->observaciones)
+            {{ $alquiler->observaciones }}
+        @else
+            <span class="text-muted">Sin observaciones</span>
+        @endif
+    </div>
+    
 
     <!-- Lista de materiales -->
     <h2 class="mb-3">🔧 Materiales Alquilados</h2>
