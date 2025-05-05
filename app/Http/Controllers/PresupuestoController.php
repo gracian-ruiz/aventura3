@@ -193,33 +193,33 @@ class PresupuestoController extends Controller
             ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->join('users', 'bikes.user_id', '=', 'users.id')
             ->where('appointments.id', $presupuestoId)
-            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre','bikes.marca as marca', 'users.name as usuario_nombre')
+            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'bikes.marca as marca', 'users.name as usuario_nombre')
             ->first();
-
+    
         $items = DB::table('appointment_component')
             ->join('components', 'appointment_component.componente_id', '=', 'components.id')
             ->where('appointment_component.appointment_id', $presupuestoId)
             ->select('appointment_component.*', 'components.nombre as componente_nombre')
             ->get();
-
-        // Si no se encuentra el presupuesto, retornar error 404
+    
         if (!$presupuesto) {
             abort(404, 'Presupuesto no encontrado');
         }
-
-
-
-        // Generar el nombre del archivo PDF
-        $nombreArchivo = "Presupuesto_{$presupuesto->usuario_nombre}_{$presupuesto->bicicleta_nombre}_" .
-            date('Y-m-d', strtotime($presupuesto->created_at)) . ".pdf";
-
-        // Generar PDF
+    
+        // Función para limpiar nombres de archivo
+        $limpiarNombre = fn($texto) => preg_replace('/[^A-Za-z0-9_\-]/', '_', $texto);
+    
+        $usuarioLimpio = $limpiarNombre($presupuesto->usuario_nombre);
+        $bicicletaLimpia = $limpiarNombre($presupuesto->bicicleta_nombre);
+        $fecha = date('Y-m-d', strtotime($presupuesto->created_at));
+    
+        $nombreArchivo = "Presupuesto_{$usuarioLimpio}_{$bicicletaLimpia}_{$fecha}.pdf";
+    
         $pdf = Pdf::loadView('pdf.presupuesto', compact('presupuesto', 'items'));
-
+    
         return $pdf->download($nombreArchivo);
     }
-
-
+    
     public function edit($id)
     {
         // Obtener el presupuesto con los datos de la bicicleta y el usuario
