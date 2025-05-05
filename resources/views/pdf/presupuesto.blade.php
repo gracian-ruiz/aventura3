@@ -45,7 +45,7 @@
     <h2>Presupuesto #{{ $presupuesto->id }}</h2>
     
     <p><strong>Cliente:</strong> {{ $presupuesto->usuario_nombre }}</p>
-    <p><strong>Bicicleta:</strong> {{ $presupuesto->bicicleta_nombre }}</p>
+    <p><strong>Bicicleta:</strong>{{ $presupuesto->marca }}  {{ $presupuesto->bicicleta_nombre }}</p>
     <p><strong>Fecha:</strong> {{ date('d/m/Y', strtotime($presupuesto->created_at)) }}</p>
 
     <h3>Presupuesto</h3>

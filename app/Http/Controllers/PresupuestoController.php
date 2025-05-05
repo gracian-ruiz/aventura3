@@ -193,7 +193,7 @@ class PresupuestoController extends Controller
             ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->join('users', 'bikes.user_id', '=', 'users.id')
             ->where('appointments.id', $presupuestoId)
-            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'users.name as usuario_nombre')
+            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre','bikes.marca as marca', 'users.name as usuario_nombre')
             ->first();
 
         $items = DB::table('appointment_component')
