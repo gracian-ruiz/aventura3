@@ -21,7 +21,7 @@ class PresupuestoController extends Controller
         $query = DB::table('appointments')
             ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->leftJoin('users', 'bikes.user_id', '=', 'users.id')
-            ->select('appointments.*', 'bikes.nombre as bike_nombre', 'users.name as user_nombre')
+            ->select('appointments.*', 'bikes.nombre as bike_nombre', 'bikes.marca as marca','users.name as user_nombre')
             ->whereIn('appointments.estado', ['presupuesto', 'denegado','vacia']);
     
         // Aplicar filtro de búsqueda
