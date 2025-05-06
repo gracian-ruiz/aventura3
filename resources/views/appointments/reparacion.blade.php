@@ -45,6 +45,19 @@
                    placeholder="Introduce los kilómetros actuales"
                    min="0" value="{{ old('kilometros') }}">
         </div>
+
+        <div class="mt-6">
+            <label class="block text-gray-700 font-semibold mb-1">Descripción anterior del problema:</label>
+            <span class="block mb-2 text-blue-700 font-medium">
+                {{ $appointment->descripcion_problema ?? 'No registrada' }}
+            </span>
+        
+            <label for="descripcion_problema" class="block text-gray-700 mb-1">Descripción actual del problema</label>
+            <textarea name="descripcion_problema" id="descripcion_problema"
+                      class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Describe el problema actual...">{{ old('descripcion_problema') }}</textarea>
+        </div>
+        
         
 
         <div class="mt-6">

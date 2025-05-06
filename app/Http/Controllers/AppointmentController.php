@@ -535,17 +535,18 @@ class AppointmentController extends Controller
     
     public function updateReparacion(Request $request, Appointment $appointment)
     {
-        // Validar los componentes seleccionados
+        // Validar los datos recibidos
         $request->validate([
             'componentes' => 'array',
             'componentes.*.id' => 'exists:components,id',
             'componentes.*.checked' => 'boolean',
-            'kilometros' => 'nullable|numeric|min:0', // Validar los kilómetros si vienen
+            'kilometros' => 'nullable|numeric|min:0',
+            'descripcion_problema' => 'nullable|string|max:1000', // Validar la descripción si viene
         ]);
     
-        $usuarioTallerId = auth()->id(); // Obtener el ID del usuario autenticado
+        $usuarioTallerId = auth()->id(); // ID del usuario autenticado
     
-        // Actualizar el estado de los componentes de la cita
+        // Actualizar estado de los componentes seleccionados
         foreach ($request->componentes as $component) {
             $checked = isset($component['checked']) ? true : false;
     
@@ -558,14 +559,21 @@ class AppointmentController extends Controller
                 ]);
         }
     
-        // Actualizar los kilómetros si se enviaron
+        // Actualizar los kilómetros si se proporcionaron
         if ($request->filled('kilometros')) {
             $appointment->bike->kilometros = $request->input('kilometros');
             $appointment->bike->save();
         }
     
+        // Actualizar la descripción del problema si se proporciona
+        if ($request->filled('descripcion_problema')) {
+            $appointment->descripcion_problema = $request->input('descripcion_problema');
+            $appointment->save();
+        }
+    
         return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
     }
+    
     
     
     

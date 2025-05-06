@@ -48,7 +48,14 @@
             </thead>
             <tbody class="divide-y divide-gray-300">
                 @foreach ($appointments as $appointment)
-                    <tr class="hover:bg-gray-100 {{ $appointment->estado == 'en proceso' ? 'bg-yellow-200' : '' }}">
+                <tr class="hover:bg-gray-100
+                @if(!empty($appointment->descripcion_problema))
+                    bg-red-200
+                @elseif($appointment->estado == 'en proceso')
+                    bg-yellow-200
+                @endif
+            ">
+            
                         <td class="py-2 px-4">{{ $appointment->bike->marca }} {{ $appointment->bike->nombre }} {{ $appointment->bike->color }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
                         <td class="py-2 px-4">
