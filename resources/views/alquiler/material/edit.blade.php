@@ -68,6 +68,11 @@
             <input type="number" step="0.01" name="precio_dia" id="precio_dia" value="{{ old('precio_dia', $material->precio_dia) }}" class="w-full border px-4 py-2 rounded-md" required>
         </div>
 
+        <div class="mb-4">
+            <label for="amortizacion" class="block text-gray-700 font-semibold mb-2">Amortizacion (€)</label>
+            <input type="number" step="0.01" name="amortizacion" id="amortizacion" value="{{ old('amortizacion', $material->amortizacion) }}" class="w-full border px-4 py-2 rounded-md" required>
+        </div>
+
         <!-- Botones -->
         <div class="flex justify-between mt-6">
             <a href="{{ route('material.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">

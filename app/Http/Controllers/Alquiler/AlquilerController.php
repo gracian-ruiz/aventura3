@@ -349,12 +349,29 @@ class AlquilerController extends Controller
 
     public function devolverMaterial($pivotId)
     {
+        $pivot = DB::table('alquiler_material')->where('id', $pivotId)->first();
+    
+        if (!$pivot || $pivot->estado === 'finalizado') {
+            return back()->with('warning', 'Este material ya ha sido devuelto o no existe.');
+        }
+    
+        // Obtener el material correspondiente
+        $material = Material::find($pivot->material_id);
+    
+        if ($material) {
+            // Sumar el subtotal a la amortización
+            $material->amortizacion += $pivot->subtotal;
+            $material->save();
+        }
+    
+        // Actualizar el estado a finalizado
         DB::table('alquiler_material')
             ->where('id', $pivotId)
             ->update(['estado' => 'finalizado']);
     
-        return back()->with('success', 'Material marcado como devuelto.');
+        return back()->with('success', 'Material marcado como devuelto y amortización actualizada.');
     }
+    
     
 
 
@@ -379,9 +396,16 @@ class AlquilerController extends Controller
 
             // Finalizar los materiales vinculados al alquiler
             foreach ($alquiler->materiales as $material) {
-                if ($material->pivot->estado !== 'finalizado') {
-                    $material->pivot->estado = 'finalizado';
-                    $material->pivot->save();
+                $pivot = $material->pivot;
+        
+                if ($pivot->estado !== 'finalizado') {
+                    // Sumar el subtotal del alquiler al campo amortización del material
+                    $material->amortizacion += $pivot->subtotal;
+                    $material->save();
+        
+                    // Cambiar el estado del material en el pivot a finalizado
+                    $pivot->estado = 'finalizado';
+                    $pivot->save();
                 }
             }
 

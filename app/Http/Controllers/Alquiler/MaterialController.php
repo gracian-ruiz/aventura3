@@ -40,6 +40,7 @@ class MaterialController extends Controller
             'estado' => 'required|string',
             'descripcion' => 'nullable|string',
             'precio_dia' => 'required|numeric',
+            'amortizacion' => 'required|numeric',
         ]);
     
         Material::create($validated);
@@ -62,6 +63,7 @@ class MaterialController extends Controller
             'estado' => 'required|string',
             'descripcion' => 'nullable|string',
             'precio_dia' => 'required|numeric',
+            'amortizacion' => 'required|numeric',
         ]);
     
         $material->update($validated);
