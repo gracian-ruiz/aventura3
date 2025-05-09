@@ -64,7 +64,12 @@
         <!-- Precio por Día -->
         <div class="mb-4">
             <label for="precio_dia" class="block text-gray-700 font-semibold mb-2">Precio por Día (€)</label>
-            <input type="number" step="0.01" name="precio_dia" id="precio_dia" value="{{ old('precio_dia') }}" class="w-full border px-4 py-2 rounded-md" required>
+            <input type="number" step="0.01" name="precio_dia" id="precio_dia" value="{{ old('precio_dia') }}" class="w-full border px-4 py-2 rounded-md">
+        </div>
+
+        <div class="mb-4">
+            <label for="amortizacion" class="block text-gray-700 font-semibold mb-2">Amortizacion (€)</label>
+            <input type="number" step="0.01" name="amortizacion" id="amortizacion" value="0" class="w-full border px-4 py-2 rounded-md" required>
         </div>
 
         <!-- Botones -->
