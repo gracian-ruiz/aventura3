@@ -31,7 +31,7 @@ class AppointmentController extends Controller
                     $query->whereHas('bike', function ($q) use ($search) {
                         $q->where('nombre', 'like', '%' . $search . '%')
                           ->orWhereHas('user', function ($qq) use ($search) {
-                              $qq->where('nombre', 'like', '%' . $search . '%');
+                              $qq->where('name', 'like', '%' . $search . '%');
                           });
                     });
                 }
