@@ -60,6 +60,57 @@ class AppointmentController extends Controller
         return view('appointments.index', compact('appointments', 'search', 'estado'));
     }
 
+    public function indextaller(Request $request)
+    {
+        $user = auth()->user()->id;
+        $search = $request->input('search');
+        $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
+
+        // Recalcular siempre antes de mostrar la vista
+        $this->recalcularFechasAsignadas();
+        $search = $request->input('search'); // Obtén el término de búsqueda desde el input
+
+        $search = $request->input('search');
+
+        $appointments = Appointment::with('bike.user', 'componentes')
+            ->whereIn('estado', ['pendiente', 'en proceso'])
+            ->whereJsonContains('asignacion_taller', (string) auth()->user()->id)
+            ->where(function ($query) use ($search) {
+                if ($search) {
+                    $query->whereHas('bike', function ($q) use ($search) {
+                        $q->where('nombre', 'like', '%' . $search . '%')
+                          ->orWhereHas('user', function ($qq) use ($search) {
+                              $qq->where('nombre', 'like', '%' . $search . '%');
+                          });
+                    });
+                }
+            })
+            ->orderByRaw('
+                CASE 
+                    -- EN PROCESO
+                    WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
+                    WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
+                    WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
+                    WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
+                    -- PENDIENTE
+                    WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total < 30 THEN 5
+                    WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total >= 30 THEN 6
+                    WHEN estado = "pendiente" AND prioridad = "normal" AND horas_total < 30 THEN 7
+                    ELSE 8
+                END
+            ')
+            ->orderBy('horas_total', 'asc')
+            ->paginate(8);
+        
+    
+    
+
+
+        return view('appointments.index', compact('appointments', 'search', 'estado'));
+    }
+
+    
+
     public function confirmCompletion(Appointment $appointment)
     {
         // Obtener los componentes de la cita
@@ -147,17 +198,7 @@ class AppointmentController extends Controller
         //app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
     
         return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
-    }
-
-
-
-    public function create()
-    {
-        $bikes = Bike::all();
-        $componentes = Component::all(); // Agregamos los componentes
-
-        return view('appointments.create', compact('bikes', 'componentes'));
-    }
+    }    
 
     public function updatedos(Request $request, $id)
     {
@@ -169,6 +210,8 @@ class AppointmentController extends Controller
             'textos' => 'nullable|array',
             'prioridad' => 'required|in:normal,urgente',
             'descuento' => 'nullable|array', // Validación de descuentos
+            'asignacion_taller' => 'nullable|array',
+            'asignacion_taller.*' => 'exists:users,id',
         ]);
     
         DB::beginTransaction();
@@ -229,6 +272,7 @@ class AppointmentController extends Controller
                 ->update([
                     'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
+                    'asignacion_taller' => $request->asignacion_taller ?? [],
                 ]);
     
             DB::commit();
@@ -272,12 +316,19 @@ class AppointmentController extends Controller
             ->get();
 
 
+            $usuariosTaller = DB::table('users')
+            ->whereIn('role', ['admin', 'taller'])
+            ->select('id', 'name')
+            ->get();
+        
+
+
 
         // Obtener todas las bicicletas y componentes disponibles
         $bikes = DB::table('bikes')->get();
         $components = DB::table('components')->get();
 
-        return view('appointments.edit', compact('presupuesto', 'bikes', 'components', 'presupuesto_items'));
+        return view('appointments.edit', compact('presupuesto', 'bikes', 'components', 'presupuesto_items', 'usuariosTaller'));
     }
 
 
@@ -379,27 +430,6 @@ class AppointmentController extends Controller
             }
         }
     }
-
-    public function store(StoreAppointmentRequest $request)
-    {
-        $appointment = Appointment::create([
-            'bike_id' => $request->bike_id,
-            'prioridad' => $request->prioridad,
-            'descripcion_problema' => $request->descripcion_problema,
-            'estimacion_reparacion' => $request->estimacion_reparacion,
-            'tiempo_estimado' => $request->tiempo_estimado,
-            'estado' => 'pendiente',
-        ]);
-
-        // Asociar los componentes seleccionados a la cita
-        $appointment->componentes()->attach($request->componentes);
-
-        // 🔥 Recalcula fechas automáticamente
-        $this->recalcularFechasAsignadas();
-
-        return redirect()->route('appointments.index')->with('success', 'Cita registrada correctamente.');
-    }
-
 
     private function recalcularFechasAsignadas()
     {

@@ -31,6 +31,20 @@
              </select>
          </div>
 
+         <div class="mb-4">
+            <label for="asignacion_taller" class="block text-gray-700">Asignar a taller</label>
+            <select name="asignacion_taller[]" id="asignacion_taller" class="w-full border px-4 py-2 rounded-md" multiple>
+                @foreach($usuariosTaller as $usuario)
+                    <option value="{{ $usuario->id }}"
+                        @if(in_array($usuario->id, json_decode($presupuesto->asignacion_taller ?? '[]')))
+                            selected
+                        @endif>
+                        {{ $usuario->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
         <!-- Tabla de Componentes -->
         <div class="mb-4">
             <table class="w-full border-collapse border border-gray-300">

@@ -25,6 +25,17 @@
                 <option value="urgente">Urgente</option>
             </select>
         </div>
+        
+        <div class="mb-4">
+            <label for="asignacion_taller" class="block text-gray-700">Asignar a Mecanico</label>
+            <select name="asignacion_taller[]" id="asignacion_taller" class="w-full border px-4 py-2 rounded-md" multiple>
+                @foreach ($talleristas as $tallerista)
+                    <option value="{{ $tallerista->id }}">{{ $tallerista->name }}</option>
+                @endforeach
+            </select>
+            <small class="text-gray-500">Puedes seleccionar uno o varios usuarios</small>
+        </div>
+        
         <!-- Selección de Componentes con select -->
         <div class="mb-4">
             <label class="block text-gray-700">Selecciona un Componente</label>

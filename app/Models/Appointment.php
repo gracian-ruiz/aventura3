@@ -13,6 +13,10 @@ class Appointment extends Model
 
     protected $table = 'appointments';
 
+    protected $casts = [
+        'asignacion_taller' => 'array',
+    ];
+
     protected $fillable = [
         'bike_id', 
         'user_id',
@@ -30,7 +34,8 @@ class Appointment extends Model
         'reparacion_enviado',
         'horas_total',
         'precio_total',
-        'descuento'
+        'descuento',
+        'asignacion_taller'
     ];
 
     public function bike()

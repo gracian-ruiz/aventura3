@@ -19,13 +19,6 @@
         </button>
     </form>
 
-    <!-- Botón para Añadir Nueva Cita -->
-    <div class="flex justify-end mb-4">
-        <a href="{{ route('appointments.create') }}" class="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600">
-            + Nueva Cita
-        </a>
-    </div>
-
     @if (session('success'))
         <div class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
             {{ session('success') }}

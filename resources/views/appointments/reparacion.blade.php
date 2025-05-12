@@ -9,6 +9,22 @@
         @method('PUT')
 
         <div class="space-y-6">
+            <div class="mt-6">
+                <h1 class="block text-700 text-lg font-semibold mb-1">
+                    Descripción anterior del problema:
+                </h1>
+                <span class="block mb-2 text-red-700 text-lg font-medium">
+                    {{ $appointment->descripcion_problema ?? 'No registrada' }}
+                </span>
+                <br>
+                <label for="descripcion_problema" class="block text-700 text-lg mb-1 font-semibold">
+                    Descripción actual del problema
+                </label>
+                <textarea name="descripcion_problema" id="descripcion_problema"
+                          class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Describe el problema actual...">{{ old('descripcion_problema') }}</textarea>
+            </div>
+            
             <h3 class="text-xl font-semibold text-gray-800">Componentes de la Cita</h3>
 
             <!-- Iterar a través de los componentes de la cita -->
@@ -45,20 +61,6 @@
                    placeholder="Introduce los kilómetros actuales"
                    min="0" value="{{ old('kilometros') }}">
         </div>
-
-        <div class="mt-6">
-            <label class="block text-gray-700 font-semibold mb-1">Descripción anterior del problema:</label>
-            <span class="block mb-2 text-blue-700 font-medium">
-                {{ $appointment->descripcion_problema ?? 'No registrada' }}
-            </span>
-        
-            <label for="descripcion_problema" class="block text-gray-700 mb-1">Descripción actual del problema</label>
-            <textarea name="descripcion_problema" id="descripcion_problema"
-                      class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Describe el problema actual...">{{ old('descripcion_problema') }}</textarea>
-        </div>
-        
-        
 
         <div class="mt-6">
             <button type="submit" class="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">

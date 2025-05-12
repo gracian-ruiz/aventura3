@@ -94,6 +94,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Rutas de citas
     Route::get('/citas', [AppointmentController::class, 'index'])->name('appointments.index'); // Ver citas pendientes
+    Route::get('/citas/taller', [AppointmentController::class, 'indextaller'])->name('appointments.indextaller'); // Ver citas pendientes
     Route::get('/citas/historico', [AppointmentController::class, 'historico'])->name('appointments.historico');
     // Ver citas completadas
     Route::post('/citas', [AppointmentController::class, 'store'])->name('appointments.store'); // Registrar nueva cita
