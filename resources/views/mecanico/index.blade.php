@@ -11,7 +11,7 @@
     <h1 class="text-2xl font-bold text-center mb-4">Orden Pendientes para reparar</h1>
 
     <!-- Buscador -->
-    <form action="{{ route('appointments.index') }}" method="GET" class="mb-4 flex items-center">
+    <form action="{{ route('mecanico.index') }}" method="GET" class="mb-4 flex items-center">
         <input type="text" name="search" placeholder="Buscar por bicicleta, usuario o componente..." 
                class="border px-4 py-2 rounded-md w-1/2" value="{{ request('search') }}">
         <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
@@ -74,7 +74,7 @@
                         <td class="py-2 px-4 text-center">
                             <!-- Botón Revisar (solo si está pendiente) -->
                             @if($appointment->estado == 'pendiente')
-                                <form action="{{ route('appointments.updateEstado', $appointment->id) }}" method="POST" class="inline-block">
+                                <form action="{{ route('mecanico.updateEstado', $appointment->id) }}" method="POST" class="inline-block">
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="estado" value="en proceso">
@@ -86,14 +86,14 @@
 
                             <!-- Botón Completar (solo si está en proceso) -->
                             @if($appointment->estado == 'en proceso')
-                                <a href="{{ route('appointments.confirmCompletion', $appointment->id) }}" 
+                                <a href="{{ route('mecanico.confirmCompletion', $appointment->id) }}" 
                                     class="block px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 my-1">
                                     Finalizar
                                 </a>
                             @endif
 
                             @if($appointment->estado == 'en proceso')
-                            <a href="{{ route('appointments.reparacion.show', $appointment->id) }}" 
+                            <a href="{{ route('mecanico.reparacion.show', $appointment->id) }}" 
                                 class="block px-3 py-1 bg-black text-white rounded-md hover:bg-gray-800 my-1">
                                 Reparación
                             </a>
@@ -101,16 +101,16 @@
                         
 
                             <!-- Botón Editar -->
-                            <a href="{{ route('appointments.edit', $appointment->id) }}" 
+                            <a href="{{ route('mecanico.edit', $appointment->id) }}" 
                                 class="block px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 my-1">
                                 Editar
                             </a>
-                            <a href="{{ route('appointments.show', $appointment->id) }}" class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                            <a href="{{ route('mecanico.show', $appointment->id) }}" class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600">
                                 Ver
                             </a>
 
                             <!-- Botón Eliminar -->
-                            <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">
+                            <form action="{{ route('mecanico.destroy', $appointment->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 my-1" 

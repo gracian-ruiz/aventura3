@@ -82,16 +82,15 @@
                                 </a>                       
                                 <a href="{{ url("/presupuestos/{$presupuesto->id}/factura") }}" 
                                     class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                                     Ver Factura
+                                     Ver Presupuesto
                                  </a>
-                                <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" 
+{{--                                 <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" 
                                    class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
                                     Descargar PDF
-                                </a>
-                                <a href="{{ route('presupuesto.enviar', ['clienteId' => $presupuesto->user_id, 'presupuestoId' => $presupuesto->id]) }}" 
-                                    class="bg-green-500 text-white px-4 py-2 rounded">
-                                    📩 Enviar PDF por WhatsApp
-                                </a>                                
+                                </a> --}}
+                                @if ($presupuesto->presupuesto_enviado)
+                                    <h1 style="font-weight: bold;">SE HA ENVIADO EL MENSAJE</h1>
+                                @endif
                             </div>
                         </td>
                                                                      

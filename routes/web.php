@@ -13,6 +13,7 @@ use App\Http\Controllers\AvisoEnviadoController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PresupuestoController;
 use App\Http\Controllers\Alquiler\UsuarioAlquilerController;
+use App\Http\Controllers\MecanicoController;
 use App\Http\Controllers\WhatsappController;
 use App\Models\Bike;
 use App\Models\Material;
@@ -94,23 +95,39 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Rutas de citas
     Route::get('/citas', [AppointmentController::class, 'index'])->name('appointments.index'); // Ver citas pendientes
-    Route::get('/citas/taller', [AppointmentController::class, 'indextaller'])->name('appointments.indextaller'); // Ver citas pendientes
+    Route::get('/mecanico', [MecanicoController::class, 'index'])->name('mecanico.index'); // Ver citas pendientes
     Route::get('/citas/historico', [AppointmentController::class, 'historico'])->name('appointments.historico');
     // Ver citas completadas
     Route::post('/citas', [AppointmentController::class, 'store'])->name('appointments.store'); // Registrar nueva cita
     Route::put('/citas/{appointment}/updateEstado', [AppointmentController::class, 'updateEstado'])->name('appointments.updateEstado'); // Completar cita
     Route::delete('/citas/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy'); // Eliminar cita
 
+    Route::post('/mecanico', [MecanicoController::class, 'store'])->name('mecanico.store'); // Registrar nueva cita
+    Route::put('/mecanico/{appointment}/updateEstado', [MecanicoController::class, 'updateEstado'])->name('mecanico.updateEstado'); // Completar cita
+    Route::delete('/mecanico/{appointment}', [MecanicoController::class, 'destroy'])->name('mecanico.destroy'); // Eliminar cita
+
     Route::get('/citas/create', [AppointmentController::class, 'create'])->name('appointments.create');
     Route::get('/citas/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
     Route::put('/citas/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
 
+    Route::get('/mecanico/create', [MecanicoController::class, 'create'])->name('mecanico.create');
+    Route::get('/mecanico/{appointment}/edit', [MecanicoController::class, 'edit'])->name('mecanico.edit');
+    Route::put('/mecanico/{appointment}', [MecanicoController::class, 'update'])->name('mecanico.update');
+
     Route::get('/citas/{appointment}/confirm', [AppointmentController::class, 'confirmCompletion'])
         ->name('appointments.confirmCompletion');
+
+    Route::get('/mecanico/{appointment}/confirm', [MecanicoController::class, 'confirmCompletion'])
+        ->name('mecanico.confirmCompletion');    
 
     Route::put('/citas/{appointment}/complete', [AppointmentController::class, 'complete'])
         ->name('appointments.complete');
     Route::get('/citas/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
+
+
+    Route::put('/mecanico/{appointment}/complete', [MecanicoController::class, 'complete'])
+    ->name('mecanico.complete');
+Route::get('/mecanico/{appointment}', [MecanicoController::class, 'show'])->name('mecanico.show');
 
 
     // ✅ Nueva ruta para update con otro nombre
@@ -118,6 +135,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/citas/{appointment}/reparacion', [AppointmentController::class, 'showReparacion'])->name('appointments.reparacion.show');
     Route::put('/citas/{appointment}/reparacion', [AppointmentController::class, 'updateReparacion'])->name('appointments.updateReparacion');
     Route::delete('/presupuestos/{id}', [PresupuestoController::class, 'destroy'])->name('presupuestos.destroy');
+
+
+    Route::put('mecanico/{appointment}/updatedos', [MecanicoController::class, 'updatedos'])->name('mecanico.updatedos');
+    Route::get('/mecanico/{appointment}/reparacion', [MecanicoController::class, 'showReparacion'])->name('mecanico.reparacion.show');
+    Route::put('/mecanico/{appointment}/reparacion', [MecanicoController::class, 'updateReparacion'])->name('mecanico.updateReparacion');
+
 
 
 

@@ -15,7 +15,7 @@
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">Usuarios</x-nav-link>
                     <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-nav-link>
                     <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Orden de taller</x-nav-link>
-                    <x-nav-link :href="route('appointments.indextaller')" :active="request()->routeIs('appointments.indextaller')">Orden de taller Asignado</x-nav-link>
+                    <x-nav-link :href="route('mecanico.index')" :active="request()->routeIs('mecanico.index')">Orden de taller Asignado</x-nav-link>
 {{--                     <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-nav-link> --}}
                     <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">Bicicletas</x-nav-link>
                     <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-nav-link>

@@ -222,6 +222,11 @@ class PresupuestoController extends Controller
         $nombreArchivo = "Presupuesto_{$usuarioLimpio}_{$bicicletaLimpia}_{$fecha}.pdf";
     
         $pdf = Pdf::loadView('pdf.presupuesto', compact('presupuesto', 'items'));
+
+        DB::table('appointments')
+        ->where('id', $presupuestoId)
+        ->update(['presupuesto_enviado' => true]);
+    
     
         return $pdf->download($nombreArchivo);
     }
