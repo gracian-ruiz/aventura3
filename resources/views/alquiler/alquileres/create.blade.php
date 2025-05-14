@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         <!-- Nombre del material arriba con checkbox -->
                                         <div class="flex items-center space-x-2 mb-2">
                                             <input type="hidden" name="materiales[${mat.id}][id]" value="${mat.id}">
-                                            <input type="checkbox" id="material_${mat.id}" name="materiales[${mat.id}][selected]" value="on" class="h-5 w-5 text-green-600">
+                                            <input type="checkbox" id="material_${mat.id}" name="materiales[${mat.id}][selected]" value="on" class="h-5 w-5 text-green-600" style="margin-right: 5px;">
                                             <label for="material_${mat.id}" class="text-green-700 text-lg font-semibold">
                                                 ${mat.nombre} ${mat.descripcion} ${mat.tipo} (${mat.talla})
                                             </label>
