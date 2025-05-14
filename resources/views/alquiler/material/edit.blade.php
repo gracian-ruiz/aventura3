@@ -73,6 +73,11 @@
             <input type="number" step="0.01" name="amortizacion" id="amortizacion" value="{{ old('amortizacion', $material->amortizacion) }}" class="w-full border px-4 py-2 rounded-md" required>
         </div>
 
+        <div class="mb-4">
+            <label for="reserva_precio" class="block text-gray-700 font-semibold mb-2">Precio de la reserva (€)</label>
+            <input type="number" step="0.01" name="reserva_precio" id="reserva_precio" value="{{ old('reserva_precio', $material->reserva_precio) }}" class="w-full border px-4 py-2 rounded-md">
+        </div>
+
         <!-- Botones -->
         <div class="flex justify-between mt-6">
             <a href="{{ route('material.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">

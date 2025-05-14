@@ -167,8 +167,9 @@ document.addEventListener('DOMContentLoaded', function () {
         params.append('fecha_inicio', fechaInicio);
         params.append('fecha_fin', fechaFin);
         combinaciones.forEach(comb => params.append('tipo_talla[]', comb));
-
+        
         fetch(`/public/alquileres/materiales-disponibles?${params.toString()}`)
+        //fetch(`/alquileres/materiales-disponibles?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -180,13 +181,38 @@ document.addEventListener('DOMContentLoaded', function () {
                     html += '<div class="space-y-4">';
                     data.forEach(mat => {
                         html += `
-                            <div class="flex items-center space-x-4">
-                                <input type="hidden" name="materiales[${mat.id}][id]" value="${mat.id}">  <!-- Campo oculto para el ID -->
-                                <input type="checkbox" id="material_${mat.id}" name="materiales[${mat.id}][selected]" value="on" class="mr-2">
-                                <label for="material_${mat.id}" class="text-green-700">${mat.nombre} ${mat.descripcion} ${mat.tipo} (${mat.talla})</label>
-                                <input type="number" step="0.01" min="0" name="materiales[${mat.id}][precio_unitario]" value="${mat.precio_total}" placeholder="Precio (€)" class="border-gray-300 rounded-md shadow-sm w-32">
-                                <input type="number" step="0.01" min="0" name="materiales[${mat.id}][descuento]" value="0" placeholder="Descuento" class="border-gray-300 rounded-md shadow-sm w-32">
-                            </div>
+                                <div class="space-y-4">
+                                    <!-- Reemplazar este bloque con un bucle que genere uno por cada material -->
+                                    <div class="border-b border-gray-300 pb-4">
+                                        <div class="flex items-center space-x-4 flex-wrap">
+                                            <input type="hidden" name="materiales[${mat.id}][id]" value="${mat.id}">
+                                            
+                                            <div class="flex items-center space-x-2">
+                                                <input type="checkbox" id="material_${mat.id}" name="materiales[${mat.id}][selected]" value="on" class="h-5 w-5 text-green-600" style="margin-right: 10px;">
+                                                <label for="material_${mat.id}" class="text-green-700 text-lg font-semibold">
+                                                    ${mat.nombre} ${mat.descripcion} ${mat.tipo} (${mat.talla})
+                                                </label>
+                                            </div>
+
+                                            <div class="flex flex-col">
+                                                <label class="text-sm text-gray-600">Precio (€)</label>
+                                                <input type="number" step="0.01" min="0" name="materiales[${mat.id}][precio_unitario]" value="${mat.precio_total}" class="border-gray-300 rounded-md shadow-sm w-32">
+                                            </div>
+
+                                            <div class="flex flex-col">
+                                                <label class="text-sm text-gray-600">Descuento (€)</label>
+                                                <input type="number" step="0.01" min="0" name="materiales[${mat.id}][descuento]" value="0" class="border-gray-300 rounded-md shadow-sm w-32">
+                                            </div>
+
+                                            <div class="flex flex-col">
+                                                <label class="text-sm text-gray-600">Reserva (€)</label>
+                                                <input type="number" step="0.01" min="0" name="materiales[${mat.id}][reserva_precio]" value="${mat.reserva_precio}" class="border-gray-300 rounded-md shadow-sm w-32">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Fin del material -->
+                                </div>
+
                         `;
                     });
                     html += '</div>';

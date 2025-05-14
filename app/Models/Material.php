@@ -20,13 +20,14 @@ class Material extends Model
         'categoria',
         'observaciones',
         'precio_dia',
-        'amortizacion'
+        'amortizacion',
+        'reserva_precio'
     ];
 
     public function alquileres()
     {
         return $this->belongsToMany(Alquiler::class, 'alquiler_material')
-                    ->withPivot('precio_unitario', 'cantidad_dias', 'subtotal','amortizacion')
+                    ->withPivot('precio_unitario', 'cantidad_dias', 'subtotal','amortizacion','reserva_precio')
                     ->withTimestamps();
     }
 }

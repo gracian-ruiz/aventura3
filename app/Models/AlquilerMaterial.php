@@ -24,6 +24,7 @@ class AlquilerMaterial extends Model
         'estado',
         'fecha_inicio',
         'fecha_fin',
+        'reserva_precio'
         
     ];
 

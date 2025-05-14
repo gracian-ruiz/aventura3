@@ -20,6 +20,7 @@ class Alquiler extends Model
         'descuento', // ¡Ojo! este campo tiene un typo en la migración, debería ser 'descuento'
         'estado',
         'observaciones',
+        'reserva_precio'
     ];
 
     public function usuario()
@@ -30,7 +31,7 @@ class Alquiler extends Model
     public function materiales()
     {
         return $this->belongsToMany(Material::class, 'alquiler_material')
-                    ->withPivot('id','precio_unitario', 'subtotal', 'descuento','estado','fecha_inicio',
+                    ->withPivot('id','precio_unitario', 'subtotal', 'descuento','estado','fecha_inicio','reserva_precio',
                     'fecha_fin',)
                     ->withTimestamps();
     }

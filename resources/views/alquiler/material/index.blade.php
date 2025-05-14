@@ -43,6 +43,7 @@
                     <th class="py-2 px-4 text-left">Estado</th>
                     <th class="py-2 px-4 text-left">Precio/día (€)</th>
                     <th class="py-2 px-4 text-left">Amortización (€)</th>
+                    <th class="py-2 px-4 text-left">Precio Reserva (€)</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
             </thead>
@@ -56,6 +57,7 @@
                         <td class="py-2 px-4 capitalize">{{ $material->estado }}</td>
                         <td class="py-2 px-4">{{ number_format($material->precio_dia, 2) }} eu</td>
                         <td class="py-2 px-4">{{ number_format($material->amortizacion, 2) }} eu</td>
+                        <td class="py-2 px-4">{{ number_format($material->reserva_precio, 2) }} eu</td>
                         <td class="py-2 px-4 text-center">
                             <a href="{{ route('material.edit', $material->id) }}" 
                                class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Editar</a>

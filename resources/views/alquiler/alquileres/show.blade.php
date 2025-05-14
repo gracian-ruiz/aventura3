@@ -28,17 +28,25 @@
     <div class="card shadow mb-5">
         <div class="card-body">
             <div class="row mb-3">
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <strong>📅 Fecha de creación:</strong><br>
                     {{ $alquiler->created_at->format('d/m/Y') }}
                 </div>
-                <div class="col-md-4">
-                    <strong>💰 Total precio:</strong><br>
+                <div class="col-md-2">
+                    <strong>💰 Total precio (sin la reserva)</strong><br>
                     {{ number_format($alquiler->total_precio, 2) }} €
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <strong>🔻 Descuento total:</strong><br>
                     {{ number_format($alquiler->descuento, 2) }} €
+                </div>
+                <div class="col-md-2">
+                    <strong>🔻 Precio Reserva:</strong><br>
+                    {{ number_format($alquiler->reserva_precio, 2) }} €
+                </div>
+                <div class="col-md-2">
+                    <strong>🔻 Precio total menos el de la Precio Reserva:</strong><br>
+                    {{ number_format($alquiler->total_precio - $alquiler->reserva_precio, 2) }} €
                 </div>
             </div>
         </div>
@@ -65,12 +73,12 @@
                 <thead class="table-light text-center">
                     <tr>
                         <th>Material</th>
-                        <th>Cantidad</th>
                         <th>Fecha Inicio</th>
                         <th>Fecha Fin</th>
                         <th>Precio Unitario</th>
                         <th>Subtotal</th>
                         <th>Descuento</th>
+                        <th>Reserva</th>
                         <th>Estado</th>
                         <th>Acción</th>
                     </tr>
@@ -81,12 +89,12 @@
                         {{ $material->pivot->estado === 'finalizado' ? 'bg-red-100 text-red-700' : '' }} 
                         {{ $material->pivot->estado === 'activo' ? 'bg-green-100 text-green-700' : '' }}">
                         <td class="px-3 py-3"><strong>{{ $material->nombre }}</strong></td>
-                        <td class="text-center px-3 py-3">{{ $material->pivot->cantidad }}</td>
                         <td class="text-center px-3 py-3">{{ \Carbon\Carbon::parse($material->pivot->fecha_inicio)->format('d/m/Y') }}</td>
                         <td class="text-center px-3 py-3">{{ \Carbon\Carbon::parse($material->pivot->fecha_fin)->format('d/m/Y') }}</td>
                         <td class="text-end px-3 py-3">{{ number_format($material->pivot->precio_unitario, 2) }} €</td>
                         <td class="text-end px-3 py-3">{{ number_format($material->pivot->subtotal, 2) }} €</td>
                         <td class="text-end px-3 py-3 text-danger fw-semibold">{{ number_format($material->pivot->descuento, 2) }} €</td>
+                        <td class="text-end px-3 py-3 text-danger fw-semibold">{{ number_format($material->pivot->reserva_precio, 2) }} €</td>
                         <td class="text-center px-3 py-3">
                             @if($material->pivot->estado === 'finalizado')
                                 <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle me-1"></i> Finalizado</span>

@@ -34,7 +34,6 @@
                     <th class="py-2 px-4 text-left">Usuario</th>
                     <th class="py-2 px-4 text-left">Fecha inicio</th>
                     <th class="py-2 px-4 text-left">Fecha fin</th>
-                    <th class="py-2 px-4 text-left">Días</th>
                     <th class="py-2 px-4 text-left">Estado</th>
                     <th class="py-2 px-4 text-left">Total (€)</th>
                     <th class="py-2 px-4 text-left">Acciones</th>
@@ -55,9 +54,8 @@
                 <td class="py-2 px-4">{{ $alquiler->usuario->nombre ?? '—' }}</td>
                 <td class="py-2 px-4">{{ $alquiler->fecha_inicio }}</td>
                 <td class="py-2 px-4">{{ $alquiler->fecha_fin }}</td>
-                <td class="py-2 px-4">{{ $alquiler->total_dias }}</td>
                 <td class="py-2 px-4 capitalize">{{ $alquiler->estado }}</td>
-                <td class="py-2 px-4">{{ number_format($alquiler->total_precio, 2) }} €</td>
+                <td class="py-2 px-4">{{ number_format($alquiler->total_precio - $alquiler->reserva_precio, 2) }} €</td>
             
                 <td class="py-2 px-4">
                     <a href="{{ route('alquileres.edit', $alquiler) }}" class="text-blue-600 hover:underline">Editar</a>

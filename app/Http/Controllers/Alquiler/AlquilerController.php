@@ -90,6 +90,7 @@ class AlquilerController extends Controller
         // --------- Cálculo del total_precio ----------
         $totalPrecio = 0;
         $descuentoTotal = 0;
+        $reservaTotal = 0;
         foreach ($materialesSeleccionados as $material) {
             $precioUnitario = $material['precio_unitario'];
             $descuento = $material['descuento'];
@@ -97,6 +98,7 @@ class AlquilerController extends Controller
             $subtotal = $precioUnitario - $descuento;
             $totalPrecio += $subtotal;
             $descuentoTotal += $descuento;
+            $reservaTotal += $material['reserva_precio'];
         }
         // ---------------------------------------------
 
@@ -106,6 +108,7 @@ class AlquilerController extends Controller
             'fecha_inicio' => $request->input('fecha_inicio'),
             'fecha_fin' => $request->input('fecha_fin'),
             'total_precio' => $totalPrecio,
+            'reserva_precio' => $reservaTotal,
             'descuento' => $descuentoTotal,
             'observaciones' => $request->input('observaciones'),
             'estado' => $request->input('estado'),
@@ -120,6 +123,7 @@ class AlquilerController extends Controller
                     'fecha_fin' => $request->input('fecha_fin'),
                     'precio_unitario' => $material['precio_unitario'],
                     'descuento' => $material['descuento'],
+                    'reserva_precio' => $material['reserva_precio'],
                     'subtotal' => ($material['precio_unitario'] - $material['descuento']) ,
                 ]
             );
@@ -192,6 +196,7 @@ class AlquilerController extends Controller
         // Añadir precio total al resultado
         $materialesConPrecio = $materiales->map(function ($material) use ($dias) {
             $material->precio_total = $material->precio_dia * $dias;
+            $material->reserva_precio = $material->reserva_precio * $dias;
             return $material;
         });
     
@@ -264,6 +269,7 @@ class AlquilerController extends Controller
     
         $alquiler->total_precio -= $pivot->subtotal;
         $alquiler->descuento -= $pivot->descuento;
+        $alquiler->reserva_precio -= $pivot->reserva_precio;
     
         $alquiler->total_precio = max(0, $alquiler->total_precio);
         $alquiler->descuento = max(0, $alquiler->descuento);
@@ -299,23 +305,27 @@ class AlquilerController extends Controller
         // Inicializar las variables de total solo para el material nuevo
         $totalPrecioNuevo = 0;
         $totalDescuentoNuevo = 0;
+        $totalReservaNuevo = 0;
 
         // Validar y asociar los materiales seleccionados al alquiler
         foreach ($materialesSeleccionados as $index => $material) {
             $request->validate([
                 "materiales.$index.precio_unitario" => 'required|numeric|min:0',
                 "materiales.$index.descuento" => 'required|numeric|min:0',
+                "materiales.$index.reserva_precio" => 'required|numeric|min:0',
             ]);
 
             // Calcular subtotal por material
             $precioUnitario = $material['precio_unitario'];
             $descuento = $material['descuento'];
+            $reserva = $material['reserva_precio'];
 
             $subtotal = ($precioUnitario) - $descuento;
 
             // Actualizar los totales solo para los materiales nuevos
             $totalPrecioNuevo += $subtotal;
             $totalDescuentoNuevo += $descuento;
+            $totalReservaNuevo += $reserva;
 
             // Asociar el material al alquiler
             $alquiler->materiales()->attach(
@@ -324,6 +334,7 @@ class AlquilerController extends Controller
                     'precio_unitario' => $precioUnitario,
                     'descuento' => $descuento,
                     'subtotal' => $subtotal,
+                    'reserva_precio' => $reserva,
                     'fecha_inicio' => $request->input('fecha_inicio'),
                     'fecha_fin' => $request->input('fecha_fin'),
                 ]
@@ -333,6 +344,7 @@ class AlquilerController extends Controller
         // Actualizar el alquiler solo con los totales nuevos
         $alquiler->total_precio += $totalPrecioNuevo; // Se suma al total existente
         $alquiler->descuento += $totalDescuentoNuevo; // Se suma al descuento existente
+        $alquiler->reserva_precio += $totalReservaNuevo;
 
         // Guardar los cambios en el alquiler
         $alquiler->save();

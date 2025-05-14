@@ -41,6 +41,7 @@ class MaterialController extends Controller
             'descripcion' => 'nullable|string',
             'precio_dia' => 'required|numeric',
             'amortizacion' => 'required|numeric',
+            'reserva_precio' => 'required|numeric',
         ]);
     
         Material::create($validated);
@@ -64,6 +65,7 @@ class MaterialController extends Controller
             'descripcion' => 'nullable|string',
             'precio_dia' => 'required|numeric',
             'amortizacion' => 'required|numeric',
+            'reserva_precio' => 'required|numeric',
         ]);
     
         $material->update($validated);
