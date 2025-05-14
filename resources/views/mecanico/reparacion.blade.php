@@ -68,5 +68,10 @@
             </button>
         </div>
     </form>
+    <div class="mt-4 d-flex justify-content-center gap-3">
+        <a href="{{ route('presupuestos.pdf', $appointment->id) }}" class="btn text-white" style="background-color: #E1251B;">
+            <i class="fas fa-file-pdf"></i> Descargar PDF
+        </a>            
+    </div>
 </div>
 @endsection
