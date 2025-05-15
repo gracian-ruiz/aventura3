@@ -34,8 +34,8 @@
                     <th class="py-2 px-4 text-left">Componentes</th>
                     <th class="py-2 px-4 text-left">Prioridad</th>
                     <th class="py-2 px-4 text-left">Tiempo de Reparacion</th>
-                    <th class="py-2 px-4 text-left">Mecanico</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
+                    <th class="py-2 px-4 text-left">Mecanico</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
