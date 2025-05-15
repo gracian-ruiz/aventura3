@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\User;
 use App\Models\Bike;
 use Illuminate\Http\Request;
 use App\Models\Component;
@@ -27,7 +28,18 @@ class MecanicoController extends Controller
 
         $appointments = Appointment::with('bike.user', 'componentes')
             ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->whereJsonContains('asignacion_taller', (string) auth()->user()->id)
+            ->where(function ($query) {
+                $userId = auth()->user()->id;
+            
+                if ($userId == 1 || $userId == 14 ) {
+                    // Traer solo los que tienen algún mecánico asignado
+                    $query->whereNotNull('asignacion_taller')
+                          ->where('asignacion_taller', '!=', '[]');
+                } else {
+                    // Solo los que contienen el ID del mecánico actual
+                    $query->whereJsonContains('asignacion_taller', (string) $userId);
+                }
+            })
             ->where(function ($query) use ($search) {
                 if ($search) {
                     $query->whereHas('bike', function ($q) use ($search) {
@@ -54,11 +66,22 @@ class MecanicoController extends Controller
             ')
             ->orderBy('horas_total', 'asc')
             ->paginate(8);
-        
-    
-    
 
 
+
+            foreach ($appointments as $appointment) {
+                // Si el campo ya es array, úsalo directamente. Si es string (JSON), decodifícalo.
+                $userIds = is_array($appointment->asignacion_taller)
+                    ? $appointment->asignacion_taller
+                    : json_decode($appointment->asignacion_taller, true);
+            
+                // Si por alguna razón $userIds no es un array válido, lo dejamos como array vacío
+                $userIds = is_array($userIds) ? $userIds : [];
+            
+                // Obtener los usuarios asignados
+                $appointment->usuarios_asignados = User::whereIn('id', $userIds)->get();
+            }
+            
         return view('mecanico.index', compact('appointments', 'search', 'estado'));
     }
 

@@ -34,8 +34,7 @@
                     <th class="py-2 px-4 text-left">Componentes</th>
                     <th class="py-2 px-4 text-left">Prioridad</th>
                     <th class="py-2 px-4 text-left">Tiempo de Reparacion</th>
-                    <th class="py-2 px-4 text-left">Fecha Creación</th>
-                    <th class="py-2 px-4 text-left">Fecha Asignada</th>
+                    <th class="py-2 px-4 text-left">Mecanico</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
                 </tr>
             </thead>
@@ -65,12 +64,6 @@
                             </span>
                         </td>
                         <td class="py-2 px-4">{{ $appointment->horas_total }} min</td>
-                        <td class="py-2 px-4">
-                            {{ \Carbon\Carbon::parse($appointment->created_at)->addHour()->format('d/m/Y H:i') }}
-                        </td>
-                        <td class="py-2 px-4">
-                            {{ $appointment->fecha_asignada ? \Carbon\Carbon::parse($appointment->fecha_asignada)->format('d/m/Y') : 'Pendiente' }}
-                        </td>
                         <td class="py-2 px-4 text-center">
                             <!-- Botón Revisar (solo si está pendiente) -->
                             @if($appointment->estado == 'pendiente')
@@ -119,6 +112,11 @@
                                 </button>
                             </form>
                         </td>
+                        <td class="py-2 px-4">
+                            @foreach ($appointment->usuarios_asignados as $usuario)
+                            <h1>{{ $usuario->name }}</h1>
+                            <br> {{-- O $usuario->nombre si usas 'nombre' como campo --}}
+                            @endforeach</td>
                     </tr>
                 @endforeach
             </tbody>
