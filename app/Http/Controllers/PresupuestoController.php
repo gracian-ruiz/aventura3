@@ -21,26 +21,28 @@ class PresupuestoController extends Controller
         $query = DB::table('appointments')
             ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->leftJoin('users', 'bikes.user_id', '=', 'users.id')
-            ->select('appointments.*', 'bikes.nombre as bike_nombre', 'bikes.marca as marca','users.name as user_nombre')
-            ->whereIn('appointments.estado', ['presupuesto', 'denegado','vacia']);
+            ->select('appointments.*', 'bikes.nombre as bike_nombre', 'bikes.marca as marca', 'users.name as user_nombre')
+            ->whereIn('appointments.estado', ['presupuesto', 'denegado', 'vacia']);
     
-        // Aplicar filtro de búsqueda
-        if ($request->has('search') && !empty($request->search)) {
+        // Filtro de búsqueda por usuario, nombre de bici o marca
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('users.name', 'like', "%$search%")
-                    ->orWhere('bikes.nombre', 'like', "%$search%");
+                  ->orWhere('bikes.nombre', 'like', "%$search%")
+                  ->orWhere('bikes.marca', 'like', "%$search%");
             });
         }
     
-        // Ordenar primero por prioridad (urgente primero), luego por fecha de creación (más reciente primero)
+        // Ordenar por prioridad y fecha
         $query->orderByRaw("CASE WHEN appointments.prioridad = 'urgente' THEN 0 ELSE 1 END")
               ->orderBy('appointments.created_at', 'asc');
     
         $presupuestos = $query->paginate(10)->appends(['search' => $request->search]);
-        
+    
         return view('presupuestos.index', compact('presupuestos'));
-    }    
+    }
+       
 
     public function create($userId)
     {
