@@ -88,7 +88,7 @@
                             @if($appointment->estado == 'en proceso')
                                 <a href="{{ route('appointments.confirmCompletion', $appointment->id) }}" 
                                     class="block px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 my-1">
-                                    Finalizar
+                                    Completar
                                 </a>
                             @endif
 

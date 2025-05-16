@@ -91,26 +91,6 @@
                                 Reparación
                             </a>
                             @endif
-                        
-
-                            <!-- Botón Editar -->
-                            <a href="{{ route('mecanico.edit', $appointment->id) }}" 
-                                class="block px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 my-1">
-                                Editar
-                            </a>
-                            <a href="{{ route('mecanico.show', $appointment->id) }}" class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600">
-                                Ver
-                            </a>
-
-                            <!-- Botón Eliminar -->
-                            <form action="{{ route('mecanico.destroy', $appointment->id) }}" method="POST" class="inline-block">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 my-1" 
-                                    onclick="return confirm('¿Seguro que quieres eliminar esta cita?')">
-                                    Eliminar
-                                </button>
-                            </form>
                         </td>
                         <td class="py-2 px-4">
                             @foreach ($appointment->usuarios_asignados as $usuario)

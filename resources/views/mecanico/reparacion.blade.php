@@ -29,25 +29,30 @@
 
             <!-- Iterar a través de los componentes de la cita -->
             @foreach ($data as $item)
-                <div class="flex items-center justify-between bg-white p-4 rounded-md shadow-sm mb-4">
-                    <!-- Checkbox con ID del componente y su estado 'checked' -->
-                    <div class="flex items-center">
+            <label class="block cursor-pointer">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 rounded-md shadow-md mb-4 border border-gray-200 peer-checked:border-green-500 peer-checked:bg-green-50 transition-all">
+                    <!-- Checkbox visible y grande -->
+                    <div class="flex items-start mr-4">
                         <input type="checkbox" name="componentes[{{ $item->componente_id }}][checked]" value="1"
                                @if($item->checked) checked @endif
-                               class="form-checkbox h-5 w-5 text-green-500">
+                               class="h-6 w-6 text-green-600 border-gray-300 rounded-md focus:ring-green-500 mr-3">
                         <input type="hidden" name="componentes[{{ $item->componente_id }}][id]" value="{{ $item->componente_id }}">
-                        <label for="componentes[]" class="ml-3 text-lg text-gray-700">{{ $item->component_nombre }}</label>
                     </div>
-
-                    <!-- Mostrar el texto descriptivo del componente (solo visualización) -->
-                    <div class="ml-4 w-3/4">
-                        <p class="text-gray-500 text-sm italic">{{ $item->texto }}</p>
+        
+                    <!-- Información del componente -->
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-800">{{ $item->component_nombre }}</h3>
+                        <p class="text-gray-500 text-sm italic mt-1">{{ $item->texto }}</p>
+                        <p class="text-gray-500 text-sm italic">Duración estimada: {{ $item->horas_trabajo }} minutos</p>
                     </div>
-                    <div>
-                        <p>Usuario {{ $item->usuario_taller_id }}</p>
+        
+                    <!-- Info del usuario asignado -->
+                    <div class="text-sm text-right mt-2 sm:mt-0 sm:ml-4 text-gray-600">
+                        Usuario asignado: {{ $item->usuario_taller_id }}
                     </div>
                 </div>
-            @endforeach
+            </label>
+        @endforeach               
         </div>
         <div class="mt-6">
             <label class="block text-gray-700 font-semibold mb-1">Kilómetros anteriores:</label>
@@ -68,10 +73,18 @@
             </button>
         </div>
     </form>
+    <br>
+    <br>
     <div class="mt-4 d-flex justify-content-center gap-3">
-        <a href="{{ route('presupuestos.pdf', $appointment->id) }}" class="btn text-white" style="background-color: #E1251B;">
-            <i class="fas fa-file-pdf"></i> Descargar PDF
+        <a href="{{ route('presupuestos.pdf', $appointment->id) }}" class="px-6 mr-5 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" style="background-color: #E1251B;">
+            <i class="fas fa-file-pdf"></i> Descargar PDF Ultimo Presupuesto
+        </a>
+        <a href="{{ route('mecanico.edit', $appointment->id) }}" 
+            class="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            Editar Presupuesto
         </a>            
     </div>
+    <br>
+    <br>
 </div>
 @endsection
