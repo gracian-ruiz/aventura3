@@ -79,12 +79,13 @@ class AppointmentController extends Controller
                 if ($search) {
                     $query->whereHas('bike', function ($q) use ($search) {
                         $q->where('nombre', 'like', '%' . $search . '%')
+                          ->orWhere('marca', 'like', '%' . $search . '%') // 🔍 búsqueda por marca
                           ->orWhereHas('user', function ($qq) use ($search) {
                               $qq->where('nombre', 'like', '%' . $search . '%');
                           });
                     });
                 }
-            })
+            })            
             ->orderByRaw('
                 CASE 
                     -- EN PROCESO
