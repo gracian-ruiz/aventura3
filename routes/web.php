@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Alquiler\AlquilerController;
+use App\Http\Controllers\Alquiler\AventuraBikeController;
 use App\Http\Controllers\Alquiler\MaterialController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -255,8 +256,12 @@ Route::delete('/alquileres/{alquiler}', [AlquilerController::class, 'destroy'])-
 Route::get('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'confirmarPresupuesto'])
     ->name('presupuesto.confirmar');
 
-    Route::post('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'procesarConfirmacion'])
+Route::post('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'procesarConfirmacion'])
     ->name('presupuesto.procesar');
+
+Route::get('/alquiler/bicicletas/montana', [AventuraBikeController::class, 'bicismontaña'])
+    ->name('bicismontaña');
+
 
 
 
