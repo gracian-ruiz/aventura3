@@ -28,19 +28,22 @@ class AlquilerController extends Controller
             });
         }
     
-        // Ordenar primero por estado (Activo primero), luego por fecha_inicio ascendente
-        $query->orderByRaw("
-            CASE 
-                WHEN estado = 'Activo' THEN 0
-                WHEN estado = 'Reservado' THEN 1
-                ELSE 2
-            END
-        ")->orderBy('fecha_inicio', 'asc');
+        // Ordenar primero por fallo (1 primero), luego por estado (Activo primero), luego por fecha
+        $query->orderByDesc('fallo')
+            ->orderByRaw("
+                CASE 
+                    WHEN estado = 'Activo' THEN 0
+                    WHEN estado = 'Reservado' THEN 1
+                    ELSE 2
+                END
+            ")
+            ->orderBy('fecha_inicio', 'asc');
     
         $alquileres = $query->paginate(10)->withQueryString();
     
         return view('alquiler.alquileres.index', compact('alquileres'));
     }
+    
         
     public function finalizado(Request $request)
     {
@@ -237,6 +240,8 @@ class AlquilerController extends Controller
             'total_precio' => 'nullable|numeric|min:0',
             'descuento' => 'nullable|numeric|min:0|max:100',
             'observaciones' => 'nullable|string|max:1000',
+            'incidencia' => 'nullable|string|max:1000',
+            'fallo' => 'nullable|boolean',
         ]);
     
         $alquiler->update([
@@ -244,6 +249,8 @@ class AlquilerController extends Controller
             'total_precio' => $request->total_precio,
             'descuento' => $request->descuento,
             'observaciones' => $request->observaciones,
+            'incidencia' => $request->incidencia,
+            'fallo' => $request->fallo,
         ]);
     
         return redirect()->route('alquileres.index')->with('success', 'Alquiler actualizado correctamente.');

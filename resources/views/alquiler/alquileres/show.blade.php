@@ -60,6 +60,15 @@
         @endif
     </div>
     <br>
+    @if($alquiler->fallo)
+    <div class="col-md-12 mt-3" style="background: rgb(241, 255, 47)">
+        <strong>📝 Notas:</strong><br>
+        
+            {{ $alquiler->incidencia }}
+        
+    </div>
+    @endif
+    <br>
     
 
     <!-- Lista de materiales -->

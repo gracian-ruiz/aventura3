@@ -44,11 +44,13 @@
             <tbody class="divide-y divide-gray-300">
                 @forelse($alquileres as $alquiler)
                 <tr class="
-                @if($alquiler->estado === 'reservado') bg-red-100 
-                @elseif($alquiler->estado === 'activo') bg-green-100 
-                @elseif($alquiler->estado === 'finalizado') bg-gray-100 
-                @else bg-white 
+                @if($alquiler->fallo === 1) bg-yellow-300
+                @elseif($alquiler->estado === 'reservado') bg-red-300
+                @elseif($alquiler->estado === 'activo') bg-green-400
+                @elseif($alquiler->estado === 'finalizado') bg-gray-100
+                @else bg-white
                 @endif hover:bg-opacity-80">
+            
                 
                 <td class="py-2 px-4">{{ $alquiler->id }}</td>
                 <td class="py-2 px-4">{{ $alquiler->usuario->nombre ?? '—' }}</td>

@@ -39,6 +39,22 @@
             <textarea name="observaciones" id="observaciones" rows="3" class="w-full border-gray-300 rounded-md shadow-sm">{{ old('observaciones', $alquiler->observaciones) }}</textarea>
             @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
+
+        <div class="mb-4">
+            <label class="block font-medium text-gray-700 mb-1" for="incidencia">Incidencia RESERVA WEB</label>
+            <textarea name="incidencia" id="incidencia" rows="3" class="w-full border-gray-300 rounded-md shadow-sm">{{ old('incidencia', $alquiler->incidencia) }}</textarea>
+            @error('incidencia') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+
+        <!-- Fallo de stock -->
+        <div class="mb-4">
+            <label class="block font-medium text-gray-700 mb-1" for="fallo">Problemas de stock</label>
+            <select name="fallo" id="fallo" class="w-full border-gray-300 rounded-md shadow-sm">
+                <option value="1" {{ old('fallo', $alquiler->fallo) == 1 ? 'selected' : '' }}>Tiene un problema</option>
+                <option value="0" {{ old('fallo', $alquiler->fallo) == 0 ? 'selected' : '' }}>Problema solucionado</option>
+            </select>
+        </div>
+
     
         <!-- Botones -->
         <div class="mt-6">

@@ -20,7 +20,10 @@ class Alquiler extends Model
         'descuento', // ¡Ojo! este campo tiene un typo en la migración, debería ser 'descuento'
         'estado',
         'observaciones',
-        'reserva_precio'
+        'reserva_precio',
+        'web',
+        'incidencia',
+        'fallo'
     ];
 
     public function usuario()

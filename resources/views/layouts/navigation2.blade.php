@@ -16,6 +16,7 @@
                     <x-nav-link :href="route('material.index')" :active="request()->routeIs('material.index')">Material</x-nav-link>
                     <x-nav-link :href="route('alquileres.index')" :active="request()->routeIs('alquileres.index')">Alquileres</x-nav-link>
                     <x-nav-link :href="route('alquileres.finalizado')" :active="request()->routeIs('alquileres.finalizado')">Alquileres finalizado</x-nav-link>
+                    <x-nav-link :href="route('addbicismontaña')" :active="request()->routeIs('addbicismontaña')">Alquileres formulario</x-nav-link>
                 @endif
             </div>
 
