@@ -45,6 +45,7 @@
                 @forelse($alquileres as $alquiler)
                 <tr class="
                 @if($alquiler->fallo === 1) bg-yellow-300
+                @elseif($alquiler->web === 1 && $alquiler->estado === 'reservado') bg-blue-300
                 @elseif($alquiler->estado === 'reservado') bg-red-300
                 @elseif($alquiler->estado === 'activo') bg-green-400
                 @elseif($alquiler->estado === 'finalizado') bg-gray-100
