@@ -263,10 +263,10 @@ Route::post('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController:
 
 
 
-Route::get('/alquiler/bicicletas/montana', [AventuraBikeController::class, 'bicismontaña'])
+Route::get('/alquiler/bicicletas', [AventuraBikeController::class, 'bicismontaña'])
     ->name('bicismontaña');
 
-Route::post('/alquiler/bicicletas', [AventuraBikeController::class, 'store'])->middleware('throttle:5,1')->name('addbicismontaña');
+Route::post('/alquiler/bicicletas/montana', [AventuraBikeController::class, 'store'])->middleware('throttle:5,1')->name('addbicismontaña');
 
 Route::post('/verificar-disponibilidad', [
     AventuraBikeController::class, 'comprobarDisponibilidad'])->name('bicicletas.disponibilidad');
