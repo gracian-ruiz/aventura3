@@ -23,7 +23,8 @@ class Alquiler extends Model
         'reserva_precio',
         'web',
         'incidencia',
-        'fallo'
+        'fallo',
+        'notificacion'
     ];
 
     public function usuario()

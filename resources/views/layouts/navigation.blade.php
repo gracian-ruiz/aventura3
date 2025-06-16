@@ -24,6 +24,24 @@
                 @endif
             </div>
 
+                        <!-- Campana de notificación (solo en alquileres.index) -->
+            <div class="relative mr-4 hidden md:flex">
+                <a href="{{ route('alquileres.index') }}" class="relative text-gray-600 hover:text-gray-800 focus:outline-none">
+                    <!-- Icono de campana -->
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 17h5l-1.405-1.405C18.21 14.79 18 13.918 18 13V9a6 6 0 00-12 0v4c0 .918-.21 1.79-.595 2.595L4 17h5" />
+                        <path d="M13.73 21a2 2 0 01-3.46 0" />
+                    </svg>
+
+                    @if($notificaciones > 0)
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                            {{ $notificaciones }}
+                        </span>
+                    @endif
+                </a>
+            </div>
+
             <!-- Botón de Usuario (Escritorio) -->
             <div class="hidden md:flex items-center">
                 <x-dropdown align="right" width="48">

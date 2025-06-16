@@ -13,21 +13,47 @@
     </div>
 
     <!-- Texto introductorio -->
-    <div class="text-center my-4">
-        <p class="mb-3">
-            Para continuar con la reserva, rellena el formulario con el <strong>día de inicio</strong>, <strong>día de fin</strong>, <strong>modelo</strong> y <strong>talla</strong> de la bicicleta que deseas alquilar.<br>
-            <span class="text-sm text-gray-700">To continue with the reservation, fill out the form with the <strong>start date</strong>, <strong>end date</strong>, <strong>model</strong>, and <strong>size</strong> of the bicycle you wish to rent.</span>
+<div class="text-center my-4">
+    <p class="mb-3">
+        Para continuar con la reserva, rellena el formulario con el <strong>día de inicio</strong>, <strong>día de fin</strong>, <strong>modelo</strong> y <strong>talla</strong> de la bicicleta que deseas alquilar.<br>
+        <span class="text-sm text-gray-700">To continue with the reservation, fill out the form with the <strong>start date</strong>, <strong>end date</strong>, <strong>model</strong>, and <strong>size</strong> of the bicycle you wish to rent.</span>
+    </p>
+
+    <!-- AVISO IMPORTANTE -->
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 mb-4" role="alert">
+        <p class="font-bold text-base">
+            🕒 Importante / Important:
         </p>
-        <p class="mb-3">
-            Ante cualquier duda, puedes enviar un <strong>WhatsApp al <a href="https://wa.me/34654231254" target="_blank">654 231 254</a></strong> o llamar al <strong><a href="tel:950345675">950 345 675</a></strong>.<br>
-            <span class="text-sm text-gray-700">If you have any questions, you can send a <strong>WhatsApp to <a href="https://wa.me/34654231254" target="_blank">654 231 254</a></strong> or call <strong><a href="tel:950345675">950 345 675</a></strong>.</span>
-        </p>
-        <p class="mb-4">
-            En caso de problemas de stock o disponibilidad, <strong>nos pondremos en contacto contigo</strong> lo antes posible.<br>
-            <span class="text-sm text-gray-700">If there are stock or availability issues, <strong>we will contact you</strong> as soon as possible.</span>
-        </p>
-        <a href="#modelos" class="btn btn-primary btn-sm">Pincha aquí para ver los modelos / Click here to see the models</a>
+        <ul class="text-sm mt-2 text-left sm:text-center">
+            <li class="mb-1">
+                📅 <strong>Los sábados abrimos solo hasta el mediodía.</strong><br>
+                🕛 <strong>Domingos cerrado.</strong>
+            </li>
+            <li class="mb-1">
+                🚲 Existe la posibilidad de <strong>recoger la bicicleta el día anterior</strong> si el inicio es en domingo.
+            </li>
+{{--             <li>
+                🔁 En caso de devolución en lunes tras alquiler en sábado, puedes <strong>devolverla el lunes por la mañana</strong>.
+            </li> --}}
+        </ul>
+        <p class="text-xs text-gray-600 mt-2 sm:text-center">Sábados hasta las 14:00 / Saturdays until 2:00 PM</p>
     </div>
+
+    <p class="mb-3">
+        Ante cualquier duda, puedes <strong>enviar un <a href="https://wa.me/34950013448" target="_blank" class="text-green-700 underline">mensaje de WhatsApp</a> o llamar al <a href="tel:950013448" class="text-blue-700 underline">950 013 448</a></strong>.<br>
+        <span class="text-sm text-gray-700">
+            If you have any questions, you can <strong><a href="https://wa.me/34950013448" target="_blank" class="text-green-700 underline">send a WhatsApp message</a> or call <a href="tel:950013448" class="text-blue-700 underline">950 013 448</a></strong>.
+        </span>
+    </p>
+
+    <p class="mb-4">
+        En caso de problemas de stock o disponibilidad, <strong>nos pondremos en contacto contigo</strong> lo antes posible.<br>
+        <span class="text-sm text-gray-700">If there are stock or availability issues, <strong>we will contact you</strong> as soon as possible.</span>
+    </p>
+
+    <a href="#modelos" class="btn btn-primary btn-sm">Pincha aquí para ver los modelos / Click here to see the models</a>
+</div>
+
 
     <!-- Mensajes -->
     @if(session('error'))

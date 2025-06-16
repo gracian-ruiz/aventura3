@@ -18,6 +18,8 @@ class AlquilerController extends Controller
 
     public function index(Request $request)
     {
+        Alquiler::where('notificacion', true)->update(['notificacion' => false]);
+        
         $query = Alquiler::with('usuario')
             ->whereIn('estado', ['Activo', 'Reservado']);
     

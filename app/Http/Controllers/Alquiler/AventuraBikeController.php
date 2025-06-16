@@ -131,7 +131,8 @@ class AventuraBikeController extends Controller
                 'reserva_precio' => 0,
                 'descuento' => 0,
                 'web' => true, // <- importante
-                'oberservaciones'=> $request->input('observaciones')
+                'oberservaciones'=> $request->input('observaciones'),
+                'notificacion' => true
 
             ]);
     
@@ -174,7 +175,9 @@ class AventuraBikeController extends Controller
                         $fechaInicioFormatted = Carbon::parse($fechaInicio)->format('d/m/Y');
                         $fechaFinFormatted = Carbon::parse($fechaFin)->format('d/m/Y');
                     
-                        $incidencias[] = "$tipo talla $talla ($fechaInicioFormatted a $fechaFinFormatted): solicitados $cantidad, disponibles $disponibles.";
+                        $incidencias[] = "$tipo talla $talla ($fechaInicioFormatted a $fechaFinFormatted): solicitados $cantidad, disponibles $disponibles.\nNombre: {$usuario->name}\nTeléfono: {$usuario->telefono}\nCorreo: {$usuario->email}";
+
+
                     
                         continue; // no intentamos insertar, solo registramos la incidencia
                     }
@@ -208,10 +211,9 @@ class AventuraBikeController extends Controller
             ]);
 
             // Enviar correo al usuario y a un email fijo
-            Mail::to($usuario->email)
-            ->cc('admin@tuempresa.com')
+/*             Mail::to($usuario->email)
             ->send(new \App\Mail\ReservaAlquilerMail($alquiler, $usuario, $request->bicicletas, $request->input('observaciones')
-                       ));
+                       )); */
         
         
 
