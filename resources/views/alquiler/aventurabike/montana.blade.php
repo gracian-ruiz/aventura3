@@ -36,7 +36,7 @@
                 🔁 En caso de devolución en lunes tras alquiler en sábado, puedes <strong>devolverla el lunes por la mañana</strong>.
             </li> --}}
         </ul>
-        <p class="text-xs text-gray-600 mt-2 sm:text-center">Sábados hasta las 14:00 / Saturdays until 2:00 PM</p>
+        <p class="text-xs text-gray-600 mt-2 sm:text-center">Sábados hasta las 13:00 / Saturdays until 1:00 PM</p>
     </div>
 
     <p class="mb-3">
