@@ -211,9 +211,9 @@ class AventuraBikeController extends Controller
             ]);
 
             // Enviar correo al usuario y a un email fijo
-/*             Mail::to($usuario->email)
+            Mail::to($usuario->email)
             ->send(new \App\Mail\ReservaAlquilerMail($alquiler, $usuario, $request->bicicletas, $request->input('observaciones')
-                       )); */
+                       ));
         
         
 
