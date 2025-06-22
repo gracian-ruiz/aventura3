@@ -37,7 +37,7 @@
 
             <!-- Pie de página -->
             <div class="flex justify-center mt-16 px-0 sm:items-center sm:justify-between w-full text-center text-sm text-gray-500">
-                Taller Aventura Bike - Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
+                Taller Aventura Bike
             </div>
         </div>
     </div>
