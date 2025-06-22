@@ -3,14 +3,25 @@
 @section('content')
 <div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mt-8 bg-white shadow-md rounded-lg p-6">
 
-    <!-- Encabezado con logo -->
-    <div class="flex items-center justify-center mb-6">
-        <h1 class="text-2xl font-bold text-center">
+<!-- Encabezado con logo y enlace a la izquierda -->
+<div class="flex items-center justify-between mb-6">
+    <!-- Enlace a la izquierda -->
+    <a href="https://aventurabike.es/" class="text-blue-600 hover:underline text-sm">
+        ← Volver a AventuraBike
+    </a>
+
+    <!-- Título centrado -->
+    <div class="flex-1 text-center">
+        <h1 class="text-2xl font-bold">
             Alquiler de Bicicletas Aventura Bike<br>
             <span class="text-base font-normal">Aventura Bike Bicycle Rental</span>
         </h1>
-        <img src="{{ asset('images/logo_taller_1.png') }}" alt="Logo Aventura Bike" class="h-20 w-auto mr-3">
     </div>
+
+    <!-- Logo a la derecha -->
+    <img src="{{ asset('images/logo_taller_1.png') }}" alt="Logo Aventura Bike" class="h-20 w-auto ml-3">
+</div>
+
 
     <!-- Texto introductorio -->
 <div class="text-center my-4">
