@@ -18,9 +18,6 @@
                     <a href="{{ route('users.index') }}" class="font-semibold text-gray-600 hover:text-gray-900">Admin</a>
                 @else
                     <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900">Iniciar sesión</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="ml-4 font-semibold text-gray-600 hover:text-gray-900">Registrarse</a>
-                    @endif
                 @endauth
             </div>
         @endif
