@@ -35,7 +35,8 @@ class Appointment extends Model
         'horas_total',
         'precio_total',
         'descuento',
-        'asignacion_taller'
+        'asignacion_taller',
+        'idprograma'
     ];
 
     public function bike()

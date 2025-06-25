@@ -18,14 +18,22 @@
             </select>
             <p id="bike-error" class="text-red-500 text-sm mt-1 hidden">Debes seleccionar una bicicleta.</p>
         </div>
-        <div class="mb-4">
-            <label for="prioridad" class="block text-gray-700">Prioridad</label>
-            <select name="prioridad" id="prioridad" class="w-full border px-4 py-2 rounded-md" required>
-                <option value="normal">Normal</option>
-                <option value="urgente">Urgente</option>
-            </select>
+        <div class="mb-4 flex gap-4">
+            <!-- Campo Prioridad -->
+            <div class="w-1/2">
+                <label for="prioridad" class="block text-gray-700">Prioridad</label>
+                <select name="prioridad" id="prioridad" class="w-full border px-4 py-2 rounded-md" required>
+                    <option value="normal">Normal</option>
+                    <option value="urgente">Urgente</option>
+                </select>
+            </div>
+
+            <!-- Campo idprograma -->
+            <div class="w-1/2">
+                <label for="idprograma" class="block text-gray-700">ID Programa</label>
+                <input type="text" name="idprograma" id="idprograma" class="w-full border px-4 py-2 rounded-md">
+            </div>
         </div>
-        
         <div class="mb-4">
             <label for="asignacion_taller" class="block text-gray-700">Asignar a Mecanico</label>
             <select name="asignacion_taller[]" id="asignacion_taller" class="w-full border px-4 py-2 rounded-md" multiple>

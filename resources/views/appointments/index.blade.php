@@ -49,7 +49,7 @@
                 @endif
             ">
             
-                        <td class="py-2 px-4">{{ $appointment->bike->marca }} {{ $appointment->bike->nombre }} {{ $appointment->bike->color }}</td>
+                        <td class="py-2 px-4">{{ $appointment->bike->marca }} {{ $appointment->bike->nombre }} {{ $appointment->bike->color }} <br><br> {{$appointment->idprograma}}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
                         <td class="py-2 px-4">
                             @if($appointment->componentes->isNotEmpty())

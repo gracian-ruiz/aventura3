@@ -22,14 +22,23 @@
             </select>
         </div>
 
-                        <!-- Prioridad de la Cita -->
-                        <div class="mb-4">
-                            <label for="prioridad" class="block text-gray-700">Prioridad</label>
-                            <select name="prioridad" class="w-full border px-4 py-2 rounded-md" required>
-                                <option value="normal" {{ $presupuesto->prioridad == 'normal' ? 'selected' : '' }}>Normal</option>
-                                <option value="urgente" {{ $presupuesto->prioridad == 'urgente' ? 'selected' : '' }}>Urgente</option>
-                            </select>
-                        </div>
+                                <div class="mb-4 flex gap-4">
+                                    <!-- Campo Prioridad -->
+                                    <div class="w-1/2">
+                                        <label for="prioridad" class="block text-gray-700">Prioridad</label>
+                                            <select name="prioridad" class="w-full border px-4 py-2 rounded-md" required>
+                                                <option value="normal" {{ $presupuesto->prioridad == 'normal' ? 'selected' : '' }}>Normal</option>
+                                                <option value="urgente" {{ $presupuesto->prioridad == 'urgente' ? 'selected' : '' }}>Urgente</option>
+                                            </select>
+                                    </div>
+
+                                    <!-- Campo idprograma -->
+                                    <div class="w-1/2">
+                                        <label for="idprograma" class="block text-gray-700">ID Programa</label>
+                                        <input type="text" name="idprograma" id="idprograma" class="w-full border px-4 py-2 rounded-md" value="{{$presupuesto->idprograma }}">
+                                    </div>
+                                </div>
+
 
                         <div class="mb-4">
                             <label for="asignacion_taller" class="block text-gray-700">Asignar a taller</label>

@@ -24,7 +24,7 @@ class Alquiler extends Model
         'web',
         'incidencia',
         'fallo',
-        'notificacion'
+        'notificacion',
     ];
 
     public function usuario()

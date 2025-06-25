@@ -10,6 +10,8 @@
 
         <div class="space-y-6">
             <div class="mt-6">
+                <h2 class="text-lg font-semibold mt-4">ID SISTEMA</h2>
+        <p class="text-gray-700">{{ $appointment->idprograma }}</p>
                 <h1 class="block text-700 text-lg font-semibold mb-1">
                     Descripción anterior del problema:
                 </h1>

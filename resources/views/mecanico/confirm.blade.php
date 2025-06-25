@@ -14,6 +14,9 @@
 
         <h2 class="text-lg font-semibold mt-4">Tiempo Estimado:</h2>
         <p class="text-gray-700">{{ $appointment->tiempo_estimado }} min</p>
+
+        <h2 class="text-lg font-semibold mt-4">ID SISTEMA</h2>
+        <p class="text-gray-700">{{ $appointment->idprograma }}</p>
     </div>
 
     <!-- Componentes a Revisar -->

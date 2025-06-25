@@ -39,7 +39,7 @@
             <tbody class="divide-y divide-gray-300">
                 @foreach ($presupuestos as $presupuesto)
                 <tr class="hover:bg-gray-100 {{ $presupuesto->estado === 'denegado' ? 'bg-red-200' : '' }}{{ $presupuesto->estado === 'vacia' ? 'bg-yellow-200' : '' }}">
-                        <td class="py-2 px-4">{{ $presupuesto->id }}</td>
+                        <td class="py-2 px-4">{{ $presupuesto->id }}<br><br>{{ $presupuesto->idprograma }}</td>
                         <td class="py-2 px-4">{{ $presupuesto->user_nombre ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ $presupuesto->marca ?? 'N/A' }} {{ $presupuesto->bike_nombre ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ date('d/m/Y', strtotime($presupuesto->created_at)) }}</td>

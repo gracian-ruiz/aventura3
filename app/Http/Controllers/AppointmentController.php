@@ -13,52 +13,47 @@ use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
-    public function index(Request $request)
-    {
-        $search = $request->input('search');
-        $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
+public function index(Request $request)
+{
+    $search = $request->input('search');
+    $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
 
-        // Recalcular siempre antes de mostrar la vista
-        $this->recalcularFechasAsignadas();
-        $search = $request->input('search'); // Obtén el término de búsqueda desde el input
+    // Recalcular siempre antes de mostrar la vista
+    $this->recalcularFechasAsignadas();
 
-        $search = $request->input('search');
+    $appointments = Appointment::with('bike.user', 'componentes')
+        ->whereIn('estado', ['pendiente', 'en proceso'])
+        ->where(function ($query) use ($search) {
+            if ($search) {
+                $query->whereHas('bike', function ($q) use ($search) {
+                    $q->where('nombre', 'like', '%' . $search . '%')
+                      ->orWhereHas('user', function ($qq) use ($search) {
+                          $qq->where('name', 'like', '%' . $search . '%');
+                      });
+                })
+                ->orWhere('idprograma', 'like', '%' . $search . '%');
+            }
+        })
+        ->orderByRaw('
+            CASE 
+                -- EN PROCESO
+                WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
+                WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
+                WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
+                WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
+                -- PENDIENTE
+                WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total < 30 THEN 5
+                WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total >= 30 THEN 6
+                WHEN estado = "pendiente" AND prioridad = "normal" AND horas_total < 30 THEN 7
+                ELSE 8
+            END
+        ')
+        ->orderBy('horas_total', 'asc')
+        ->paginate(8);
 
-        $appointments = Appointment::with('bike.user', 'componentes')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->where(function ($query) use ($search) {
-                if ($search) {
-                    $query->whereHas('bike', function ($q) use ($search) {
-                        $q->where('nombre', 'like', '%' . $search . '%')
-                          ->orWhereHas('user', function ($qq) use ($search) {
-                              $qq->where('name', 'like', '%' . $search . '%');
-                          });
-                    });
-                }
-            })
-            ->orderByRaw('
-                CASE 
-                    -- EN PROCESO
-                    WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
-                    WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
-                    WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
-                    WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
-                    -- PENDIENTE
-                    WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total < 30 THEN 5
-                    WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total >= 30 THEN 6
-                    WHEN estado = "pendiente" AND prioridad = "normal" AND horas_total < 30 THEN 7
-                    ELSE 8
-                END
-            ')
-            ->orderBy('horas_total', 'asc')
-            ->paginate(8);
-        
-    
-    
+    return view('appointments.index', compact('appointments', 'search', 'estado'));
+}
 
-
-        return view('appointments.index', compact('appointments', 'search', 'estado'));
-    }
 
     public function indextaller(Request $request)
     {
@@ -209,6 +204,7 @@ class AppointmentController extends Controller
             'horas_trabajo' => 'required|array',
             'precio' => 'required|array',
             'textos' => 'nullable|array',
+            'idprograma' => 'nullable',
             'prioridad' => 'required|in:normal,urgente',
             'descuento' => 'nullable|array', // Validación de descuentos
             'asignacion_taller' => 'nullable|array',
@@ -274,6 +270,7 @@ class AppointmentController extends Controller
                     'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
                     'asignacion_taller' => $request->asignacion_taller ?? [],
+                    'idprograma'=> $request->idprograma,
                 ]);
     
             DB::commit();
@@ -548,6 +545,7 @@ class AppointmentController extends Controller
             'appointments.prioridad',
             'appointments.estado',
             'appointments.descripcion_problema',
+            'appointments.idprograma',
             'appointments.estimacion_reparacion',
             'components.id as componente_id',
             'components.nombre as component_nombre',
@@ -573,6 +571,7 @@ class AppointmentController extends Controller
             'componentes.*.checked' => 'boolean',
             'kilometros' => 'nullable|numeric|min:0',
             'descripcion_problema' => 'nullable|string|max:1000', // Validar la descripción si viene
+            'idprograma' => 'nullable|string|max:200',
         ]);
     
         $usuarioTallerId = auth()->id(); // ID del usuario autenticado
