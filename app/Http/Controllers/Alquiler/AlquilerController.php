@@ -446,4 +446,11 @@ class AlquilerController extends Controller
         return redirect()->route('alquileres.show', $alquiler->id)
             ->with('warning', 'No se pudo actualizar el estado del alquiler.');
     }
+
+    // En AventuraBikeController
+public function pruebas()
+{
+    return view('pruebas'); // o simplemente 'index' si la vista está en resources/views/
+}
+
 }
