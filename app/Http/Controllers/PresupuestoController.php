@@ -89,7 +89,6 @@ class PresupuestoController extends Controller
         $precios = $request->precios ?? [];
         $textos = $request->textos ?? [];
         $descuentos = $request->descuentos ?? [];
-        dd($request->idprograma);
 
         if (
             count($componentes) > 0 &&
@@ -553,7 +552,6 @@ class PresupuestoController extends Controller
             return redirect()->route('presupuestos.index')
                 ->with('success', 'Cita y componentes asociados eliminados correctamente.');
         } catch (\Exception $e) {
-            dd($e);
             // Si algo falla, revertir la transacción
             DB::rollback();
 
