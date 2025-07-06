@@ -8,38 +8,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
-
-/* html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background-color: #fce4ec;
-}
-
-.fondo-centro {
-  display: flex;
-  justify-content: center;
-  align-items: start; 
-  min-height: 100vh;
-}
-
-.mobile-wrapper {
-  width: 100%;
-  max-width: 480px;
-  background-color: white;
-  min-height: 100vh;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
-} */
-
-
-
-
-
-
 .fade-in {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 1.2s ease-out, transform 1.2s ease-out;
+  transition: opacity 1.6s ease-out, transform 1.6s ease-out;
 }
 .fade-in.visible {
   opacity: 1;
@@ -496,9 +468,6 @@
   </style>
 </head>
 <body>
-  <div class="fondo-centro">
-   <div class="mobile-wrapper">
-
 
   <!-- Pantalla inicial con el sobre -->
 <!-- Pantalla inicial con el sobre -->
@@ -1103,8 +1072,8 @@ function actualizarContador() {
   setInterval(actualizarContador, 1000);
   actualizarContador();
 </script>
-</div>
-</div>
+
+
 </body>
 
 <script>
