@@ -128,7 +128,7 @@
 
 @font-face {
   font-family: '__Parisienne_f98ef7';
-  src: url('/fonts/Parisienne-Regular.ttf') format('truetype');
+  src: url('images/boda/fonts/Parisienne-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
