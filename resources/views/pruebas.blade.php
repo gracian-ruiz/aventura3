@@ -826,25 +826,6 @@
   </div>
 </section>
 
-<section class="seccion-alojamientos">
-  <h1 class="titulo-alojamientos">Alojamientos</h1>
-  <p class="texto-intro">
-    Si queréis hacer noche por la zona, os dejamos algunas opciones para que podáis gestionar la reserva.
-  </p>
-
-  <div class="alojamientos-lista">
-    <!-- Alojamiento 1 -->
-    <div class="alojamiento">
-      <p class="nombre">Finca Can Estades</p>
-      <p class="telefono">+34 971 670 558</p>
-      <button class="ver-mas" onclick="alert('Abrir detalles o mapa de Finca Can Estades')">
-        <img src="{{ asset('images/boda/hotel-service.png') }}" alt="Hotel" width="80" height="80">
-        <span>(clic para ver)</span>
-      </button>
-    </div>
-  </div>
-</section>
-
 <div class="section-container fade-in" style="margin-top: 100px;">
   <!-- Imagen decorativa superior -->
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
