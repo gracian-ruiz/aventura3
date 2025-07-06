@@ -309,7 +309,7 @@ html, body {
 
     .contador-seccion {
       height: 100vh;
-      background-image: url('{{ asset('images/contador.png') }}');
+      background-image: url('{{ asset('boda/images/contador.png') }}');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -505,7 +505,7 @@ html, body {
 <div class="pantalla-inicial" id="pantallaInicial">
   <div class="sobre" onclick="abrirInvitacion()">
     <!-- Imagen de fondo del sobre -->
-    <img class="img" src="{{ asset('images/entrada.jpg') }}" alt="Sobre de invitación">
+    <img class="img" src="{{ asset('boda/images/entrada.jpg') }}" alt="Sobre de invitación">
 
     <!-- Contenido superpuesto -->
     <div class="contenido-superpuesto __className_f98ef7">
@@ -537,12 +537,12 @@ html, body {
 <div class="portada-invitacion __className_f98ef7 oculta" id="portadaInvitacion" style="margin-bottom: 0px!important">
 
   <!-- Decoración superior -->
-  <img src="{{ asset('images/hoja1.png') }}" alt="🌿 hoja decorativa"
+  <img src="{{ asset('boda/images/hoja1.png') }}" alt="🌿 hoja decorativa"
   class="hoja-decorativa animate-wind">
 
   <!-- Anillo con nombres -->
   <div class="contenedor-anillo">
-    <img src="{{ asset('images/ring.png') }}" alt="anillo" class="anillo">
+    <img src="{{ asset('boda/images/ring.png') }}" alt="anillo" class="anillo">
 
     <div class="nombres">
           <p class="__className_f98ef7" style="font-size: 3.25rem; margin: 0;">Javi</p>
@@ -552,8 +552,8 @@ html, body {
   </div>
 
   <!-- Decoración inferior -->
-  <img src="{{ asset('images/hoja2.png') }}" alt="decoración inferior" class="decoracion-abajo animate-wind">
-  <img src="{{ asset('images/hoja3.png') }}" alt="decoración inferior" class="decoracion-lateral1 animate-wind">
+  <img src="{{ asset('boda/images/hoja2.png') }}" alt="decoración inferior" class="decoracion-abajo animate-wind">
+  <img src="{{ asset('boda/images/hoja3.png') }}" alt="decoración inferior" class="decoracion-lateral1 animate-wind">
 
   <!-- Texto inferior -->
   <div class="texto-inferior">
@@ -648,14 +648,14 @@ html, body {
 <div class="portada fade-in">
   <div class="portada-contenido">
     <!-- Imagen de fondo -->
-    <img style="margin-bottom: 5px" class="imagen-base" src="{{ asset('images/foto1.jpg') }}" alt="foto pareja">
+    <img style="margin-bottom: 5px" class="imagen-base" src="{{ asset('boda/images/foto1.jpg') }}" alt="foto pareja">
 
     <!-- Imagen con borde roto transparente -->
-    <img class="imagen-borde" src="{{ asset('images/photo-border-2.png') }}" alt="borde decorativo">
+    <img class="imagen-borde" src="{{ asset('boda/images/photo-border-2.png') }}" alt="borde decorativo">
 
     <!-- Contenido encima del borde roto -->
     <div class="texto-superpuesto">
-      <img style="width: 130px;margin-left: 224px;" src="{{ asset('images/dec-flower.png') }}" class="icono-hoja" alt="hojita decorativa">
+      <img style="width: 130px;margin-left: 224px;" src="{{ asset('boda/images/dec-flower.png') }}" class="icono-hoja" alt="hojita decorativa">
       <p style="font-size: 18px" class="frase">Después de 9 años, entre huellas y pañales,  hemos decidido dar el paso mas importante, ¡ NOS CASAMOS!</p>
     </div>
   </div>
@@ -736,7 +736,7 @@ html, body {
 
 <div class="section-container fade-in" style="margin-top: 100px;">
   <!-- Imagen decorativa superior -->
-  <img src="{{ asset('images/divisor.png') }}" alt="decoración superior" class="decoracion-superior">
+  <img src="{{ asset('boda/images/divisor.png') }}" alt="decoración superior" class="decoracion-superior">
 
   <section class="contenido" style="  background-color: #9aa5a5;">
     <div class="mensaje">
@@ -744,11 +744,11 @@ html, body {
       este día tan especial
     </div>
 
-    <img src="{{ asset('images/dec-flower2.png') }}" alt="Decoración floral" class="flor-decorativa">
+    <img src="{{ asset('boda/images/dec-flower2.png') }}" alt="Decoración floral" class="flor-decorativa">
   </section>
 
   <!-- Imagen decorativa inferior -->
-  <img src="{{ asset('images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior">
+  <img src="{{ asset('boda/images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior">
 </div>
 
 
@@ -759,7 +759,7 @@ html, body {
       Ceremonia Religiosa
     </h2>
     <br>
-    <img src="{{ asset('images/iglesia.jpeg') }}" alt="Lugar de la ceremonia"
+    <img src="{{ asset('boda/images/iglesia.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
     
     <p style="font-size: 1.2em; margin: 10px 0;"><strong>Catedral de Santa María la Real de Almudena</strong></p>
@@ -767,7 +767,7 @@ html, body {
     <p style="font-size: 1em; margin: 5px 0;">C. de Bailén, 10, 28013 Madrid</p>
 
     <a href="https://www.google.es/maps/place/Catedral+de+Murcia/@37.9840473,-1.1311501,908m/data=!3m2!1e3!4b1!4m6!3m5!1s0xd63821b3435ac97:0xae905eadb07c3969!8m2!3d37.9840473!4d-1.1285752!16zL20vMDc3Mno1?entry=ttu&g_ep=EgoyMDI1MDYyMy4yIKXMDSoASAFQAw%3D%3D" target="_blank" style="display: inline-block; margin: 15px 0;">
-      <img src="{{ asset('images/map-locator.png') }}" alt="Ver mapa en Google"
+      <img src="{{ asset('boda/images/map-locator.png') }}" alt="Ver mapa en Google"
            style="width: 80px; height: auto; display: block; margin: 0 auto;">
     </a>
 
@@ -776,7 +776,7 @@ html, body {
 
 {{-- <div class="section-container fade-in" style="margin-top: 100px;">
   <!-- Imagen decorativa superior -->
-  <img src="{{ asset('images/divisor.png') }}" alt="decoración superior" class="decoracion-superior2">
+  <img src="{{ asset('boda/images/divisor.png') }}" alt="decoración superior" class="decoracion-superior2">
 
   <section class="contenido" style="  background-color: #9aa5a5;">
     <div class="mensaje">
@@ -784,11 +784,11 @@ html, body {
       <p class="text-gray-800 mb-4">El blanco está reservado para la novia,<br>¡sorpréndenos con otros colores!</p>
     </div>
 
-    <img src="{{ asset('images/dress-code.png') }}" alt="Decoración floral" class="flor-decorativa" style="120px!important">
+    <img src="{{ asset('boda/images/dress-code.png') }}" alt="Decoración floral" class="flor-decorativa" style="120px!important">
   </section>
 
   <!-- Imagen decorativa inferior -->
-  <img src="{{ asset('images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior">
+  <img src="{{ asset('boda/images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior">
 </div> --}}
 
 <section class="section-blanca fade-in" style="padding-bottom: 0px"> 
@@ -797,7 +797,7 @@ html, body {
       Restaurante
     </h2>
     <br>
-    <img src="{{ asset('images/restaurante.jpeg') }}" alt="Lugar de la ceremonia"
+    <img src="{{ asset('boda/images/restaurante.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
     
     <p style="font-size: 1.2em; margin: 10px 0;"><strong>Catedral de Santa María la Real de Almudena</strong></p>
@@ -805,7 +805,7 @@ html, body {
     <p style="font-size: 1em; margin: 5px 0;">C. de Bailén, 10, 28013 Madrid</p>
 
     <a href="https://www.google.es/maps/place/Catedral+de+Murcia/@37.9840473,-1.1311501,908m/data=!3m2!1e3!4b1!4m6!3m5!1s0xd63821b3435ac97:0xae905eadb07c3969!8m2!3d37.9840473!4d-1.1285752!16zL20vMDc3Mno1?entry=ttu&g_ep=EgoyMDI1MDYyMy4yIKXMDSoASAFQAw%3D%3D" target="_blank" style="display: inline-block; margin: 15px 0;">
-      <img src="{{ asset('images/map-locator.png') }}" alt="Ver mapa en Google"
+      <img src="{{ asset('boda/images/map-locator.png') }}" alt="Ver mapa en Google"
            style="width: 80px; height: auto; display: block; margin: 0 auto;">
     </a>
 
@@ -820,25 +820,25 @@ html, body {
 
   <div class="relative w-full pb-6">
     <!-- Ceremonia -->
-    <img class="mx-auto" src="{{ asset('images/tent.png') }}" alt="Ceremonia" width="100" style="opacity: 1;">
+    <img class="mx-auto" src="{{ asset('boda/images/tent.png') }}" alt="Ceremonia" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
       <span>18:00 h</span> - <span>Ceremonia</span>
     </p>
 
     <!-- Cocktail -->
-    <img class="mx-auto" src="{{ asset('images/cocktail.png') }}" alt="Cocktail" width="100" style="opacity: 1;">
+    <img class="mx-auto" src="{{ asset('boda/images/cocktail.png') }}" alt="Cocktail" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
       <span>19:30 h</span> - <span>Cocktail</span>
     </p>
 
     <!-- Banquete -->
-    <img class="mx-auto" src="{{ asset('images/food.png') }}" alt="Banquete" width="100" style="opacity: 1;">
+    <img class="mx-auto" src="{{ asset('boda/images/food.png') }}" alt="Banquete" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
       <span>20:30 h</span> - <span>Banquete</span>
     </p>
 
     <!-- Fiesta -->
-    <img class="mx-auto" src="{{ asset('images/dance.png') }}" alt="Fiesta" width="100" style="opacity: 1;">
+    <img class="mx-auto" src="{{ asset('boda/images/dance.png') }}" alt="Fiesta" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
       <span>23:00 h</span> - <span>Fiesta</span>
     </p>
@@ -848,7 +848,7 @@ html, body {
 
 <div class="section-container fade-in" style="margin-top: 100px;">
   <!-- Imagen decorativa superior -->
-  <img src="{{ asset('images/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
+  <img src="{{ asset('boda/images/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
     <h1 style="color: white; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal;">
@@ -861,7 +861,7 @@ html, body {
 
     <div style="margin-top: 1rem; padding: 0 1rem;">
       <button onclick="copiarCuenta()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;">
-        <img width="30" src="{{ asset('images/copy.svg') }}" alt="copy">
+        <img width="30" src="{{ asset('boda/images/copy.svg') }}" alt="copy">
         <div style="text-align: left;">
           <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);">Nuria Rodríguez</p>
           <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
@@ -875,16 +875,16 @@ html, body {
   </section>
 
   <!-- Imagen decorativa inferior -->
-  <img src="{{ asset('images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
+  <img src="{{ asset('boda/images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
 </div>
 
-{{-- <section class="relative grid place-items-center gap-4 px-8 py-12 md:px-16 bg-cover bg-center" style="background-image: url('{{ asset('images/bg-xl.png') }}');">
+{{-- <section class="relative grid place-items-center gap-4 px-8 py-12 md:px-16 bg-cover bg-center" style="background-image: url('{{ asset('boda/images/bg-xl.png') }}');">
   <!-- Fondo blanco semitransparente para mejor lectura -->
   <div class="bg-white bg-opacity-70 p-6 rounded-xl text-center max-w-md">
     <h1 style="font-size: 40px;" class="__className_f98ef7 text-3xl font-cursive mb-2">Dress Code</h1>
     <p class="text-[#cb717e] text-xl font-semibold mb-2">Formal</p>
     <p class="text-gray-800 mb-4">El blanco está reservado para la novia,<br>¡sorpréndenos con otros colores!</p>
-    <img src={{ asset('images/dress-code.png') }} alt="dress clothes" class="mx-auto w-24 opacity-90" style="width: 210px">
+    <img src={{ asset('boda/images/dress-code.png') }} alt="dress clothes" class="mx-auto w-24 opacity-90" style="width: 210px">
   </div>
 </section> --}}
 
@@ -905,7 +905,7 @@ html, body {
 
     <div style="margin-top: 1rem; padding: 0 1rem;">
       <button onclick="copiarCuenta()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;">
-        <img width="30" src="{{ asset('images/copy.svg') }}" alt="copy">
+        <img width="30" src="{{ asset('boda/images/copy.svg') }}" alt="copy">
         <div style="text-align: left;">
           <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);">Nuria Rodríguez</p>
           <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
@@ -936,7 +936,7 @@ html, body {
 
 <section class="fade-in" style="padding: 0; margin: 0;margin-top: 130px;">
   <div style="margin: 0; padding: 0;">
-    <img src="{{ asset('images/puestanillo.jpeg') }}" alt="Lugar de la ceremonia"
+    <img src="{{ asset('boda/images/puestanillo.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; display: block;">
   </div>
 </section>
@@ -954,7 +954,7 @@ html, body {
 
 <div class="section-container fade-in" style="margin-top: 100px;">
   <!-- Imagen decorativa superior -->
-  <img src="{{ asset('images/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
+  <img src="{{ asset('boda/images/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
   <h2 style="color: white; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem;">
@@ -967,7 +967,7 @@ html, body {
   </section>
 
   <!-- Imagen decorativa inferior -->
-  <img src="{{ asset('images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
+  <img src="{{ asset('boda/images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
 </div>
 
 
@@ -1029,7 +1029,7 @@ html, body {
 
   <!-- Scripts -->
 <audio id="audioBoda" preload="auto">
-  <source src="{{ asset('audio/song1.mp3') }}" type="audio/mpeg">
+  <source src="{{ asset('boda/audio/song1.mp3') }}" type="audio/mpeg">
   Tu navegador no soporta el audio.
 </audio>
 
