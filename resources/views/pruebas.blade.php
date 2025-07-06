@@ -7,8 +7,82 @@
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Georgia&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
+<style>
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #fce4ec;
+}
+
+.fondo-centro {
+  display: flex;
+  justify-content: center;
+  align-items: start; /* usa center si quieres vertical absoluto */
+  min-height: 100vh;
+}
+
+.mobile-wrapper {
+  width: 100%;
+  max-width: 480px;
+  background-color: white;
+  min-height: 100vh;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+}
+
+
+
+
+
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.2s ease-out, transform 1.2s ease-out;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+@keyframes fadeGrow {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.portada-invitacion.oculta {
+  opacity: 0;
+}
+
+.portada-invitacion.mostrar {
+  animation: fadeGrow 1.2s ease-out forwards;
+}
+
+</style>
+
+
+
+
+
+
 
   <style>
+    body{
+      font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7'!important;
+    }
+.__className_f98ef7 {
+  font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7';
+  font-weight: 400;
+  font-style: normal;
+}
 
     .icono-container {
   display: flex;
@@ -96,11 +170,7 @@
   size-adjust: 84.23%;
 }
 
-.__className_f98ef7 {
-  font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7';
-  font-weight: 400;
-  font-style: normal;
-}
+
 
 
 .contenido-superpuesto {
@@ -239,7 +309,7 @@
 
     .contador-seccion {
       height: 100vh;
-      background-image: url('{{ asset('images/boda/contador.png') }}');
+      background-image: url('{{ asset('images/contador.png') }}');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -426,13 +496,16 @@
   </style>
 </head>
 <body>
+  <div class="fondo-centro">
+   <div class="mobile-wrapper">
+
 
   <!-- Pantalla inicial con el sobre -->
 <!-- Pantalla inicial con el sobre -->
 <div class="pantalla-inicial" id="pantallaInicial">
   <div class="sobre" onclick="abrirInvitacion()">
     <!-- Imagen de fondo del sobre -->
-    <img class="img" src="{{ asset('images/boda/entrada.jpg') }}" alt="Sobre de invitación">
+    <img class="img" src="{{ asset('images/entrada.jpg') }}" alt="Sobre de invitación">
 
     <!-- Contenido superpuesto -->
     <div class="contenido-superpuesto __className_f98ef7">
@@ -446,7 +519,7 @@
         <div class="flex flex-col items-center" style="margin-top: 50px;">
           <p class="text-2xl" style="font-size: 1.5rem; margin: 0;">Tenemos una noticia...</p>
           <div class="icono-container">
-            <img class="bounce click-icon" src="images/boda/click.png" alt="clic">
+            <img class="bounce click-icon" src="images/click.png" alt="clic">
           </div>
           <p class="text-sm">¡ Haz clic !</p>
         </div>
@@ -461,14 +534,15 @@
 
     <!-- Pantalla inicial con el sobre -->
 <!-- Pantalla inicial con el sobre -->
-<div class="portada-invitacion __className_f98ef7" style="margin-bottom: 0px!important">
+<div class="portada-invitacion __className_f98ef7 oculta" id="portadaInvitacion" style="margin-bottom: 0px!important">
+
   <!-- Decoración superior -->
-  <img src="{{ asset('images/boda/hoja1.png') }}" alt="🌿 hoja decorativa"
+  <img src="{{ asset('images/hoja1.png') }}" alt="🌿 hoja decorativa"
   class="hoja-decorativa animate-wind">
 
   <!-- Anillo con nombres -->
   <div class="contenedor-anillo">
-    <img src="{{ asset('images/boda/ring.png') }}" alt="anillo" class="anillo">
+    <img src="{{ asset('images/ring.png') }}" alt="anillo" class="anillo">
 
     <div class="nombres">
           <p class="__className_f98ef7" style="font-size: 3.25rem; margin: 0;">Javi</p>
@@ -478,8 +552,8 @@
   </div>
 
   <!-- Decoración inferior -->
-  <img src="{{ asset('images/boda/hoja2.png') }}" alt="decoración inferior" class="decoracion-abajo animate-wind">
-  <img src="{{ asset('images/boda/hoja3.png') }}" alt="decoración inferior" class="decoracion-lateral1 animate-wind">
+  <img src="{{ asset('images/hoja2.png') }}" alt="decoración inferior" class="decoracion-abajo animate-wind">
+  <img src="{{ asset('images/hoja3.png') }}" alt="decoración inferior" class="decoracion-lateral1 animate-wind">
 
   <!-- Texto inferior -->
   <div class="texto-inferior">
@@ -571,51 +645,121 @@
 
 </style>
 
-<div class="portada">
+<div class="portada fade-in">
   <div class="portada-contenido">
     <!-- Imagen de fondo -->
-    <img style="margin-bottom: 5px" class="imagen-base" src="{{ asset('images/boda/foto1.jpg') }}" alt="foto pareja">
+    <img style="margin-bottom: 5px" class="imagen-base" src="{{ asset('images/foto1.jpg') }}" alt="foto pareja">
 
     <!-- Imagen con borde roto transparente -->
-    <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo">
+    <img class="imagen-borde" src="{{ asset('images/photo-border-2.png') }}" alt="borde decorativo">
 
     <!-- Contenido encima del borde roto -->
     <div class="texto-superpuesto">
-      <img src="{{ asset('images/boda/dec-flower.png') }}" class="icono-hoja" alt="hojita decorativa">
-      <p class="frase">Todos los días pueden ser el comienzo<br>de algo nuevo</p>
+      <img style="width: 130px;margin-left: 224px;" src="{{ asset('images/dec-flower.png') }}" class="icono-hoja" alt="hojita decorativa">
+      <p style="font-size: 18px" class="frase">Después de 9 años, entre huellas y pañales,  hemos decidido dar el paso mas importante, ¡ NOS CASAMOS!</p>
     </div>
   </div>
 </div>
 
+<style>
+  .section-container {
+  position: relative;
+  width: 100%;
+  color: white;
+  overflow: hidden;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.decoracion-superior {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  margin-top: -26px;
+}
+
+.decoracion-superior2 {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  margin-top: 2px;
+}
 
 
+.decoracion-superior3 {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  margin-top: -14px;
+}
 
+.decoracion-inferior {
+  position: absolute;
+  bottom: 0;
+  left: -16%;
+  width: 497px;
+  margin-bottom: -35px;
+}
 
+.decoracion-inferior2 {
+  position: absolute;
+  bottom: 0;
+  left: -16%;
+  width: 497px;
+  margin-bottom: -33px;
+}
 
+.contenido {
+  position: relative;
+  z-index: 10;
+  padding: 0 24px;
+}
 
-  <!-- Secciones -->
-{{--   <section class="section-blanca">
-    <h2>Aquí estamos</h2>
-    <p>¡Gracias por estar aquí con nosotros!</p>
+.mensaje {
+  font-size: 28px;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.flor-decorativa {
+  margin-top: 16px;
+  width: 96px;
+}
+
+</style>
+
+<div class="section-container fade-in" style="margin-top: 100px;">
+  <!-- Imagen decorativa superior -->
+  <img src="{{ asset('images/divisor.png') }}" alt="decoración superior" class="decoracion-superior">
+
+  <section class="contenido" style="  background-color: #9aa5a5;">
+    <div class="mensaje">
+      Queremos que nos acompañes en<br>
+      este día tan especial
+    </div>
+
+    <img src="{{ asset('images/dec-flower2.png') }}" alt="Decoración floral" class="flor-decorativa">
   </section>
 
-  <section class="section-rosa">
-    <h2>Detalles del Evento</h2>
-    <p>Información sobre la ceremonia, ubicación y más.</p>
-  </section>
+  <!-- Imagen decorativa inferior -->
+  <img src="{{ asset('images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior">
+</div>
 
-  <section class="section-blanca">
-    <h2>Confirmación</h2>
-    <p>No olvides confirmar tu asistencia.</p>
-  </section> --}}
 
-<section class="section-blanca"  style="padding-bottom: 0px">
+
+<section class="section-blanca fade-in"  style="padding-bottom: 0px">
   <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     <h2 class="__className_f98ef7" style="font-size: 2.5em; margin-bottom: 10px;">
       Ceremonia Religiosa
     </h2>
     <br>
-    <img src="{{ asset('images/boda/iglesia.jpeg') }}" alt="Lugar de la ceremonia"
+    <img src="{{ asset('images/iglesia.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
     
     <p style="font-size: 1.2em; margin: 10px 0;"><strong>Catedral de Santa María la Real de Almudena</strong></p>
@@ -623,20 +767,37 @@
     <p style="font-size: 1em; margin: 5px 0;">C. de Bailén, 10, 28013 Madrid</p>
 
     <a href="https://www.google.es/maps/place/Catedral+de+Murcia/@37.9840473,-1.1311501,908m/data=!3m2!1e3!4b1!4m6!3m5!1s0xd63821b3435ac97:0xae905eadb07c3969!8m2!3d37.9840473!4d-1.1285752!16zL20vMDc3Mno1?entry=ttu&g_ep=EgoyMDI1MDYyMy4yIKXMDSoASAFQAw%3D%3D" target="_blank" style="display: inline-block; margin: 15px 0;">
-      <img src="{{ asset('images/boda/map-locator.png') }}" alt="Ver mapa en Google"
+      <img src="{{ asset('images/map-locator.png') }}" alt="Ver mapa en Google"
            style="width: 80px; height: auto; display: block; margin: 0 auto;">
     </a>
 
   </div>
 </section>
 
-<section class="section-blanca" style="padding-bottom: 0px"> 
+{{-- <div class="section-container fade-in" style="margin-top: 100px;">
+  <!-- Imagen decorativa superior -->
+  <img src="{{ asset('images/divisor.png') }}" alt="decoración superior" class="decoracion-superior2">
+
+  <section class="contenido" style="  background-color: #9aa5a5;">
+    <div class="mensaje">
+      <h1 style="font-size: 40px;" class="__className_f98ef7 text-3xl font-cursive mb-2">Dress Code</h1>
+      <p class="text-gray-800 mb-4">El blanco está reservado para la novia,<br>¡sorpréndenos con otros colores!</p>
+    </div>
+
+    <img src="{{ asset('images/dress-code.png') }}" alt="Decoración floral" class="flor-decorativa" style="120px!important">
+  </section>
+
+  <!-- Imagen decorativa inferior -->
+  <img src="{{ asset('images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior">
+</div> --}}
+
+<section class="section-blanca fade-in" style="padding-bottom: 0px"> 
   <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     <h2 class="__className_f98ef7" style="font-size: 2.5em; margin-bottom: 10px;">
       Restaurante
     </h2>
     <br>
-    <img src="{{ asset('images/boda/restaurante.jpeg') }}" alt="Lugar de la ceremonia"
+    <img src="{{ asset('images/restaurante.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
     
     <p style="font-size: 1.2em; margin: 10px 0;"><strong>Catedral de Santa María la Real de Almudena</strong></p>
@@ -644,7 +805,7 @@
     <p style="font-size: 1em; margin: 5px 0;">C. de Bailén, 10, 28013 Madrid</p>
 
     <a href="https://www.google.es/maps/place/Catedral+de+Murcia/@37.9840473,-1.1311501,908m/data=!3m2!1e3!4b1!4m6!3m5!1s0xd63821b3435ac97:0xae905eadb07c3969!8m2!3d37.9840473!4d-1.1285752!16zL20vMDc3Mno1?entry=ttu&g_ep=EgoyMDI1MDYyMy4yIKXMDSoASAFQAw%3D%3D" target="_blank" style="display: inline-block; margin: 15px 0;">
-      <img src="{{ asset('images/boda/map-locator.png') }}" alt="Ver mapa en Google"
+      <img src="{{ asset('images/map-locator.png') }}" alt="Ver mapa en Google"
            style="width: 80px; height: auto; display: block; margin: 0 auto;">
     </a>
 
@@ -652,64 +813,87 @@
 </section>
 
 
-
-
-
-
-{{--   <section class="section-blanca">
-    <div style="max-width: 800px; margin: 0 auto;">
-      <img src="{{ asset('images/boda/restaurante.jpeg') }}" alt="Lugar de la ceremonia" style="width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
-      
-      <h2 style="font-family: 'Great Vibes', cursive; font-size: 2.5em; margin-bottom: 10px; color: #c2185b;">
-        Restaurante
-      </h2>
-      
-      <p style="font-size: 1.2em; margin: 10px 0;"><strong>La casa de Mónico</strong></p>
-      
-      <p style="font-size: 1.1em; margin: 5px 0;">20:00 hrs</p>
-      
-      <p style="font-size: 1em; margin: 5px 0;">C. de Cabeza de Manzaneda, 105, 28023 Madrid</p>
-      
-      <a href="https://goo.gl/maps/YGiXToYVqu42" target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #c2185b; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
-        VER MAPA
-      </a>
-    </div>
-  </section> --}}
-
-
-  <section style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding-top:0px">
+  <section class="fade-in" style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding-top:0px">
   <h1 style="color: #879696; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal; opacity: 1;">
     Itinerario
   </h1>
 
   <div class="relative w-full pb-6">
     <!-- Ceremonia -->
-    <img class="mx-auto" src="{{ asset('images/boda/tent.png') }}" alt="Ceremonia" width="100" style="opacity: 1;">
+    <img class="mx-auto" src="{{ asset('images/tent.png') }}" alt="Ceremonia" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
       <span>18:00 h</span> - <span>Ceremonia</span>
     </p>
 
     <!-- Cocktail -->
-    <img class="mx-auto" src="{{ asset('images/boda/cocktail.png') }}" alt="Cocktail" width="100" style="opacity: 1;">
+    <img class="mx-auto" src="{{ asset('images/cocktail.png') }}" alt="Cocktail" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
       <span>19:30 h</span> - <span>Cocktail</span>
     </p>
 
     <!-- Banquete -->
-    <img class="mx-auto" src="{{ asset('images/boda/food.png') }}" alt="Banquete" width="100" style="opacity: 1;">
+    <img class="mx-auto" src="{{ asset('images/food.png') }}" alt="Banquete" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
       <span>20:30 h</span> - <span>Banquete</span>
     </p>
 
     <!-- Fiesta -->
-    <img class="mx-auto" src="{{ asset('images/boda/dance.png') }}" alt="Fiesta" width="100" style="opacity: 1;">
+    <img class="mx-auto" src="{{ asset('images/dance.png') }}" alt="Fiesta" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
       <span>23:00 h</span> - <span>Fiesta</span>
     </p>
   </div>
 </section>
 
-  <section style="background-color: #9aa5a5; color: #575757; padding: 1rem 0;">
+
+<div class="section-container fade-in" style="margin-top: 100px;">
+  <!-- Imagen decorativa superior -->
+  <img src="{{ asset('images/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
+
+  <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
+    <h1 style="color: white; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal;">
+      Regalo
+    </h1>
+
+    <div style="padding: 0 1rem; max-width: 800px; margin: 0 auto; font-size: 1.1em;">
+      Nuestro mayor regalo es vuestra presencia, pero si quieres ayudar, aquí está la cuenta bancaria:
+    </div>
+
+    <div style="margin-top: 1rem; padding: 0 1rem;">
+      <button onclick="copiarCuenta()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;">
+        <img width="30" src="{{ asset('images/copy.svg') }}" alt="copy">
+        <div style="text-align: left;">
+          <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);">Nuria Rodríguez</p>
+          <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
+        </div>
+      </button>
+      <p style="text-align: center; font-size: 0.9em; color: #ffffff; margin-top: 0.5rem;">
+        Concepto: <strong>BODA</strong> y nombre de la persona
+      </p>
+      <p id="copiado-msg" style="text-align: center; font-size: 0.9em; color: white; margin-top: 0.5rem; display: none;">¡Número de cuenta copiado!</p>
+    </div>
+  </section>
+
+  <!-- Imagen decorativa inferior -->
+  <img src="{{ asset('images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
+</div>
+
+{{-- <section class="relative grid place-items-center gap-4 px-8 py-12 md:px-16 bg-cover bg-center" style="background-image: url('{{ asset('images/bg-xl.png') }}');">
+  <!-- Fondo blanco semitransparente para mejor lectura -->
+  <div class="bg-white bg-opacity-70 p-6 rounded-xl text-center max-w-md">
+    <h1 style="font-size: 40px;" class="__className_f98ef7 text-3xl font-cursive mb-2">Dress Code</h1>
+    <p class="text-[#cb717e] text-xl font-semibold mb-2">Formal</p>
+    <p class="text-gray-800 mb-4">El blanco está reservado para la novia,<br>¡sorpréndenos con otros colores!</p>
+    <img src={{ asset('images/dress-code.png') }} alt="dress clothes" class="mx-auto w-24 opacity-90" style="width: 210px">
+  </div>
+</section> --}}
+
+
+  <!-- Imagen decorativa -->
+
+
+
+{{--   <section style="background-color: #9aa5a5; color: #575757; padding: 1rem 0;">
   <div style="text-align: center;">
     <h1 style="color: white; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal;">
       Regalo
@@ -721,10 +905,10 @@
 
     <div style="margin-top: 1rem; padding: 0 1rem;">
       <button onclick="copiarCuenta()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;">
-        <img width="30" src="{{ asset('images/boda/copy.svg') }}" alt="copy">
+        <img width="30" src="{{ asset('images/copy.svg') }}" alt="copy">
         <div style="text-align: left;">
           <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);">Nuria Rodríguez</p>
-          <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 xxxx xxxx xxxx 03 268016</p>
+          <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
         </div>
       </button>
       <p style="text-align: center; font-size: 0.9em; color: #ffffff; margin-top: 0.5rem;">
@@ -733,7 +917,7 @@
       <p id="copiado-msg" style="text-align: center; font-size: 0.9em; color: white; margin-top: 0.5rem; display: none;">¡Número de cuenta copiado!</p>
     </div>
   </div>
-</section>
+</section> --}}
 
 
 <script>
@@ -750,14 +934,14 @@
 
 </script>
 
-<section style="padding: 0; margin: 0;">
+<section class="fade-in" style="padding: 0; margin: 0;margin-top: 130px;">
   <div style="margin: 0; padding: 0;">
-    <img src="{{ asset('images/boda/anillo.jpeg') }}" alt="Lugar de la ceremonia"
+    <img src="{{ asset('images/puestanillo.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; display: block;">
   </div>
 </section>
 
-<section style="background-color: #a7b3af; padding: 2rem 1rem; text-align: center; font-family: 'Georgia', serif;">
+{{-- <section class="fade-in" style="background-color: #a7b3af; padding: 2rem 1rem; text-align: center; font-family: 'Georgia', serif;">
   <h2 style="color: white; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem;">
     Nos vemos en...
   </h2>
@@ -765,7 +949,26 @@
   <div id="contador" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
     <!-- JS insertará aquí los 4 bloques -->
   </div>
-</section>
+</section> --}}
+
+
+<div class="section-container fade-in" style="margin-top: 100px;">
+  <!-- Imagen decorativa superior -->
+  <img src="{{ asset('images/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
+
+  <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
+  <h2 style="color: white; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem;">
+    Nos vemos en...
+  </h2>
+
+  <div id="contador" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <!-- JS insertará aquí los 4 bloques -->
+  </div>
+  </section>
+
+  <!-- Imagen decorativa inferior -->
+  <img src="{{ asset('images/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
+</div>
 
 
 
@@ -777,7 +980,7 @@
 
 
 
-      <section class="section-blanca" style="padding: 0px">
+      <section class="fade-in" class="section-blanca" style="padding: 0px">
   <div style="max-width: 600px; margin: 0 auto; text-align: left; padding: 30px; border-radius: 15px; background-color: #fff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
     <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">Confirmación de asistencia</h2>
     
@@ -831,19 +1034,25 @@
 </audio>
 
 <script>
-  function abrirInvitacion() {
-    const pantalla = document.getElementById('pantallaInicial');
-    pantalla.classList.add('oculto');
-    setTimeout(() => {
-      pantalla.style.display = 'none';
-    }, 1000);
+function abrirInvitacion() {
+  const pantalla = document.getElementById('pantallaInicial');
+  pantalla.classList.add('oculto');
+  setTimeout(() => {
+    pantalla.style.display = 'none';
 
-    // Reproducir música al abrir
-    const audio = document.getElementById('audioBoda');
-    audio.play().catch((e) => {
-      console.log("Error al reproducir música automáticamente:", e);
-    });
-  }
+    // Mostrar portada con animación
+    const portada = document.getElementById('portadaInvitacion');
+    portada.classList.remove('oculta');
+    portada.classList.add('mostrar');
+  }, 1000);
+
+  // Reproducir música al abrir
+  const audio = document.getElementById('audioBoda');
+  audio.play().catch((e) => {
+    console.log("Error al reproducir música automáticamente:", e);
+  });
+}
+
 
   // Contador regresivo
 function actualizarContador() {
@@ -894,7 +1103,19 @@ function actualizarContador() {
   setInterval(actualizarContador, 1000);
   actualizarContador();
 </script>
-
-
+</div>
+</div>
 </body>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
 </html>
