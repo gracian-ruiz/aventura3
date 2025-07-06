@@ -9,7 +9,7 @@
 
 <style>
 
-html, body {
+/* html, body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -19,7 +19,7 @@ html, body {
 .fondo-centro {
   display: flex;
   justify-content: center;
-  align-items: start; /* usa center si quieres vertical absoluto */
+  align-items: start; 
   min-height: 100vh;
 }
 
@@ -29,7 +29,7 @@ html, body {
   background-color: white;
   min-height: 100vh;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
-}
+} */
 
 
 
