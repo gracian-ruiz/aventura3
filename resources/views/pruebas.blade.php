@@ -8,6 +8,50 @@
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
+  .icono-hotel {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  -webkit-tap-highlight-color: transparent;
+  --foreground-rgb: 0,0,0;
+  --background-start-rgb: 214,219,220;
+  --background-end-rgb: 255,255,255;
+  --trsn: all 0.5s ease 0s;
+  --black: #000;
+  --tw-bg-opacity: 1;
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  text-transform: none;
+  cursor: pointer;
+  text-align: center;
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0/var(--tw-text-opacity));
+  width: 80px;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  border: 0 solid #e5e7eb;
+  display: block;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  background: #9aa5a5;
+}
+
+.boton-sin-borde {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+
+}
+
+
+
 .fade-in {
   opacity: 0;
   transform: translateY(20px);
@@ -794,22 +838,39 @@
       <p class="nombre">Finca Can Estades</p>
       <p class="telefono">+34 971 670 558</p>
       <button class="ver-mas" onclick="alert('Abrir detalles o mapa de Finca Can Estades')">
-        <img src="/icons/v2/hotel-service.png" alt="Hotel" width="80" height="80">
-        <span>(clic para ver)</span>
-      </button>
-    </div>
-
-    <!-- Alojamiento 2 -->
-    <div class="alojamiento">
-      <p class="nombre">Son Malero</p>
-      <p class="telefono">+34 971 670 301</p>
-      <button class="ver-mas" onclick="alert('Abrir detalles o mapa de Son Malero')">
-        <img src="/icons/v2/hotel-service.png" alt="Hotel" width="80" height="80">
+        <img src="{{ asset('images/boda/hotel-service.png') }}" alt="Hotel" width="80" height="80">
         <span>(clic para ver)</span>
       </button>
     </div>
   </div>
 </section>
+
+<div class="section-container fade-in" style="margin-top: 100px;">
+  <!-- Imagen decorativa superior -->
+  <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
+
+  <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
+  <h1 class="titulo-alojamientos">Alojamientos</h1>
+  <p class="texto-intro">
+    Si queréis hacer noche por la zona, os dejamos algunas opciones para que podáis gestionar la reserva.
+  </p>
+
+  <div class="alojamientos-lista">
+    <!-- Alojamiento 1 -->
+    <div class="alojamiento">
+      <p class="nombre">Finca Can Estades</p>
+      <p class="telefono">+34 971 670 558</p>
+      <button class="ver-mas boton-sin-borde" onclick="alert('Abrir detalles o mapa de Finca Can Estades')">
+        <img class="icono-hotel" src="{{ asset('images/boda/hotel-service.png') }}" alt="Hotel" width="80" height="80">
+        <span>(clic para ver)</span>
+      </button>
+    </div>
+  </div>
+  </section>
+
+  <!-- Imagen decorativa inferior -->
+  <img src="{{ asset('images/boda/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
+</div>
 
 
 
