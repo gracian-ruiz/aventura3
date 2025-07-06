@@ -601,6 +601,7 @@
   font-size: 1.5rem;
   margin-top: 10px;
   font-family: 'Georgia', serif;
+  margin-bottom: 55px;
 }
 
 .icono-hoja {
