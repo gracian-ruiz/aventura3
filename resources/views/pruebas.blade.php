@@ -615,7 +615,7 @@
 
 </style>
 
-<div class="portada fade-in">
+<div class="portada fade-in" style="height: 766px">
   <div class="portada-contenido">
     <!-- Imagen de fondo -->
     <img style="margin-bottom: 5px" class="imagen-base" src="{{ asset('images/boda/foto1.jpg') }}" alt="foto pareja">
@@ -781,6 +781,36 @@
 
   </div>
 </section>
+
+<section class="seccion-alojamientos">
+  <h1 class="titulo-alojamientos">Alojamientos</h1>
+  <p class="texto-intro">
+    Si queréis hacer noche por la zona, os dejamos algunas opciones para que podáis gestionar la reserva.
+  </p>
+
+  <div class="alojamientos-lista">
+    <!-- Alojamiento 1 -->
+    <div class="alojamiento">
+      <p class="nombre">Finca Can Estades</p>
+      <p class="telefono">+34 971 670 558</p>
+      <button class="ver-mas" onclick="alert('Abrir detalles o mapa de Finca Can Estades')">
+        <img src="/icons/v2/hotel-service.png" alt="Hotel" width="80" height="80">
+        <span>(clic para ver)</span>
+      </button>
+    </div>
+
+    <!-- Alojamiento 2 -->
+    <div class="alojamiento">
+      <p class="nombre">Son Malero</p>
+      <p class="telefono">+34 971 670 301</p>
+      <button class="ver-mas" onclick="alert('Abrir detalles o mapa de Son Malero')">
+        <img src="/icons/v2/hotel-service.png" alt="Hotel" width="80" height="80">
+        <span>(clic para ver)</span>
+      </button>
+    </div>
+  </div>
+</section>
+
 
 
   <section class="fade-in" style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding-top:0px">
