@@ -519,7 +519,7 @@ html, body {
         <div class="flex flex-col items-center" style="margin-top: 50px;">
           <p class="text-2xl" style="font-size: 1.5rem; margin: 0;">Tenemos una noticia...</p>
           <div class="icono-container">
-            <img class="bounce click-icon" src="images/click.png" alt="clic">
+            <img class="bounce click-icon" src="images/boda/click.png" alt="clic">
           </div>
           <p class="text-sm">¡ Haz clic !</p>
         </div>
@@ -1029,7 +1029,7 @@ html, body {
 
   <!-- Scripts -->
 <audio id="audioBoda" preload="auto">
-  <source src="{{ asset('boda/audio/song1.mp3') }}" type="audio/mpeg">
+  <source src="{{ asset('audio/song1.mp3') }}" type="audio/mpeg">
   Tu navegador no soporta el audio.
 </audio>
 
