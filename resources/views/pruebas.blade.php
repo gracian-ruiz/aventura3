@@ -964,25 +964,25 @@
     <!-- Ceremonia -->
     <img class="mx-auto" src="{{ asset('images/boda/tent.png') }}" alt="Ceremonia" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
-      <span>18:00 h</span> - <span>Ceremonia</span>
+      <span>11:30 h</span> - <span>Ceremonia</span>
     </p>
 
     <!-- Cocktail -->
     <img class="mx-auto" src="{{ asset('images/boda/cocktail.png') }}" alt="Cocktail" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
-      <span>19:30 h</span> - <span>Cocktail</span>
+      <span>14:00 h</span> - <span>Cocktail</span>
     </p>
 
     <!-- Banquete -->
     <img class="mx-auto" src="{{ asset('images/boda/food.png') }}" alt="Banquete" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
-      <span>20:30 h</span> - <span>Banquete</span>
+      <span>15:00 h</span> - <span>Banquete</span>
     </p>
 
     <!-- Fiesta -->
     <img class="mx-auto" src="{{ asset('images/boda/dance.png') }}" alt="Fiesta" width="100" style="opacity: 1;">
     <p class="mb-6" style="padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;">
-      <span>23:00 h</span> - <span>Fiesta</span>
+      <span>17:00 h</span> - <span>Fiesta</span>
     </p>
   </div>
 </section>
