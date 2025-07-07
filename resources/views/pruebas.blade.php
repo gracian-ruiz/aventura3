@@ -260,7 +260,6 @@
 
     .portada {
       width: 100%;
-      height: 90vh;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -655,7 +654,7 @@
   font-size: 1.5rem;
   margin-top: 10px;
   font-family: 'Georgia', serif;
-  margin-bottom: -3px;
+  margin-bottom: 122px;
 }
 
 .icono-hoja {
@@ -664,7 +663,7 @@
   margin-bottom: 10px;
   opacity: 0.8;
       margin-left: 218px;
-    margin-bottom: 24px;
+    margin-bottom: 42px;
 }
 
 
@@ -672,13 +671,13 @@
 
 </style>
 
-<div class="fade-in portada" style="height: 880px">
+<div class="fade-in portada" style="height: 770px">
   <div class="fade-in portada-contenido">
     <!-- Imagen de fondo -->
-    <img style="margin-bottom: 5px" class="imagen-base" src="{{ asset('images/boda/foto1.jpg') }}" alt="foto pareja">
+    <img style="margin-bottom: 216px;" class="imagen-base" src="{{ asset('images/boda/familia.jpeg') }}" alt="foto pareja" >
 
     <!-- Imagen con borde roto transparente -->
-    <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo">
+    <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo" style="margin-bottom: 169px;">
 
     <!-- Contenido encima del borde roto -->
 <div class="texto-superpuesto">
@@ -772,7 +771,7 @@
 
 </style>
 
-<div class="section-container fade-in negro" style="margin-top: 100px;">
+<div class="section-container fade-in negro" style="margin-top: 0px;">
   <!-- Imagen decorativa superior -->
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior">
 
