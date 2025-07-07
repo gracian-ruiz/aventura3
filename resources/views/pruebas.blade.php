@@ -545,22 +545,12 @@
 
 <style>
   .adios{
-    display: none
+    opacity: 0;
   }
 
-.fadee-out {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 6s ease, transform 6s ease;
+  .adios2 {
+  animation: fadeGrow 3.2s ease-out forwards;
 }
-
-.fadee-out.adios {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-
-
 
 </style>
 
@@ -1095,11 +1085,13 @@ function abrirInvitacion() {
     portada.classList.add('mostrar');
   }, 2000);
 
-  setTimeout(() => {
+setTimeout(() => {
   document.querySelectorAll('.adios').forEach(el => {
     el.classList.remove('adios');
+    el.classList.add('adios2');
   });
 }, 3000);
+
 
 
   // Reproducir música al abrir
