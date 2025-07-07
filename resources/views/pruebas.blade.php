@@ -839,7 +839,7 @@
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
-    <h1 style="color: white; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal;">
+    <h1 style="margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal;">
       Regalo
     </h1>
 
@@ -977,7 +977,7 @@
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
-  <h2 style="color: white; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem;">
+  <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem;">
     Nos vemos en...
   </h2>
 
