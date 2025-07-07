@@ -868,7 +868,7 @@
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          console.log('🌸 Imagen visible, activando animación');
+          console.log('Imagen visible, activando animación');
           target.classList.add('visible');
           observer.unobserve(target);
         }
