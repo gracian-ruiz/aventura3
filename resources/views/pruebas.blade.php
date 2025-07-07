@@ -834,7 +834,7 @@
 
 </style>
 
-<div class="section-container fade-in negro" style="margin-top: 50px;">
+<div class="section-container fade-in negro" style="margin-top: 25px;">
   <!-- Imagen decorativa superior -->
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
