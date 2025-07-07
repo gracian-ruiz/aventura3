@@ -543,7 +543,26 @@
 </div>
 
 
+<style>
+  .adios{
+    display: none
+  }
 
+.fadee-out {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 6s ease, transform 6s ease;
+}
+
+.fadee-out.adios {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+
+
+
+</style>
 
 
     <!-- Pantalla inicial con el sobre -->
@@ -559,9 +578,9 @@
     <img src="{{ asset('images/boda/ring.png') }}" alt="anillo" class="anillo">
 
     <div class="nombres">
-          <p class="__className_f98ef7" style="font-size: 3.25rem; margin: 0;">Javi</p>
-          <p class="__className_f98ef7" style="font-size: 3.25rem; margin: 0;">&amp;</p>
-          <p class="__className_f98ef7" style="font-size: 3.25rem; margin: 0;">Maite</p>
+          <p class="adios fadee-out  __className_f98ef7" style="font-size: 3.25rem; margin: 0;">Javi</p>
+          <p class="adios fadee-out  __className_f98ef7" style="font-size: 3.25rem; margin: 0;">&amp;</p>
+          <p class="adios fadee-out  __className_f98ef7" style="font-size: 3.25rem; margin: 0;">Maite</p>
     </div>
   </div>
 
@@ -570,9 +589,9 @@
   <img src="{{ asset('images/boda/hoja3.png') }}" alt="decoración inferior" class="decoracion-lateral1 animate-wind">
 
   <!-- Texto inferior -->
-  <div class="texto-inferior">
-    <p class="titulo">NOS CASAMOS</p>
-    <p class="fecha">— 18.10.2025 —</p>
+  <div class="texto-inferior" style="width: 390px;height: 84px">
+    <p class="adios fadee-out  titulo">NOS CASAMOS</p>
+    <p class="adios fadee-out  fecha">— 18.10.2025 —</p>
   </div>
 </div>
 
@@ -1074,7 +1093,14 @@ function abrirInvitacion() {
     const portada = document.getElementById('portadaInvitacion');
     portada.classList.remove('oculta');
     portada.classList.add('mostrar');
-  }, 1000);
+  }, 2000);
+
+  setTimeout(() => {
+  document.querySelectorAll('.adios').forEach(el => {
+    el.classList.remove('adios');
+  });
+}, 3000);
+
 
   // Reproducir música al abrir
   const audio = document.getElementById('audioBoda');
