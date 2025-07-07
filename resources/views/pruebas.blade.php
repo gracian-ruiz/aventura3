@@ -822,6 +822,7 @@
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px;width: 383px;
     height: 90px;">
+    <img src="{{ asset('images/boda/dec-flower2.png') }}" alt="Decoración floral" class="flor-decorativa" style="width: 169px!important;">
       
   </section>
 
