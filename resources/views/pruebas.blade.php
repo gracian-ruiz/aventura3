@@ -900,7 +900,7 @@
   <img src="{{ asset('images/boda/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior">
 </div> --}}
 
-<section class="fade-in section-blanca" style="padding-bottom: 0px;    padding-top: 40px;"> 
+<section class="fade-in section-blanca" style="padding-bottom: 0px;    padding-top: 20px;"> 
   <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     <h2 class="__className_f98ef7" style="font-size: 2.5em; margin-bottom: 10px;">
       Restaurante
@@ -923,7 +923,7 @@
 
 
 
-<div class="section-container fade-in negro" style="margin-top: 100px;">
+<div class="section-container fade-in negro" style="margin-top: 30px;">
   <!-- Imagen decorativa superior -->
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
@@ -1043,7 +1043,7 @@
 
 </script>
 
-<section class="fade-in" style="padding: 0; margin: 0;margin-top: 130px;">
+<section class="fade-in" style="padding: 0; margin: 0;margin-top: 35px;">
   <div style="margin: 0; padding: 0;">
     <img src="{{ asset('images/boda/anillo.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; display: block;">
