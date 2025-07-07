@@ -1061,7 +1061,7 @@
 </section> --}}
 
 
-<div class="section-container fade-in negro" style="margin-top: 100px;">
+<div class="section-container fade-in negro" style="margin-top: 40px;">
   <!-- Imagen decorativa superior -->
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
