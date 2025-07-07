@@ -781,9 +781,10 @@
     <img src="{{ asset('images/boda/iglesia.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
     
-    <p style="font-size: 1.2em; margin: 10px 0;"><strong>Parroquia Ntra. Sra. De la Fuensanta ( Patiño- Murcia)</strong></p>
+    <p style="font-size: 1.2em; margin: 10px 0;"><strong>Parroquia Ntra. Sra. De la Fuensanta</strong></p>
+     <p style="font-size: 1em; margin: 5px 0;">( Patiño- Murcia)</p>
     <p style="font-size: 1.1em; margin: 5px 0;">11:30 hrs</p>
-{{--     <p style="font-size: 1em; margin: 5px 0;">C. de Bailén, 10, 28013 Madrid</p> --}}
+   
 
     <a href="https://www.google.es/maps/place/Parroquia+de+Ntra.+Sra.+de+la+Fuensanta/@37.9503922,-1.1532766,6282m/data=!3m1!1e3!4m10!1m2!2m1!1sParroquia+Ntra.+Sra.+De+la+Fuensanta!3m6!1s0xd6378b031a72e5b:0xd39481bf1bf212a7!8m2!3d37.9616103!4d-1.1276479!15sCiRQYXJyb3F1aWEgTnRyYS4gU3JhLiBEZSBsYSBGdWVuc2FudGFaJCIicGFycm9xdWlhIG50cmEgc3JhIGRlIGxhIGZ1ZW5zYW50YZIBD2NhdGhvbGljX2NodXJjaJoBI0NoWkRTVWhOTUc5blMwVkpRMEZuU1VOdFh6ZElOVUpSRUFFqgGCAQoNL2cvMTFsNjV4N3d3MhABKiYiInBhcnJvcXVpYSBudHJhIHNyYSBkZSBsYSBmdWVuc2FudGEoDjIfEAEiG_Xu5F0C0E6mvB4iqi-_tTCPuTAisZb_RtGRBDImEAIiInBhcnJvcXVpYSBudHJhIHNyYSBkZSBsYSBmdWVuc2FudGHgAQD6AQQIABA7!16s%2Fg%2F11gfhj5lp8?entry=ttu&g_ep=EgoyMDI1MDYzMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="display: inline-block; margin: 15px 0;">
       <img src="{{ asset('images/boda/map-locator.png') }}" alt="Ver mapa en Google"
