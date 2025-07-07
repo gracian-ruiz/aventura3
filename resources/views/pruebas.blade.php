@@ -955,7 +955,7 @@
   <img src="{{ asset('images/boda/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
 </div>
 
-  <section class="fade-in" style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding-top:0px">
+  <section class="fade-in" style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding: 0px 20px">
   <h1 style="color: #879696; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal; opacity: 1;">
     Itinerario
   </h1>
@@ -1043,10 +1043,10 @@
 
 </script>
 
-<section class="fade-in" style="padding: 0; margin: 0;margin-top: 35px;">
-  <div style="margin: 0; padding: 0;">
+<section class="fade-in" style="margin: 0px;">
+  <div style="margin: 0; padding: 0px 20px;">
     <img src="{{ asset('images/boda/anillo.jpeg') }}" alt="Lugar de la ceremonia"
-         style="width: 100%; display: block;">
+         style="width: 100%; display: block;width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
   </div>
 </section>
 
@@ -1061,7 +1061,7 @@
 </section> --}}
 
 
-<div class="section-container fade-in negro" style="margin-top: 40px;">
+<div class="section-container fade-in negro">
   <!-- Imagen decorativa superior -->
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
