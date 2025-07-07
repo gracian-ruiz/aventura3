@@ -819,7 +819,7 @@
 <style>
 .slide-in-right {
   opacity: 0;
-  transform: translateX(200vw);
+  transform: translateX(200px); /* desplazamiento lateral */
   transition: opacity 4s ease, transform 4s ease;
 }
 
@@ -827,6 +827,7 @@
   opacity: 1;
   transform: translateX(0);
 }
+
 
 
 
@@ -842,7 +843,7 @@
 <img src="{{ asset('images/boda/dec-flower2.png') }}"
      alt="Decoración floral"
      class="slide-in-right"
-     style="width: 115px!important;"
+     style="width: 115px!important;margin-top:16px"
      id="florDecorativa">
 
 
@@ -854,24 +855,32 @@
   <!-- Imagen decorativa inferior -->
   <img src="{{ asset('images/boda/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
 </div>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const target = document.getElementById('florDecorativa');
 
+    if (!target) {
+      console.warn('No se encontró el elemento con ID florDecorativa');
+      return;
+    }
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
+          console.log('🌸 Imagen visible, activando animación');
           target.classList.add('visible');
-          observer.unobserve(target); // Solo una vez
+          observer.unobserve(target);
         }
       });
-    }, { threshold: 0.1 }); // 10% visible
+    }, {
+      threshold: 0.1
+    });
 
-    if (target) {
-      observer.observe(target);
-    }
+    observer.observe(target);
   });
 </script>
+
 
 
 {{-- <div class="section-container fade-in" style="margin-top: 100px;">
