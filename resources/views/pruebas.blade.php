@@ -772,7 +772,7 @@
 
 
 
-<section class="section-blanca fade-in"  style="padding-bottom: 0px">
+<section class="fade-in section-blanca"  style="padding-bottom: 0px">
   <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     <h2 class="__className_f98ef7" style="font-size: 2.5em; margin-bottom: 10px;">
       Ceremonia Religiosa
@@ -811,7 +811,7 @@
   <img src="{{ asset('images/boda/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior">
 </div> --}}
 
-<section class="section-blanca fade-in" style="padding-bottom: 0px"> 
+<section class="fade-in section-blanca" style="padding-bottom: 0px"> 
   <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     <h2 class="__className_f98ef7" style="font-size: 2.5em; margin-bottom: 10px;">
       Restaurante
@@ -1028,7 +1028,7 @@
 
 
 
-      <section class="fade-in" class="section-blanca" style="padding: 0px">
+      <section class="fade-in section-blanca" style="padding: 0px">
   <div style="max-width: 600px; margin: 0 auto; text-align: left; padding: 30px; border-radius: 15px; background-color: #fff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
     <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">Confirmación de asistencia</h2>
     
