@@ -646,13 +646,16 @@
   font-size: 1.5rem;
   margin-top: 10px;
   font-family: 'Georgia', serif;
-  margin-bottom: 55px;
+  margin-bottom: -3px;
 }
 
 .icono-hoja {
-  width: 60px;
+  width: 130px;
+    display: block;
   margin-bottom: 10px;
   opacity: 0.8;
+      margin-left: 218px;
+    margin-bottom: 24px;
 }
 
 
@@ -669,10 +672,16 @@
     <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo">
 
     <!-- Contenido encima del borde roto -->
-    <div class="texto-superpuesto">
-      <img style="width: 130px;margin-left: 224px;" src="{{ asset('images/boda/dec-flower.png') }}" class="icono-hoja" alt="hojita decorativa">
-      <p style="font-size: 18px" class="frase">Después de 9 años, entre huellas y pañales,  hemos decidido dar el paso mas importante, ¡ NOS CASAMOS!</p>
-    </div>
+<div class="texto-superpuesto">
+  <img src="{{ asset('images/boda/dec-flower.png') }}" class="icono-hoja" alt="hojita decorativa">
+  <p class="frase" style="font-size: 21px; text-align: center;">
+    Después de 9 años,<br>
+    entre huellas y pañales,<br>
+    hemos decidido dar el paso más importante:<br>
+    <strong>¡NOS CASAMOS!</strong>
+  </p>
+</div>
+
   </div>
 </div>
 
@@ -740,6 +749,7 @@
   font-size: 28px;
   font-style: italic;
   line-height: 1.6;
+  font-size: xx-large;
 }
 
 .flor-decorativa {
