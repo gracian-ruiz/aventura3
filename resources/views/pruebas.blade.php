@@ -297,7 +297,6 @@
 
     .fecha {
       font-size: 1.8em;
-      text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
       margin-top: 20px;
     }
 
@@ -400,13 +399,15 @@
 
 .anillo {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  width: 95%;
+  height: 95%;
+  transform: translate(-50%, -50%);
   object-fit: contain;
   z-index: 1;
 }
+
 
 /* Texto dentro del anillo */
 .nombres {
@@ -447,18 +448,18 @@
 .decoracion-abajo {
   bottom: 0;
   animation: flotar-reversa 18s ease-in-out infinite;
-    bottom: 80px;
+    bottom: 146px;
   left: 17px;
-   width: 75%;
+   width: 63%;
   transform: scaleX(-1) scaleY(-1); /* voltear horizontal y vertical */
 }
 
 .decoracion-lateral1 {
   bottom: 0;
   animation: flotar-reversa 18s ease-in-out infinite;
-    bottom: 233px;
+    bottom: 263px;
   left: -41px;
-   width: 43%;
+   width: 41%;
   transform: scaleX(-1) scaleY(-1); /* voltear horizontal y vertical */
 }
 
@@ -480,9 +481,9 @@
 
 .hoja-decorativa {
   position: absolute;
-  top: -65px;
-  right: 21px;
-  width: 75%;
+  top: -29px;
+  right: 28px;
+  width: 66%;
   pointer-events: none;
 }
 
@@ -746,6 +747,10 @@
   width: 96px;
 }
 
+.negro{
+  color: black;
+}
+
 </style>
 
 <div class="section-container fade-in" style="margin-top: 100px;">
@@ -767,7 +772,7 @@
 
 
 
-<section class="section-blanca fade-in"  style="padding-bottom: 0px">
+<section class="section-blanca fade-in negro"  style="padding-bottom: 0px">
   <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     <h2 class="__className_f98ef7" style="font-size: 2.5em; margin-bottom: 10px;">
       Ceremonia Religiosa
@@ -855,6 +860,41 @@
 
 
 
+
+
+
+<div class="section-container fade-in negro" style="margin-top: 100px;">
+  <!-- Imagen decorativa superior -->
+  <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
+
+  <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
+    <h1 style="color: white; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal;">
+      Regalo
+    </h1>
+
+    <div style="padding: 0 1rem; max-width: 800px; margin: 0 auto; font-size: 1.1em;">
+      Nuestro mayor regalo es vuestra presencia, pero si quieres ayudar, aquí está la cuenta bancaria:
+    </div>
+
+    <div style="margin-top: 1rem; padding: 0 1rem;">
+      <button onclick="copiarCuenta()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;">
+        <img width="30" src="{{ asset('images/boda/copy.svg') }}" alt="copy">
+        <div style="text-align: left;">
+          <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);">Nuria Rodríguez</p>
+          <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
+        </div>
+      </button>
+      <p style="text-align: center; font-size: 0.9em; margin-top: 0.5rem;">
+        Concepto: <strong>BODA</strong> y nombre de la persona
+      </p>
+      <p id="copiado-msg" style="text-align: center; font-size: 0.9em; color: white; margin-top: 0.5rem; display: none;">¡Número de cuenta copiado!</p>
+    </div>
+  </section>
+
+  <!-- Imagen decorativa inferior -->
+  <img src="{{ asset('images/boda/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
+</div>
+
   <section class="fade-in" style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding-top:0px">
   <h1 style="color: #879696; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal; opacity: 1;">
     Itinerario
@@ -886,39 +926,6 @@
     </p>
   </div>
 </section>
-
-
-<div class="section-container fade-in" style="margin-top: 100px;">
-  <!-- Imagen decorativa superior -->
-  <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
-
-  <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
-    <h1 style="color: white; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal;">
-      Regalo
-    </h1>
-
-    <div style="padding: 0 1rem; max-width: 800px; margin: 0 auto; font-size: 1.1em;">
-      Nuestro mayor regalo es vuestra presencia, pero si quieres ayudar, aquí está la cuenta bancaria:
-    </div>
-
-    <div style="margin-top: 1rem; padding: 0 1rem;">
-      <button onclick="copiarCuenta()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;">
-        <img width="30" src="{{ asset('images/boda/copy.svg') }}" alt="copy">
-        <div style="text-align: left;">
-          <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);">Nuria Rodríguez</p>
-          <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
-        </div>
-      </button>
-      <p style="text-align: center; font-size: 0.9em; color: #ffffff; margin-top: 0.5rem;">
-        Concepto: <strong>BODA</strong> y nombre de la persona
-      </p>
-      <p id="copiado-msg" style="text-align: center; font-size: 0.9em; color: white; margin-top: 0.5rem; display: none;">¡Número de cuenta copiado!</p>
-    </div>
-  </section>
-
-  <!-- Imagen decorativa inferior -->
-  <img src="{{ asset('images/boda/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
-</div>
 
 {{-- <section class="relative grid place-items-center gap-4 px-8 py-12 md:px-16 bg-cover bg-center" style="background-image: url('{{ asset('images/boda/bg-xl.png') }}');">
   <!-- Fondo blanco semitransparente para mejor lectura -->
@@ -978,7 +985,7 @@
 
 <section class="fade-in" style="padding: 0; margin: 0;margin-top: 130px;">
   <div style="margin: 0; padding: 0;">
-    <img src="{{ asset('images/boda/puestanillo.jpeg') }}" alt="Lugar de la ceremonia"
+    <img src="{{ asset('images/boda/anillo.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; display: block;">
   </div>
 </section>
