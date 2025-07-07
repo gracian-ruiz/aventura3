@@ -663,7 +663,7 @@
 
 </style>
 
-<div class="fade-in portada" style="height: 810px">
+<div class="fade-in portada" style="height: 880px">
   <div class="fade-in portada-contenido">
     <!-- Imagen de fondo -->
     <img style="margin-bottom: 5px" class="imagen-base" src="{{ asset('images/boda/foto1.jpg') }}" alt="foto pareja">
