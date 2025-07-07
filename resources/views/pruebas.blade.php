@@ -660,8 +660,8 @@
 
 </style>
 
-<div class="portada fade-in" style="height: 766px">
-  <div class="portada-contenido">
+<div class="fade-in portada" style="height: 766px">
+  <div class="fade-in portada-contenido">
     <!-- Imagen de fondo -->
     <img style="margin-bottom: 5px" class="imagen-base" src="{{ asset('images/boda/foto1.jpg') }}" alt="foto pareja">
 
@@ -972,7 +972,7 @@
 </section> --}}
 
 
-<div class="section-container fade-in" style="margin-top: 100px;">
+<div class="section-container fade-in negro" style="margin-top: 100px;">
   <!-- Imagen decorativa superior -->
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
