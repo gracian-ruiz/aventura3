@@ -856,30 +856,7 @@
   <img src="{{ asset('images/boda/divisor2.png') }}" alt="decoración inferior" class="decoracion-inferior2">
 </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const target = document.getElementById('florDecorativa');
 
-    if (!target) {
-      console.warn('No se encontró el elemento con ID florDecorativa');
-      return;
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          console.log('Imagen visible, activando animación');
-          target.classList.add('visible');
-          observer.unobserve(target);
-        }
-      });
-    }, {
-      threshold: 0.1
-    });
-
-    observer.observe(target);
-  });
-</script>
 
 
 
