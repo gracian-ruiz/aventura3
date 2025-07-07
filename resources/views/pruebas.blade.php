@@ -794,7 +794,7 @@
 
 
 
-<section class="fade-in section-blanca"  style="padding-bottom: 0px">
+<section class="fade-in section-blanca"  style="padding-bottom: 0px;padding-top: 20px;">
   <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     <h2 class="__className_f98ef7" style="font-size: 2.5em; margin-bottom: 10px;">
       Ceremonia Religiosa
