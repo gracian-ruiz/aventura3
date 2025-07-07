@@ -767,7 +767,7 @@
 }
 
 .negro{
-  color: black;negro
+  color: white
 }
 
 </style>
