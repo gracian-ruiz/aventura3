@@ -753,7 +753,7 @@
 
 </style>
 
-<div class="section-container fade-in" style="margin-top: 100px;">
+<div class="section-container fade-in negro" style="margin-top: 100px;">
   <!-- Imagen decorativa superior -->
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior">
 
@@ -772,7 +772,7 @@
 
 
 
-<section class="section-blanca fade-in negro"  style="padding-bottom: 0px">
+<section class="section-blanca fade-in"  style="padding-bottom: 0px">
   <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     <h2 class="__className_f98ef7" style="font-size: 2.5em; margin-bottom: 10px;">
       Ceremonia Religiosa
