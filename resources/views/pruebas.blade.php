@@ -641,7 +641,7 @@
 /* NUEVO: Contenido encima del borde */
 .texto-superpuesto {
   position: absolute;
-  bottom: -106px; /* ajusta según necesidad */
+  bottom: -150px; /* ajusta según necesidad */
   width: 100%;
   text-align: center;
   z-index: 2;
@@ -672,10 +672,13 @@
 <div class="fade-in portada" style="height: 770px">
   <div class="fade-in portada-contenido">
     <!-- Imagen de fondo -->
-    <img style="margin-bottom: 216px;" class="imagen-base" src="{{ asset('images/boda/anillo2.jpeg') }}" alt="foto pareja" >
+    <img style="margin-bottom: 216px;background: #eae1d2;
+    padding-bottom: 50px;" class="imagen-base" src="{{ asset('images/boda/anillo2.jpeg') }}" alt="foto pareja">
 tan especial
     <!-- Imagen con borde roto transparente -->
-    <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo" style="margin-bottom: 169px;">
+    <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo" style="margin-bottom: 17px;
+    width: 790px!important;
+    margin-left: -161px;transform: rotate(1deg);">
 
     <!-- Contenido encima del borde roto -->
 <div class="texto-superpuesto">
