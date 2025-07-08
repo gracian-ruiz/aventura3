@@ -579,7 +579,7 @@
 
   <!-- Texto inferior -->
   <div class="texto-inferior" style="width: 390px;height: 84px">
-    <p class="adios fadee-out  fecha">— 18.10.2025 —</p>
+    <p style="margin-left: 3px;" class="adios fadee-out  fecha">— 18.10.2025 —</p>
   </div>
 </div>
 
@@ -910,7 +910,7 @@
     <a href="https://www.google.es/maps/place/El+Cas%C3%B3n+de+la+Vega/@38.0838264,-1.0597009,907m/data=!3m1!1e3!4m14!1m7!3m6!1s0xd639b4b62496b11:0x6a007b2bb94835ec!2sEl+Cas%C3%B3n+de+la+Vega!8m2!3d38.0838264!4d-1.057126!16s%2Fg%2F1td2cpbg!3m5!1s0xd639b4b62496b11:0x6a007b2bb94835ec!8m2!3d38.0838264!4d-1.057126!16s%2Fg%2F1td2cpbg?entry=ttu&g_ep=EgoyMDI1MDYzMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="display: inline-block; margin: 15px 0;">
       <img src="{{ asset('images/boda/map-locator.png') }}" alt="Ver mapa en Google"
            style="width: 80px; height: auto; display: block; margin: 0 auto;">
-           
+
     </a>
 
   </div>
