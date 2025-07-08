@@ -926,7 +926,7 @@ tan especial
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
-    <div style="padding: 0 1rem; max-width: 800px; margin: 0 auto; font-size: 1.1em;">
+    <div style="padding: 0 1rem; max-width: 800px; margin: 0 auto; font-size: 2em;">
       Nuestro mayor regalo es vuestra presencia, pero si quieres ayudar, aquí está la cuenta bancaria:
     </div>
 
@@ -938,7 +938,7 @@ tan especial
           <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
         </div>
       </button>
-      <p style="text-align: center; font-size: 0.9em; margin-top: 0.5rem;">
+      <p style="text-align: center; font-size: 0.9em; margin-top: 0.5rem;font-family: 'Airthay', cursive;">
         Concepto: <strong>BODA</strong> y nombre de la persona
       </p>
       <p id="copiado-msg" style="text-align: center; font-size: 0.9em; color: white; margin-top: 0.5rem; display: none;">¡Número de cuenta copiado!</p>
