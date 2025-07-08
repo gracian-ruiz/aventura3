@@ -799,7 +799,7 @@
     <img src="{{ asset('images/boda/iglesia.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 95%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
     
-    <p style="font-size: 1.7em; margin: 10px 0;"><strong>Parroquia Ntra. Sra. De la Fuensanta</strong></p>
+    <p style="font-size: 1.7em; margin: 10px 0;">Parroquia Ntra. Sra. De la Fuensanta</p>
      <p style="font-size: 1em; margin: 5px 0;">( Patiño- Murcia)</p>
     <p style="font-size: 1.1em; margin: 5px 0;">11:30 hrs</p>
    
@@ -905,7 +905,7 @@
     <img src="{{ asset('images/boda/restaurante.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
     
-    <p style="font-size: 1.7em; margin: 10px 0;"><strong>Restaurante Cason de la Vega. Santomera</strong></p>
+    <p style="font-size: 1.7em; margin: 10px 0;">Restaurante Cason de la Vega. Santomera</p>
 
     <a href="https://www.google.es/maps/place/El+Cas%C3%B3n+de+la+Vega/@38.0838264,-1.0597009,907m/data=!3m1!1e3!4m14!1m7!3m6!1s0xd639b4b62496b11:0x6a007b2bb94835ec!2sEl+Cas%C3%B3n+de+la+Vega!8m2!3d38.0838264!4d-1.057126!16s%2Fg%2F1td2cpbg!3m5!1s0xd639b4b62496b11:0x6a007b2bb94835ec!8m2!3d38.0838264!4d-1.057126!16s%2Fg%2F1td2cpbg?entry=ttu&g_ep=EgoyMDI1MDYzMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="display: inline-block; margin: 15px 0;">
       <img src="{{ asset('images/boda/map-locator.png') }}" alt="Ver mapa en Google"
