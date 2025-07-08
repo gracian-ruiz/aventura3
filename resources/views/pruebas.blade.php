@@ -159,7 +159,7 @@
 
     @media (max-width: 768px) {
   .nombres-principales {
-    font-size: 1.5rem !important;
+    font-size: 1.8rem !important;
   }
 }
 
@@ -523,14 +523,15 @@
     <!-- Contenido superpuesto -->
     <div class="contenido-superpuesto __className_f98ef7">
       <div class="flex h-96 w-full flex-col items-center justify-center gap-6 text-3xl leading-10 sm:text-4xl">
-        <div class="relative w-full overflow-visible text-center">
-          <p class="__className_f98ef7 nombres-principales" style="font-size: 2.25rem; margin: 0;">Javi</p>
-          <p class="__className_f98ef7 nombres-principales" style="font-size: 2.25rem; margin: 0;">&amp;</p>
-          <p class="__className_f98ef7 nombres-principales" style="font-size: 2.25rem; margin: 0;">Maite</p>
+        <div class="relative w-full overflow-visible text-center" style="padding-top: 20px;
+}">
+          <p class="__className_f98ef7 nombres-principales" style="font-size: 2.45rem; margin: 0;">Javi</p>
+          <p class="__className_f98ef7 nombres-principales" style="font-size: 2.45rem; margin: 0;">&amp;</p>
+          <p class="__className_f98ef7 nombres-principales" style="font-size: 2.45rem; margin: 0;">Maite</p>
         </div>
         <br>
         <div class="flex flex-col items-center" style="margin-top: 50px;">
-          <p class="text-2xl" style="font-size: 1.5rem; margin: 0;">Tenemos una noticia...</p>
+          <p class="text-2xl" style="font-size: 1.6rem; margin: 0;">Tenemos una noticia...</p>
           <div class="icono-container">
             <img class="bounce click-icon" src="images/boda/click.png" alt="clic">
           </div>
