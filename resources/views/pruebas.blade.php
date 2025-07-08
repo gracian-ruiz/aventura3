@@ -926,10 +926,6 @@ tan especial
   <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
-    <h1 style="margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal;">
-      Regalo
-    </h1>
-
     <div style="padding: 0 1rem; max-width: 800px; margin: 0 auto; font-size: 1.1em;">
       Nuestro mayor regalo es vuestra presencia, pero si quieres ayudar, aquí está la cuenta bancaria:
     </div>
@@ -938,7 +934,7 @@ tan especial
       <button onclick="copiarCuenta()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;">
         <img width="30" src="{{ asset('images/boda/copy.svg') }}" alt="copy">
         <div style="text-align: left;">
-          <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);">Nuria Rodríguez</p>
+          <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);">Maria Teresa Ruiz</p>
           <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
         </div>
       </button>
