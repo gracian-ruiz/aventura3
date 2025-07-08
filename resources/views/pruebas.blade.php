@@ -638,6 +638,7 @@
   z-index: 1;
 }
 
+
 /* NUEVO: Contenido encima del borde */
 .texto-superpuesto {
   position: absolute;
