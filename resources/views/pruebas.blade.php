@@ -946,7 +946,7 @@ tan especial
           <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
         </div>
       </button>
-      <p style="text-align: center; font-size: 0.9em; margin-top: 0.5rem;ffont-family: Ariel;">
+      <p style="text-align: center; font-size: 0.9em; margin-top: 0.5rem;font-family: Ariel;">
         Concepto: <strong>BODA</strong> y nombre de la persona
       </p>
       <p id="copiado-msg" style="text-align: center; font-size: 0.9em; color: white; margin-top: 0.5rem; display: none;">¡Número de cuenta copiado!</p>
