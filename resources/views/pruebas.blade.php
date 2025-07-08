@@ -531,7 +531,7 @@
         </div>
         <br>
         <div class="flex flex-col items-center" style="margin-top: 50px;">
-          <p class="text-2xl" style="font-size: 1.6rem; margin: 0;">Tenemos una noticia...</p>
+          <p class="text-2xl" style="font-size: 1.5rem; margin: 0;">Tenemos una noticia...</p>
           <div class="icono-container">
             <img class="bounce click-icon" src="images/boda/click.png" alt="clic">
           </div>
