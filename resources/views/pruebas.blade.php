@@ -680,7 +680,7 @@
 <div class="texto-superpuesto">
   <img src="{{ asset('images/boda/dec-flower.png') }}" class="icono-hoja" alt="hojita decorativa">
   <p class="frase" style="font-size: 24px; text-align: center;">
-    Después de 9 años,<br>
+    Después de nueve años,<br>
     entre huellas y pañales,<br>
     hemos decidido dar el paso más importante:<br>
     <span style="font-size: 35px;">¡Nos casamos!</span>
