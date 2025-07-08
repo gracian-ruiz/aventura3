@@ -683,7 +683,7 @@
     Después de 9 años,<br>
     entre huellas y pañales,<br>
     hemos decidido dar el paso más importante:<br>
-    <span>¡NOS CASAMOS!</span>
+    <span style="font-size: 35px;">¡Nos casamos!</span>
   </p>
 </div>
 
