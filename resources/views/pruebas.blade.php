@@ -579,7 +579,7 @@
 
   <!-- Texto inferior -->
   <div class="texto-inferior" style="width: 390px;height: 84px">
-    <p style="margin-left: -18px;" class="adios fadee-out  fecha">— 18.10.2025 —</p>
+    <p style="margin-left: -28px;" class="adios fadee-out  fecha">— 18.10.2025 —</p>
   </div>
 </div>
 
