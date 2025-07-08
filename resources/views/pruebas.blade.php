@@ -934,11 +934,11 @@ tan especial
       <button onclick="copiarCuenta()" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;">
         <img width="30" src="{{ asset('images/boda/copy.svg') }}" alt="copy">
         <div style="text-align: left;">
-          <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);font-family: 'Airthay', cursive;">Maria Teresa Ruiz</p>
+          <p style="margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);font-family: Ariel;">Maria Teresa Ruiz</p>
           <p style="margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);" id="gift-num">ES82 0182 5319 7002 03 268016</p>
         </div>
       </button>
-      <p style="text-align: center; font-size: 0.9em; margin-top: 0.5rem;font-family: 'Airthay', cursive;">
+      <p style="text-align: center; font-size: 0.9em; margin-top: 0.5rem;ffont-family: Ariel;">
         Concepto: <strong>BODA</strong> y nombre de la persona
       </p>
       <p id="copiado-msg" style="text-align: center; font-size: 0.9em; color: white; margin-top: 0.5rem; display: none;">¡Número de cuenta copiado!</p>
@@ -950,7 +950,7 @@ tan especial
 </div>
 
   <section class="fade-in" style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding: 0px 20px">
-  <h1 style="color: #879696; margin-bottom: 1rem; font-family: 'Airthay', cursive; font-size: 4rem; font-weight: normal; opacity: 1;">
+  <h1 style="color: #879696; margin-bottom: 1rem; font-family: Ariel; font-size: 4rem; font-weight: normal; opacity: 1;">
     Itinerario
   </h1>
 
