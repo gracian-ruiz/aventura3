@@ -647,13 +647,11 @@
   z-index: 2;
  /*  padding: 20px; */
   color: #5a5a5a;
-  font-family: 'Great Vibes', cursive;
 }
 
 .frase {
   font-size: 1.5rem;
   margin-top: 10px;
-  font-family: 'Georgia', serif;
   margin-bottom: 122px;
 }
 
@@ -1043,7 +1041,7 @@
 </script>
 
 <section class="fade-in" style="margin: 0px;">
-  <div style="margin: 0; padding: 0px 20px;">
+  <div style="margin: 0; padding: 0px 0px;">
     <img src="{{ asset('images/boda/anillo.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; display: block;width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
   </div>
