@@ -672,18 +672,18 @@
   <div class="fade-in portada-contenido">
     <!-- Imagen de fondo -->
     <img style="margin-bottom: 216px;" class="imagen-base" src="{{ asset('images/boda/familia.jpeg') }}" alt="foto pareja" >
-
+tan especial
     <!-- Imagen con borde roto transparente -->
     <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo" style="margin-bottom: 169px;">
 
     <!-- Contenido encima del borde roto -->
 <div class="texto-superpuesto">
   <img src="{{ asset('images/boda/dec-flower.png') }}" class="icono-hoja" alt="hojita decorativa">
-  <p class="frase" style="font-size: 24px; text-align: center;">
+  <p class="frase" style="font-size: 26px; text-align: center;">
     Después de nueve años,<br>
     entre huellas y pañales,<br>
-    hemos decidido dar el paso más importante:<br>
-    <span style="font-size: 35px;">¡Nos casamos!</span>
+    damos el paso:<br>
+    <span style="font-size: 42px;">¡Nos casamos!</span>
   </p>
 </div>
 
@@ -753,7 +753,7 @@
 .mensaje {
   font-size: 28px;
   font-style: italic;
-  line-height: 1.6;
+  line-height: 1.0;
   font-size: xx-large;
 }
 
@@ -774,8 +774,8 @@
 
   <section class="contenido" style="  background-color: #9aa5a5;">
     <div class="mensaje">
-      Queremos que nos acompañes en<br>
-      este día tan especial
+      Queremos que nos acompañes<br>
+      en este día tan especial <br>
     </div>
 
     <img src="{{ asset('images/boda/dec-flower2.png') }}" alt="Decoración floral" class="flor-decorativa">
