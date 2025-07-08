@@ -579,7 +579,6 @@
 
   <!-- Texto inferior -->
   <div class="texto-inferior" style="width: 390px;height: 84px">
-    <p class="adios fadee-out  titulo">NOS CASAMOS</p>
     <p class="adios fadee-out  fecha">— 18.10.2025 —</p>
   </div>
 </div>
@@ -684,7 +683,7 @@
     Después de 9 años,<br>
     entre huellas y pañales,<br>
     hemos decidido dar el paso más importante:<br>
-    <strong>¡NOS CASAMOS!</strong>
+    <span>¡NOS CASAMOS!</span>
   </p>
 </div>
 
@@ -798,7 +797,7 @@
     </h2>
     <br>
     <img src="{{ asset('images/boda/iglesia.jpeg') }}" alt="Lugar de la ceremonia"
-         style="width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
+         style="width: 95%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;">
     
     <p style="font-size: 1.7em; margin: 10px 0;"><strong>Parroquia Ntra. Sra. De la Fuensanta</strong></p>
      <p style="font-size: 1em; margin: 5px 0;">( Patiño- Murcia)</p>
