@@ -8,47 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
-  .icono-hotel {
-  -webkit-text-size-adjust: 100%;
-  tab-size: 4;
-  -webkit-tap-highlight-color: transparent;
-  --foreground-rgb: 0,0,0;
-  --background-start-rgb: 214,219,220;
-  --background-end-rgb: 255,255,255;
-  --trsn: all 0.5s ease 0s;
-  --black: #000;
-  --tw-bg-opacity: 1;
-  font-family: inherit;
-  font-feature-settings: inherit;
-  font-variation-settings: inherit;
-  font-size: 100%;
-  font-weight: inherit;
-  line-height: inherit;
-  text-transform: none;
-  cursor: pointer;
-  text-align: center;
-  --tw-text-opacity: 1;
-  color: rgb(0 0 0/var(--tw-text-opacity));
-  width: 80px;
-  aspect-ratio: 1 / 1;
-  box-sizing: border-box;
-  border: 0 solid #e5e7eb;
-  display: block;
-  vertical-align: middle;
-  max-width: 100%;
-  height: auto;
-  margin-left: auto;
-  margin-right: auto;
-  background: #9aa5a5;
-}
 
-.boton-sin-borde {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
 
-}
+
 
 
 
@@ -82,15 +44,7 @@
   animation: fadeGrow 1.2s ease-out forwards;
 }
 
-</style>
 
-
-
-
-
-
-
-  <style>
     body{
       font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7'!important;
     }
@@ -107,13 +61,6 @@
   width: 100%;     /* o el ancho que necesites */
   height: 100%;    /* o una altura fija si aplica */
 }
-
-.click-icon {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-}
-
 
 .click-icon {
   width: 30px;
@@ -148,10 +95,6 @@
     object-fit: contain;
     border-radius: 0;
   }
-
-  .contenido-superpuesto {
-    padding: 0.5rem;
-  }
 }
 
 
@@ -161,12 +104,6 @@
   .nombres-principales {
     font-size: 1.8rem !important;
   }
-}
-
-
-    .nombres-boda p {
-  margin: 0;
-  line-height: 1.2; /* opcional para ajustar altura entre líneas */
 }
 
 
@@ -272,15 +209,6 @@
       color: white;
     }
 
-/*     .portada::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.4);
-      z-index: 0;
-    } */
 
     .portada-contenido {
       position: relative;
@@ -376,9 +304,7 @@
       margin-top: 10px;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
     }
-  </style>
 
-  <style>
 .portada-invitacion {
   position: relative;
   width: 100%;
@@ -1073,7 +999,7 @@ tan especial
     width: 644px;">
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
-  <h2 style="font-size: 2rem; letter-spacing: 2px; margin-bottom: 2rem;">
+  <h2 style="font-size: 2rem; letter-spacing: 2px; margin-bottom: 2rem;font-weight: 400;">
     Nos vemos en...
   </h2>
 
@@ -1113,7 +1039,7 @@ tan especial
     <form action="#" method="POST">
       <!-- Nombre y Apellidos -->
       <div style="margin-bottom: 20px;">
-        <label for="nombre" style="display: block; font-weight: bold; margin-bottom: 5px;">Nombre y Apellidos</label>
+        <label for="nombre" style="display: block;margin-bottom: 5px;">Nombre y Apellidos</label>
         <input type="text" id="nombre" name="nombre" required
                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em;">
       </div>
@@ -1223,9 +1149,9 @@ function actualizarContador() {
       flex-direction: column;
       align-items: center;
       box-sizing: border-box;
-      ${index < bloques.length - 1 ? 'border-right: 2px solid black;' : ''}
+      ${index < bloques.length - 1 ? 'border-right: 2px solid #ffffff;' : ''}
     ">
-      <span style="font-size: 1.4rem; font-weight: bold; color: #333;">${bloque.valor}</span>
+      <span style="font-size: 1.4rem; font-weight: bold; color: #575757;">${bloque.valor}</span>
       <span style="font-size: 1rem; color: #777;">${bloque.texto}</span>
     </div>
   `).join('');
