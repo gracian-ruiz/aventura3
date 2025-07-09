@@ -1121,7 +1121,7 @@ setTimeout(() => {
 
   // Contador regresivo
 function actualizarContador() {
-  const fechaBoda = new Date("2025-10-19T00:00:00").getTime();
+  const fechaBoda = new Date("2025-10-18T11:030:00").getTime();
   const ahora = new Date().getTime();
   const diferencia = fechaBoda - ahora;
 
