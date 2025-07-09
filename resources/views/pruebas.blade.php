@@ -884,7 +884,11 @@ tan especial
 </div>
 
   <section class="fade-in" style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding: 0px 20px">
-  <h1 style="color: #879696; margin-bottom: 1rem; font-size: 4rem; opacity: 1;">
+  <h1 style="color: #879696;
+    margin-bottom: 1rem;
+    font-size: 3.2rem;
+    opacity: 1;
+    font-weight: 500;">
     Itinerario
   </h1>
 
