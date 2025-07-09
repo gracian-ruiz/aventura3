@@ -1097,6 +1097,10 @@ tan especial
 
 
       <section class="fade-in section-blanca" style="padding: 0px">
+          <img src="{{ asset('images/boda/dec-flower3.png') }}" alt="decoración superior" class="decoracion-superior3" style="top: 439px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 644px;">
   <div style="max-width: 600px; margin: 0 auto; text-align: left; padding: 30px; border-radius: 15px; background-color: #fff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
     <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">Confirmación de asistencia</h2>
     
@@ -1130,7 +1134,7 @@ tan especial
       <!-- Botón de enviar -->
       <div style="text-align: center;">
         <button type="submit"
-                style="padding: 12px 25px; background-color: #c2185b; color: white; font-size: 1em;
+                style="padding: 12px 25px; background-color: #60ca38;; color: white; font-size: 1em;
                        border: none; border-radius: 25px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
           ENVIAR RESPUESTA
         </button>
