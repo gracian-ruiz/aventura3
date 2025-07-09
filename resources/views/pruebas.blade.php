@@ -677,7 +677,7 @@
     width: 790px!important;
     margin-left: -161px;transform: rotate(185deg);">
 
-    <img style="margin-bottom: 300px;background: #eae1d2;
+    <img style="margin-bottom: 288px;background: #eae1d2;
     padding-bottom: 50px;padding-top: 50px;" class="imagen-base" src="{{ asset('images/boda/anillo2.jpeg') }}" alt="foto pareja">
 tan especial
     <!-- Imagen con borde roto transparente -->
@@ -958,7 +958,7 @@ tan especial
 </div>
 
   <section class="fade-in" style="background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding: 0px 20px">
-  <h1 style="color: #879696; margin-bottom: 1rem; font-family: Ariel; font-size: 4rem; font-weight: normal; opacity: 1;">
+  <h1 style="color: #879696; margin-bottom: 1rem; font-size: 4rem; opacity: 1;">
     Itinerario
   </h1>
 
@@ -1064,11 +1064,16 @@ tan especial
 
 
 <div class="section-container fade-in negro">
-  <!-- Imagen decorativa superior -->
-  <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3">
+     <img src="{{ asset('images/boda/anillo.jpeg') }}" alt="Lugar de la ceremonia"
+         style="width: 100%; display: block;width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);margin-bottom: 25px;">
+  
+  <img src="{{ asset('images/boda/divisor.png') }}" alt="decoración superior" class="decoracion-superior3" style="top: 439px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 644px;">
 
   <section class="contenido" style="  background-color: #9aa5a5;padding:5px">
-  <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2rem;">
+  <h2 style="font-size: 2rem; letter-spacing: 2px; margin-bottom: 2rem;">
     Nos vemos en...
   </h2>
 
