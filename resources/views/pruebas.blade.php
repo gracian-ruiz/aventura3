@@ -1045,11 +1045,11 @@ tan especial
 
 </script>
 
-<section class="fade-in" style="margin: 0px;">
+{{-- <section class="fade-in" style="margin: 0px;">
   <div style="margin: 0; padding: 0px 0px;">
     <img src="{{ asset('images/boda/anillo.jpeg') }}" alt="Lugar de la ceremonia"
          style="width: 100%; display: block;width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-  </div>
+  </div> --}}
 </section>
 
 {{-- <section class="fade-in" style="background-color: #a7b3af; padding: 2rem 1rem; text-align: center; font-family: 'Georgia', serif;">
