@@ -1050,7 +1050,7 @@ tan especial
 
       <!-- Confirmación de asistencia -->
       <div style="margin-bottom: 20px;">
-        <label style="display: block; font-weight: bold; margin-bottom: 5px;">¿Vas a asistir?</label>
+        <label style="display: block; margin-bottom: 5px;">¿Vas a asistir?</label>
         <label style="display: inline-flex; align-items: center; margin-right: 20px;">
           <input type="radio" name="asistencia" value="sí" required style="margin-right: 8px;"> Sí
         </label>
@@ -1061,7 +1061,7 @@ tan especial
 
       <!-- Alergias / Intolerancias -->
       <div style="margin-bottom: 20px;">
-        <label for="alergias" style="display: block; font-weight: bold; margin-bottom: 5px;">¿Tienes alguna alergia o intolerancia?</label>
+        <label for="alergias" style="display: block; margin-bottom: 5px;">¿Tienes alguna alergia o intolerancia?</label>
         <textarea id="alergias" name="alergias" rows="3"
                   placeholder="Ej. gluten, lactosa, frutos secos..."
                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em;"></textarea>
