@@ -604,7 +604,7 @@
     margin-left: -161px;transform: rotate(185deg);">
 
     <img style="margin-bottom: 288px;background: #eae1d2;
-    padding-bottom: 50px;padding-top: 50px;" class="imagen-base" src="{{ asset('images/boda/anillo2.jpeg') }}" alt="foto pareja">
+    padding-bottom: 50px;padding-top: 50px;" class="imagen-base" src="{{ asset('images/boda/familia.jpg') }}" alt="foto pareja">
 tan especial
     <!-- Imagen con borde roto transparente -->
     <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo" style="margin-bottom: 94px;
@@ -1153,7 +1153,7 @@ function actualizarContador() {
       flex-direction: column;
       align-items: center;
       box-sizing: border-box;
-      ${index < bloques.length - 1 ? 'border-right: 2px solid #ffffff;' : ''}
+      ${index < bloques.length - 1 ? 'border-right: 1px solid #ffffff;' : ''}
     ">
       <span style="font-size: 1.4rem; font-weight: bold; color: #575757;">${bloque.valor}</span>
       <span style="font-size: 1rem; color: #777;">${bloque.texto}</span>
