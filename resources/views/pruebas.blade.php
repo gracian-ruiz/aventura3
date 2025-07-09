@@ -1181,47 +1181,46 @@ setTimeout(() => {
 
   // Contador regresivo
 function actualizarContador() {
-    const fechaBoda = new Date("2025-10-19T00:00:00").getTime();
-    const ahora = new Date().getTime();
-    const diferencia = fechaBoda - ahora;
+  const fechaBoda = new Date("2025-10-19T00:00:00").getTime();
+  const ahora = new Date().getTime();
+  const diferencia = fechaBoda - ahora;
 
-    const contador = document.getElementById("contador");
+  const contador = document.getElementById("contador");
 
-    if (diferencia <= 0) {
-      contador.innerHTML = "<span style='font-size: 1.5rem; color: white;'>¡Es el gran día!</span>";
-      return;
-    }
-
-    const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-    const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
-    const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
-
-    const bloques = [
-      { valor: dias, texto: 'Días' },
-      { valor: horas, texto: 'Horas' },
-      { valor: minutos, texto: 'Minutos' },
-      { valor: segundos, texto: 'Segundos' }
-    ];
-
-    contador.innerHTML = bloques.map(bloque => `
-      <div style="
-        background-color: white;
-        padding: 0.4rem;
-        border-radius: 8px;
-        width: 24%;
-        max-width: 24%;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        box-sizing: border-box;
-      ">
-        <span style="font-size: 1rem; font-weight: bold; color: #333;">${bloque.valor}</span>
-        <span style="font-size: 0.65rem; color: #777;">${bloque.texto}</span>
-      </div>
-    `).join('');
+  if (diferencia <= 0) {
+    contador.innerHTML = "<span style='font-size: 1.5rem; color: white;'>¡Es el gran día!</span>";
+    return;
   }
+
+  const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+  const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+  const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+  const bloques = [
+    { valor: dias, texto: 'Días' },
+    { valor: horas, texto: 'Horas' },
+    { valor: minutos, texto: 'Minutos' },
+    { valor: segundos, texto: 'Segundos' }
+  ];
+
+  contador.innerHTML = bloques.map((bloque, index) => `
+    <div style="
+      padding: 0.4rem;
+      width: 24%;
+      max-width: 24%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-sizing: border-box;
+      ${index < bloques.length - 1 ? 'border-right: 2px solid black;' : ''}
+    ">
+      <span style="font-size: 1.4rem; font-weight: bold; color: #333;">${bloque.valor}</span>
+      <span style="font-size: 1rem; color: #777;">${bloque.texto}</span>
+    </div>
+  `).join('');
+}
+
 
 
 
