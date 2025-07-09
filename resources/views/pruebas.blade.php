@@ -1096,11 +1096,17 @@ tan especial
 
 
 
-      <section class="fade-in section-blanca" style="padding: 0px">
-          <img src="{{ asset('images/boda/dec-flower3.png') }}" alt="decoración superior" class="decoracion-superior3" style="top: 439px;
-    left: 50%;
+      <section class="fade-in section-blanca" style="padding: 0px;margin-top: 40px;}">
+          <img src="{{ asset('images/boda/dec-flower3.png') }}" alt="decoración superior" class="decoracion-superior3" style="top: -12px;
+    left: 76%;
     transform: translateX(-50%);
-    width: 644px;">
+    width: 100px;
+    transform: rotate(47deg);">
+              <img src="{{ asset('images/boda/dec-flower3.png') }}" alt="decoración superior" class="decoracion-superior3" style="top: -12px;
+    left: -1%;
+    transform: translateX(-50%);
+    width: 100px;
+        transform: rotate(185deg);">
   <div style="max-width: 600px; margin: 0 auto; text-align: left; padding: 30px; border-radius: 15px; background-color: #fff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
     <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">Confirmación de asistencia</h2>
     
