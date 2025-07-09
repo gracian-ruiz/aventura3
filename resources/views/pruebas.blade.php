@@ -1038,7 +1038,7 @@ tan especial
     width: 100px;
         transform: rotate(185deg);">
   <div style="max-width: 600px; margin: 0 auto; text-align: left; padding: 30px; border-radius: 15px; background-color: #fff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
-    <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">Confirmación de asistencia</h2>
+    <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;font-weight: 400;">Confirmación de asistencia</h2>
     
     <form action="#" method="POST">
       <!-- Nombre y Apellidos -->
