@@ -1070,7 +1070,7 @@ tan especial
       <!-- Botón de enviar -->
       <div style="text-align: center;">
         <button type="submit"
-                style="padding: 12px 25px; background-color: #60ca38;; color: white; font-size: 1em;
+                style="padding: 12px 25px; background-color: #9aa5a5; color: white; font-size: 1em;
                        border: none; border-radius: 25px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
           ENVIAR RESPUESTA
         </button>
