@@ -8,78 +8,65 @@
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
+@media (max-width: 399px) {
 
-
-
-
-
-
-.fade-in {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 1.6s ease-out, transform 1.6s ease-out;
-}
-.fade-in.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-
-@keyframes fadeGrow {
-  0% {
+  .fade-in {
     opacity: 0;
-    transform: scale(0.9);
+    transform: translateY(20px);
+    transition: opacity 1.6s ease-out, transform 1.6s ease-out;
   }
-  100% {
+  .fade-in.visible {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
-}
-
-.portada-invitacion.oculta {
-  opacity: 0;
-}
-
-.portada-invitacion.mostrar {
-  animation: fadeGrow 1.2s ease-out forwards;
-}
-
-
-    body{
-      font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7'!important;
+  @keyframes fadeGrow {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
     }
-.__className_f98ef7 {
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .portada-invitacion.oculta {
+    opacity: 0;
+  }
+
+  .portada-invitacion.mostrar {
+    animation: fadeGrow 1.2s ease-out forwards;
+  }
+
+  body{
+      font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7'!important;
+  }
+
+  .__className_f98ef7 {
   font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7';
   font-weight: 400;
   font-style: normal;
-}
+  }
 
-    .icono-container {
+  .icono-container {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;     /* o el ancho que necesites */
   height: 100%;    /* o una altura fija si aplica */
-}
-
-.click-icon {
+  }
+  .click-icon {
   width: 30px;
   height: 30px;
   object-fit: contain;
   overflow: hidden;
   display: block;
-}
+  }
 
-
-
-
-
-    @media (max-width: 768px) {
   .pantalla-inicial {
     align-items: stretch;
     padding: 0;
   }
-
   .sobre {
     width: 100vw;
     height: 100vh;
@@ -88,82 +75,39 @@
     align-items: center;
     justify-content: center;
   }
-
-  .sobre .img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 0;
-  }
-}
-
-
-
-
-    @media (max-width: 768px) {
+  
   .nombres-principales {
     font-size: 1.8rem !important;
   }
-}
-
-
-@font-face {
-  font-family: '__Parisienne_f98ef7';
-  src: url('images/boda/fonts/Parisienne-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: '__Parisienne_Fallback_f98ef7';
-  src: local("Arial");
-  ascent-override: 108.70%;
-  descent-override: 53.04%;
-  line-gap-override: 0.00%;
-  size-adjust: 84.23%;
-}
-
-
-
-
-.contenido-superpuesto {
-  position: absolute;
-  inset: 0;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  pointer-events: none;
-}
-
-
-
-
-
-.sobre .img {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
-
-.bounce {
-  animation: bounce 1s infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);  
+  @font-face {
+    font-family: '__Parisienne_f98ef7';
+    src: url('images/boda/fonts/Parisienne-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
   }
-  50% {
-    transform: translateY(-10px);
+  .contenido-superpuesto {
+    position: absolute;
+    inset: 0;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
   }
-}
+  .bounce {
+    animation: bounce 1s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);  
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
 
-
-    body, html {
+      body, html {
       margin: 0;
       padding: 0;
       overflow-x: hidden;
@@ -209,24 +153,11 @@
       color: white;
     }
 
-
     .portada-contenido {
       position: relative;
       z-index: 1;
    /*    padding: 20px; */
     }
-
-    .novios {
-      font-size: 3em;
-      font-family: 'Great Vibes', cursive;
-      text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
-    }
-
-    .fecha {
-      font-size: 1.8em;
-      margin-top: 20px;
-    }
-
     section {
       padding: 80px 20px;
       text-align: center;
@@ -239,16 +170,6 @@
     .section-blanca {
       background-color: #fff;
     }
-
-    @media (max-width: 768px) {
-      .novios {
-        font-size: 2em;
-      }
-      .fecha {
-        font-size: 1.2em;
-      }
-    }
-
     .contador-seccion {
       height: 100vh;
       background-image: url('{{ asset('images/boda/contador.png') }}');
@@ -305,134 +226,842 @@
       text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
     }
 
-.portada-invitacion {
-  position: relative;
-  width: 100%;
-  max-width: 500px;
-  margin: 50px auto;
-  text-align: center;
-  font-family: 'Georgia', serif;
-  color: #5a5a5a;
+    .portada-invitacion {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 50px auto;
+    text-align: center;
+    font-family: 'Georgia', serif;
+    color: #5a5a5a;
+  }
+
+  /* Anillo central */
+  .contenedor-anillo {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* proporción cuadrada */
+  }
+
+  .anillo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 95%;
+    height: 95%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    z-index: 1;
+  }
+
+
+  /* Texto dentro del anillo */
+  .nombres {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    line-height: 1.5;
+  }
+
+  /* Decoraciones */
+  .decoracion-arriba,
+  .decoracion-abajo {
+    position: absolute;
+    width: 100%;
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .decoracion-lateral1 {
+    position: absolute;
+    width: 100%;
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .decoracion-arriba {
+    top: 0;
+    animation: flotar 15s ease-in-out infinite;
+  }
+
+  .decoracion-abajo {
+    bottom: 0;
+    animation: flotar-reversa 18s ease-in-out infinite;
+      bottom: 146px;
+    left: 17px;
+    width: 63%;
+    transform: scaleX(-1) scaleY(-1); /* voltear horizontal y vertical */
+  }
+
+  .decoracion-lateral1 {
+    bottom: 0;
+    animation: flotar-reversa 18s ease-in-out infinite;
+      bottom: 263px;
+    left: -41px;
+    width: 41%;
+    transform: scaleX(-1) scaleY(-1); /* voltear horizontal y vertical */
+  }
+
+  /* Texto inferior */
+  .texto-inferior {
+    margin-top: 85px;
+  }
+
+  .texto-inferior .titulo {
+    font-weight: bold;
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .texto-inferior .fecha {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+
+  .hoja-decorativa {
+    position: absolute;
+    top: -29px;
+    right: 28px;
+    width: 66%;
+    pointer-events: none;
+  }
+
+  /* Animación tipo viento */
+  @keyframes wind {
+    0%, 100% {
+      transform: rotate(0deg) translateX(0px) translateY(0px) scale(1);
+    }
+    25% {
+      transform: rotate(1.5deg) translateX(2px) translateY(-2px) scale(1.01);
+    }
+    50% {
+      transform: rotate(0deg) translateX(1px) translateY(1px) scale(1.005);
+    }
+    75% {
+      transform: rotate(-1.5deg) translateX(-2px) translateY(2px) scale(1.01);
+    }
+  }
+
+  .animate-wind {
+    animation: wind 8s ease-in-out infinite;
+  }
+
+  .adios{
+    opacity: 0;
+  }
+
+  .adios2 {
+  animation: fadeGrow 3.2s ease-out forwards;
+  }
+  .portada-contenido {
+    position: relative;
+    width: 100%;
+  }
+
+  .imagen-base {
+    width: 100%;
+    display: block;
+  }
+
+  .imagen-borde {
+    position: absolute!important;
+    bottom: 0!important;
+    left: 0!important;
+    width: 100%!important;
+    pointer-events: none!important;
+  }
+
+  .portada {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    overflow: hidden;
+  }
+
+  .portada-contenido {
+    position: relative;
+    width: 100%;
+  }
+
+  .imagen-base {
+    width: 100%;
+    display: block;
+  }
+
+  .imagen-borde {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+
+  /* NUEVO: Contenido encima del borde */
+  .texto-superpuesto {
+    position: absolute;
+    bottom: -91px; /* ajusta según necesidad */
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+  /*  padding: 20px; */
+    color: #5a5a5a;
+  }
+
+  .frase {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    margin-bottom: 122px;
+  }
+
+  .icono-hoja {
+    width: 130px;
+      display: block;
+    margin-bottom: 10px;
+    opacity: 0.8;
+        margin-left: 218px;
+      margin-bottom: 42px;
+  }
+  .section-container {
+    position: relative;
+    width: 100%;
+    color: white;
+    overflow: hidden;
+    padding: 60px 0;
+    text-align: center;
+  }
+
+  .decoracion-superior {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    margin-top: -26px;
+  }
+
+  .decoracion-superior2 {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    margin-top: 2px;
+  }
+
+
+  .decoracion-superior3 {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    margin-top: -14px;
+  }
+
+  .decoracion-inferior {
+    position: absolute;
+    bottom: 0;
+    left: -16%;
+    width: 497px;
+    margin-bottom: -35px;
+  }
+
+  .decoracion-inferior2 {
+    position: absolute;
+    bottom: 0;
+    left: -16%;
+    width: 497px;
+    margin-bottom: -33px;
+  }
+
+  .contenido {
+    position: relative;
+    z-index: 10;
+    padding: 0 24px;
+  }
+
+  .mensaje {
+    font-size: 28px;
+    font-style: italic;
+    line-height: 1.0;
+    font-size: xx-large;
+  }
+
+  .flor-decorativa {
+    margin-top: 16px;
+    width: 96px;
+  }
+
+  .negro{
+    color: white
+  }
 }
 
-/* Anillo central */
-.contenedor-anillo {
-  position: relative;
-  width: 100%;
-  padding-top: 100%; /* proporción cuadrada */
-}
 
-.anillo {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 95%;
-  height: 95%;
-  transform: translate(-50%, -50%);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (min-width: 400px) {
+   .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1.6s ease-out, transform 1.6s ease-out;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @keyframes fadeGrow {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .portada-invitacion.oculta {
+    opacity: 0;
+  }
+
+  .portada-invitacion.mostrar {
+    animation: fadeGrow 1.2s ease-out forwards;
+  }
+
+  body{
+      font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7'!important;
+  }
+
+  .__className_f98ef7 {
+  font-family: '__Parisienne_f98ef7', '__Parisienne_Fallback_f98ef7';
+  font-weight: 400;
+  font-style: normal;
+  }
+
+  .icono-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;     /* o el ancho que necesites */
+  height: 100%;    /* o una altura fija si aplica */
+  }
+  .click-icon {
+  width: 30px;
+  height: 30px;
   object-fit: contain;
-  z-index: 1;
-}
-
-
-/* Texto dentro del anillo */
-.nombres {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 2;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  line-height: 1.5;
-}
-
-/* Decoraciones */
-.decoracion-arriba,
-.decoracion-abajo {
-  position: absolute;
-  width: 100%;
-  max-width: 500px;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.decoracion-lateral1 {
-  position: absolute;
-  width: 100%;
-  max-width: 500px;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.decoracion-arriba {
-  top: 0;
-  animation: flotar 15s ease-in-out infinite;
-}
-
-.decoracion-abajo {
-  bottom: 0;
-  animation: flotar-reversa 18s ease-in-out infinite;
-    bottom: 146px;
-  left: 17px;
-   width: 63%;
-  transform: scaleX(-1) scaleY(-1); /* voltear horizontal y vertical */
-}
-
-.decoracion-lateral1 {
-  bottom: 0;
-  animation: flotar-reversa 18s ease-in-out infinite;
-    bottom: 263px;
-  left: -41px;
-   width: 41%;
-  transform: scaleX(-1) scaleY(-1); /* voltear horizontal y vertical */
-}
-
-/* Texto inferior */
-.texto-inferior {
-  margin-top: 85px;
-}
-
-.texto-inferior .titulo {
-  font-weight: bold;
-  font-size: 2rem;
-  margin-bottom: 0.3rem;
-}
-
-.texto-inferior .fecha {
-  font-size: 1.5rem;
-  letter-spacing: 2px;
-}
-
-.hoja-decorativa {
-  position: absolute;
-  top: -29px;
-  right: 28px;
-  width: 66%;
-  pointer-events: none;
-}
-
-/* Animación tipo viento */
-@keyframes wind {
-  0%, 100% {
-    transform: rotate(0deg) translateX(0px) translateY(0px) scale(1);
+  overflow: hidden;
+  display: block;
   }
-  25% {
-    transform: rotate(1.5deg) translateX(2px) translateY(-2px) scale(1.01);
+
+  .pantalla-inicial {
+    align-items: stretch;
+    padding: 0;
   }
-  50% {
-    transform: rotate(0deg) translateX(1px) translateY(1px) scale(1.005);
+  .sobre {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  75% {
-    transform: rotate(-1.5deg) translateX(-2px) translateY(2px) scale(1.01);
+  
+  .nombres-principales {
+    font-size: 2.3rem !important;
   }
+  @font-face {
+    font-family: '__Parisienne_f98ef7';
+    src: url('images/boda/fonts/Parisienne-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  .contenido-superpuesto {
+    position: absolute;
+    inset: 0;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+  }
+  .bounce {
+    animation: bounce 1s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);  
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+      body, html {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .pantalla-inicial {
+      width: 100vw;
+      height: 100vh;
+      background: #fce4ec;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      transition: opacity 1s ease;
+    }
+
+    .pantalla-inicial.oculto {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sobre .img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .portada {
+      width: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+    }
+
+    .portada-contenido {
+      position: relative;
+      z-index: 1;
+   /*    padding: 20px; */
+    }
+    section {
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .section-rosa {
+      background-color: #fce4ec;
+    }
+
+    .section-blanca {
+      background-color: #fff;
+    }
+    .contador-seccion {
+      height: 100vh;
+      background-image: url('{{ asset('images/boda/contador.png') }}');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      position: relative;
+    }
+
+    .contador-seccion::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 0;
+    }
+
+    .contador-contenido {
+      position: relative;
+      z-index: 1;
+    }
+
+    .titulo-contador {
+      font-size: 3em;
+      font-family: 'Great Vibes', cursive;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+    }
+
+    .contador-estilo {
+      font-size: 2.5em;
+      font-family: 'Georgia', serif;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+      margin: 10px 0;
+    }
+
+    .contador-estilo span {
+      font-size: 0.5em;
+      font-weight: normal;
+      margin-right: 8px;
+    }
+
+    .subtitulo-contador {
+      font-size: 1.8em;
+      font-family: 'Great Vibes', cursive;
+      margin-top: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+    }
+
+    .portada-invitacion {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 50px auto;
+    text-align: center;
+    font-family: 'Georgia', serif;
+    color: #5a5a5a;
+  }
+
+  /* Anillo central */
+  .contenedor-anillo {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* proporción cuadrada */
+  }
+
+  .anillo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 95%;
+    height: 95%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    z-index: 1;
+  }
+
+
+  /* Texto dentro del anillo */
+  .nombres {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    line-height: 1.5;
+  }
+
+  /* Decoraciones */
+  .decoracion-arriba,
+  .decoracion-abajo {
+    position: absolute;
+    width: 100%;
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .decoracion-lateral1 {
+    position: absolute;
+    width: 100%;
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .decoracion-arriba {
+    top: 0;
+    animation: flotar 15s ease-in-out infinite;
+  }
+
+  .decoracion-abajo {
+    bottom: 0;
+    animation: flotar-reversa 18s ease-in-out infinite;
+      bottom: 146px;
+    left: 17px;
+    width: 63%;
+    transform: scaleX(-1) scaleY(-1); /* voltear horizontal y vertical */
+  }
+
+  .decoracion-lateral1 {
+    bottom: 0;
+    animation: flotar-reversa 18s ease-in-out infinite;
+      bottom: 263px;
+    left: -41px;
+    width: 41%;
+    transform: scaleX(-1) scaleY(-1); /* voltear horizontal y vertical */
+  }
+
+  /* Texto inferior */
+  .texto-inferior {
+    margin-top: 85px;
+  }
+
+  .texto-inferior .titulo {
+    font-weight: bold;
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .texto-inferior .fecha {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+
+  .hoja-decorativa {
+    position: absolute;
+    top: -29px;
+    right: 28px;
+    width: 66%;
+    pointer-events: none;
+  }
+
+  /* Animación tipo viento */
+  @keyframes wind {
+    0%, 100% {
+      transform: rotate(0deg) translateX(0px) translateY(0px) scale(1);
+    }
+    25% {
+      transform: rotate(1.5deg) translateX(2px) translateY(-2px) scale(1.01);
+    }
+    50% {
+      transform: rotate(0deg) translateX(1px) translateY(1px) scale(1.005);
+    }
+    75% {
+      transform: rotate(-1.5deg) translateX(-2px) translateY(2px) scale(1.01);
+    }
+  }
+
+  .animate-wind {
+    animation: wind 8s ease-in-out infinite;
+  }
+
+  .adios{
+    opacity: 0;
+  }
+
+  .adios2 {
+  animation: fadeGrow 3.2s ease-out forwards;
+  }
+  .portada-contenido {
+    position: relative;
+    width: 100%;
+  }
+
+  .imagen-base {
+    width: 100%;
+    display: block;
+  }
+
+  .imagen-borde {
+    position: absolute!important;
+    bottom: 0!important;
+    left: 0!important;
+    width: 100%!important;
+    pointer-events: none!important;
+  }
+
+  .portada {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    overflow: hidden;
+  }
+
+  .portada-contenido {
+    position: relative;
+    width: 100%;
+  }
+
+  .imagen-base {
+    width: 100%;
+    display: block;
+  }
+
+  .imagen-borde {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+
+  /* NUEVO: Contenido encima del borde */
+  .texto-superpuesto {
+    position: absolute;
+    bottom: -91px; /* ajusta según necesidad */
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+  /*  padding: 20px; */
+    color: #5a5a5a;
+  }
+
+  .frase {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    margin-bottom: 122px;
+  }
+
+  .icono-hoja {
+    width: 130px;
+      display: block;
+    margin-bottom: 10px;
+    opacity: 0.8;
+        margin-left: 218px;
+      margin-bottom: 42px;
+  }
+  .section-container {
+    position: relative;
+    width: 100%;
+    color: white;
+    overflow: hidden;
+    padding: 60px 0;
+    text-align: center;
+  }
+
+  .decoracion-superior {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    margin-top: -26px;
+  }
+
+  .decoracion-superior2 {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    margin-top: 2px;
+  }
+
+
+  .decoracion-superior3 {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    margin-top: -14px;
+  }
+
+  .decoracion-inferior {
+    position: absolute;
+    bottom: 0;
+    left: -16%;
+    width: 497px;
+    margin-bottom: -35px;
+  }
+
+  .decoracion-inferior2 {
+    position: absolute;
+    bottom: 0;
+    left: -16%;
+    width: 497px;
+    margin-bottom: -33px;
+  }
+
+  .contenido {
+    position: relative;
+    z-index: 10;
+    padding: 0 24px;
+  }
+
+  .mensaje {
+    font-size: 28px;
+    font-style: italic;
+    line-height: 1.0;
+    font-size: xx-large;
+  }
+
+  .flor-decorativa {
+    margin-top: 16px;
+    width: 96px;
+  }
+
+  .negro{
+    color: white
+  }
+ 
 }
-
-.animate-wind {
-  animation: wind 8s ease-in-out infinite;
-}
-
-
 
 
   </style>
@@ -467,20 +1096,6 @@
     </div>
   </div>
 </div>
-
-
-<style>
-  .adios{
-    opacity: 0;
-  }
-
-  .adios2 {
-  animation: fadeGrow 3.2s ease-out forwards;
-}
-
-</style>
-
-
     <!-- Pantalla inicial con el sobre -->
 <!-- Pantalla inicial con el sobre -->
 <div class="portada-invitacion __className_f98ef7 oculta" id="portadaInvitacion" style="margin-bottom: 0px!important">
@@ -510,96 +1125,10 @@
   </div>
 </div>
 
-<style>
-.portada {
-  position: relative;
-  width: 100%;
-  max-width: 600px; /* Ajusta al tamaño deseado */
-  margin: auto;
-  overflow: hidden;
-}
-
-.portada-contenido {
-  position: relative;
-  width: 100%;
-}
-
-.imagen-base {
-  width: 100%;
-  display: block;
-}
-
-.imagen-borde {
-  position: absolute!important;
-  bottom: 0!important;
-  left: 0!important;
-  width: 100%!important;
-  pointer-events: none!important;
-}
-
-.portada {
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  margin: auto;
-  overflow: hidden;
-}
-
-.portada-contenido {
-  position: relative;
-  width: 100%;
-}
-
-.imagen-base {
-  width: 100%;
-  display: block;
-}
-
-.imagen-borde {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-
-/* NUEVO: Contenido encima del borde */
-.texto-superpuesto {
-  position: absolute;
-  bottom: -91px; /* ajusta según necesidad */
-  width: 100%;
-  text-align: center;
-  z-index: 2;
- /*  padding: 20px; */
-  color: #5a5a5a;
-}
-
-.frase {
-  font-size: 1.5rem;
-  margin-top: 10px;
-  margin-bottom: 122px;
-}
-
-.icono-hoja {
-  width: 130px;
-    display: block;
-  margin-bottom: 10px;
-  opacity: 0.8;
-      margin-left: 218px;
-    margin-bottom: 42px;
-}
-
-
-
-
-</style>
-
 <div class="fade-in portada" style="height: 770px">
   <div class="fade-in portada-contenido">
     <!-- Imagen de fondo -->
-        <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo" style="margin-bottom: 490px;
+        <img class="imagen-borde" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo" style="margin-bottom: 480px;
     width: 790px!important;
     margin-left: -161px;transform: rotate(185deg);">
 
@@ -625,83 +1154,7 @@ tan especial
   </div>
 </div>
 
-<style>
-  .section-container {
-  position: relative;
-  width: 100%;
-  color: white;
-  overflow: hidden;
-  padding: 60px 0;
-  text-align: center;
-}
 
-.decoracion-superior {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  margin-top: -26px;
-}
-
-.decoracion-superior2 {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  margin-top: 2px;
-}
-
-
-.decoracion-superior3 {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  margin-top: -14px;
-}
-
-.decoracion-inferior {
-  position: absolute;
-  bottom: 0;
-  left: -16%;
-  width: 497px;
-  margin-bottom: -35px;
-}
-
-.decoracion-inferior2 {
-  position: absolute;
-  bottom: 0;
-  left: -16%;
-  width: 497px;
-  margin-bottom: -33px;
-}
-
-.contenido {
-  position: relative;
-  z-index: 10;
-  padding: 0 24px;
-}
-
-.mensaje {
-  font-size: 28px;
-  font-style: italic;
-  line-height: 1.0;
-  font-size: xx-large;
-}
-
-.flor-decorativa {
-  margin-top: 16px;
-  width: 96px;
-}
-
-.negro{
-  color: white
-}
-
-</style>
 
 <div class="section-container fade-in negro" style="margin-top: 0px;">
   <!-- Imagen decorativa superior -->
