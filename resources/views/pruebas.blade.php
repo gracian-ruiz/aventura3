@@ -3,12 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invitación</title>
+  <title>La boda del año</title>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Georgia&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
-<style>
-@media (max-width: 399px) {
+<style>@media (min-width: 451px) {
+  body {
+    max-width: 400px!important;
+    margin: 0 auto!important;
+     overflow-x: visible !important;
+    
+  }
+      .sobre .img {
+        width: 39%!important;}
+}
+
+
+@media (min-width: 380px) and (max-width: 410px) {
+  .q7 {
+    margin-left: 0px!important;
+  }
+}
+
+@media (min-width: 410px) and (max-width: 435px) {
+  .q7 {
+    margin-left: 10px!important;
+  }
+}
+@media (min-width: 436px) and (max-width: 500px) {
+  .q7 {
+    margin-left: 18px!important;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   .fade-in {
     opacity: 0;
@@ -81,7 +136,7 @@
   }
   @font-face {
     font-family: '__Parisienne_f98ef7';
-    src: url('images/boda/fonts/Parisienne-Regular.ttf') format('truetype');
+    src: url('{{ asset('images/boda/fonts/Parisienne-Regular.ttf') }}') format('truetype');
     font-weight: 400;
     font-style: normal;
   }
@@ -409,7 +464,7 @@
   /* NUEVO: Contenido encima del borde */
   .texto-superpuesto {
     position: absolute;
-    bottom: -91px; /* ajusta según necesidad */
+    bottom: -95px; /* ajusta según necesidad */
     width: 100%;
     text-align: center;
     z-index: 2;
@@ -534,16 +589,18 @@
     margin-left: -24px;
   }
   .q8{
-    height: 770px
+    height: 630px
   }
   .x3{
-    margin-bottom: 480px;
+    margin-bottom: 460px;
     width: 790px!important;
     margin-left: -161px;transform: rotate(185deg);
+    display: none
+    
   }
   .q9{
     margin-bottom: 288px;background: #eae1d2;
-    padding-bottom: 50px;padding-top: 50px;
+    padding-bottom: 50px;/* padding-top: 50px; */
   }
   .w1{
     margin-bottom: 94px;
@@ -551,10 +608,10 @@
     margin-left: -161px;transform: rotate(1deg);
   }
   .w2{
-    font-size: 26px; text-align: center;
+    font-size: 30px; text-align: center;
   }
   .w3{
-    font-size: 42px;
+    font-size: 50px;
   }
   .fondo1{
      background-color: #9aa5a5;
@@ -689,7 +746,6 @@
 .u8{}
 .u9{}
 
-}
 
 
 
@@ -730,7 +786,8 @@
 
 
 
-@media (min-width: 380px) and (max-width: 399px) {
+
+/* @media (min-width: 380px) and (max-width: 399px) {
   .x2 {
     margin-left: -5px;
   }
@@ -746,7 +803,7 @@
 @media (min-width: 410px) {
  .x2{margin-left: 0px;}
 
-}
+} */
 
 
 
@@ -758,34 +815,7 @@
 
 @media (min-width: 400px) {
 
-  .x1{
-    margin-top: 48px;
-    margin-bottom: 31px;
-  }
-
-  .x2{margin-left: 0px;}
-
-.x3{
-  margin-bottom: 490px!important;
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   .fade-in {
+  .fade-in {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 1.6s ease-out, transform 1.6s ease-out;
@@ -852,11 +882,11 @@
   }
   
   .nombres-principales {
-    font-size: 2.3rem !important;
+    font-size: 1.8rem !important;
   }
   @font-face {
     font-family: '__Parisienne_f98ef7';
-    src: url('images/boda/fonts/Parisienne-Regular.ttf') format('truetype');
+    src: url('{{ asset('images/boda/fonts/Parisienne-Regular.ttf') }}') format('truetype');
     font-weight: 400;
     font-style: normal;
   }
@@ -1184,7 +1214,7 @@
   /* NUEVO: Contenido encima del borde */
   .texto-superpuesto {
     position: absolute;
-    bottom: -91px; /* ajusta según necesidad */
+    bottom: -75px; /* ajusta según necesidad */
     width: 100%;
     text-align: center;
     z-index: 2;
@@ -1220,8 +1250,8 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 400px;
-    margin-top: -26px;
+    width: 500px;
+    margin-top: -33px;
   }
 
   .decoracion-superior2 {
@@ -1239,8 +1269,8 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 466px;
-    margin-top: -29px;
+    width: 500px;
+    margin-top: -34px;
   }
 
   .decoracion-inferior {
@@ -1255,7 +1285,7 @@
     position: absolute;
     bottom: 0;
     left: -16%;
-    width: 497px;
+    width: 500px;
     margin-bottom: -33px;
   }
 
@@ -1270,6 +1300,7 @@
     font-style: italic;
     line-height: 1.0;
     font-size: xx-large;
+    margin-top: 10px;
   }
 
   .flor-decorativa {
@@ -1280,7 +1311,188 @@
   .negro{
     color: white
   }
- 
+
+  .q1{
+    padding-top: 20px
+  }
+
+  .q2{
+    margin: 0;
+  }
+
+  .x1{
+    margin-top: 50px;
+  }
+
+  .q3{
+    font-size: 1.5rem; margin: 0;
+  }
+  .q4{
+    margin-bottom: 0px!important
+  }
+  .q5{
+    font-size: 3.25rem; margin: 0;
+  }
+  .q6{
+    width: 423px;px;height: 84px
+  }
+  .q8{
+    height: 650px
+  }
+  .x3{
+    margin-bottom: 525px;
+    width: 790px!important;
+    margin-left: -161px;transform: rotate(185deg);
+    display: none
+  }
+  .q9{
+    margin-bottom: 288px;background: #eae1d2;
+    padding-bottom: 50px;/* padding-top: 0px */;
+  }
+  .w1{
+    margin-bottom: 94px;
+    width: 790px!important;
+    margin-left: -161px;transform: rotate(1deg);
+  }
+  .w2{
+    font-size: 30px; text-align: center;
+  }
+  .w3{
+    font-size: 50px;
+  }
+  .fondo1{
+     background-color: #9aa5a5;
+  }
+  .w4{
+    padding-bottom: 0px;padding-top: 0px;
+  }
+  .w5{
+    max-width: 800px; margin: 0 auto; text-align: center;
+  }
+  .w6{
+    font-size: 2.5em; margin-bottom: 10px;
+  }
+  .w7{
+    width: 95%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;
+  }
+  .w8{
+    font-size: 1.7em; margin: 10px 0
+  }
+  .w9{
+    font-size: 1em; margin: 5px 0;
+  }
+  .w10{
+    font-size: 1.1em; margin: 5px 0;
+  }
+  .e1{
+    width: 80px; height: auto; display: block; margin: 0 auto;
+  }
+  .slide-in-right {
+    opacity: 0;
+    transform: translateX(200px); /* desplazamiento lateral */
+    transition: opacity 4s ease, transform 4s ease;
+  }
+
+  .slide-in-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .e2{
+    margin-top: 25px;
+  }
+
+  .e3{
+    background-color: #9aa5a5;padding:5px;width: 440px;
+    height: 90px;
+  }
+  .e4{
+    width: 115px!important;margin-top:16px
+  }
+
+  .e5{
+    padding-bottom: 0px;    padding-top: 20px;
+  }
+  .e6{
+    max-width: 800px; margin: 0 auto; text-align: center;
+  }
+  .e7{
+    width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;
+  }
+  .e8{
+    font-size: 1.7em; margin: 10px 0;
+  }
+  .e9{
+    width: 80px; height: auto; display: block; margin: 0 auto;
+  }
+  .r1{
+    margin-top: 30px;
+  }
+  .r2{
+    background-color: #9aa5a5;padding:5px
+  }
+  .r3{
+    padding: 0 1rem; max-width: 800px; margin: 0 auto; font-size: 1.8em;
+  }
+  .r4{
+    margin-top: 1rem; padding: 0 1rem;
+  }
+  .r5{
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto; background: none; border: none; cursor: pointer;
+  }
+  .r6{
+    text-align: left;
+  }
+  .r7{margin: 0; font-size: 0.9em; color: rgba(0, 0, 0, 0.8);}
+  .r8{margin: 0; font-weight: bold; color: rgba(0, 0, 0, 0.8);}
+  .r9{text-align: center; font-size: 0.9em; margin-top: 0.5rem;font-family: Ariel;}
+
+  .t1{text-align: center; font-size: 0.9em; color: white; margin-top: 0.5rem; display: none;}
+  .t2{background-color: transparent; color: #575757; text-align: center; padding-bottom: 2rem; position: relative; padding: 0px 20px}
+  .t3{color: #879696;
+    margin-bottom: 1rem;
+    font-size: 3.2rem;
+    opacity: 1;
+    font-weight: 500;}
+  .t4{padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;}
+  .t5{padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;}
+  .t6{padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;}
+  .t7{padding: 0 4rem; letter-spacing: 0.05em; opacity: 1;}
+  .t8{width: 100%; display: block;width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);margin-bottom: 25px;}
+  .t9{top: 496px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 710px;}
+
+.y1{font-size: 2rem; letter-spacing: 2px; margin-bottom: 2rem;font-weight: 400;}
+.y2{background-color: #9aa5a5;padding:5px}
+.y3{display: flex; justify-content: space-between; align-items: center; width: 100%;}
+.y4{padding: 0px;margin-top: 40px;}
+.y5{top: -12px;
+    left: 76%;
+    transform: translateX(-50%);
+    width: 100px;
+    transform: rotate(47deg);}
+.y6{top: -12px;
+    left: -1%;
+    transform: translateX(-50%);
+    width: 100px;
+        transform: rotate(185deg);}
+.y7{max-width: 600px; margin: 0 auto; text-align: left; padding: 30px; border-radius: 15px; background-color: #fff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);}    
+.y8{text-align: center; font-size: 2em; margin-bottom: 20px;font-weight: 400;}
+.y9{margin-bottom: 20px;}
+
+
+
+.u1{display: block;margin-bottom: 5px;}
+.u2{width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em;}
+.u3{margin-bottom: 20px;}
+.u4{display: block; margin-bottom: 5px;}
+.u5{display: inline-flex; align-items: center; margin-right: 20px;}
+.u6{}
+.u7{}
+.u8{}
+.u9{}
+
 }
 
 
@@ -1349,7 +1561,7 @@
     <!-- Imagen de fondo -->
         <img class="imagen-borde x3" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo">
 
-    <img class="imagen-base q9" src="{{ asset('images/boda/familia.jpg') }}" alt="foto pareja">
+    <img class="imagen-base q9" src="{{ asset('images/boda/anillo2.jpeg') }}" alt="foto pareja">
 tan especial
     <!-- Imagen con borde roto transparente -->
     <img class="imagen-borde w1" src="{{ asset('images/boda/photo-border-2.png') }}" alt="borde decorativo">
@@ -1361,7 +1573,7 @@ tan especial
     Después de nueve años,<br>
     entre huellas y pañales,<br>
     damos el paso:<br>
-    <span class="w3">¡Nos casamos!</span>
+    <span class="w3">¡Noos casamos!</span>
   </p>
 </div>
 
@@ -1582,6 +1794,9 @@ tan especial
 
 
 
+<div id="mensaje-exito" style="display:none; text-align: center; margin-bottom: 20px; padding: 10px; border-radius: 10px; background-color: #d4edda; color: #155724; font-weight: bold;">
+</div>
+
 
 
 
@@ -1591,7 +1806,9 @@ tan especial
   <div class="y7">
     <h2 class="y8">Confirmación de asistencia</h2>
     
-    <form action="#" method="POST">
+  <form id="form-confirmacion"  method="POST">
+   {{-- <form id="form-confirmacion" action="{{ route('invitado.store') }}" method="POST"> --}}
+    @csrf
       <!-- Nombre y Apellidos -->
       <div class="y9">
         <label for="nombre" class="u1">Nombre y Apellidos</label>
@@ -1732,4 +1949,45 @@ function actualizarContador() {
 
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('form-confirmacion');
+    const mensaje = document.getElementById('mensaje-exito');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          mensaje.textContent = data.message;
+          mensaje.style.display = 'block';
+          form.reset();
+
+          // Ocultar el mensaje después de 5 segundos (opcional)
+          setTimeout(() => {
+            mensaje.style.display = 'none';
+          }, 5000);
+        } else {
+          alert('Error al enviar: ' + (data.message || 'verifica los datos'));
+        }
+      } catch (error) {
+        alert('Error inesperado: ' + error.message);
+      }
+    });
+  });
+</script>
+
+
 </html>
