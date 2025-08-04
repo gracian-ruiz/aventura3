@@ -30,11 +30,11 @@ class MecanicoController extends Controller
             ->whereIn('estado', ['pendiente', 'en proceso'])
             ->where(function ($query) {
                 $userId = auth()->user()->id;
-            
-                if ($userId == 1 || $userId == 14 ) {
+
+                if ($userId == 1 || $userId == 14) {
                     // Traer solo los que tienen algún mecánico asignado
                     $query->whereNotNull('asignacion_taller')
-                          ->where('asignacion_taller', '!=', '[]');
+                        ->where('asignacion_taller', '!=', '[]');
                 } else {
                     // Solo los que contienen el ID del mecánico actual
                     $query->whereJsonContains('asignacion_taller', (string) $userId);
@@ -44,13 +44,13 @@ class MecanicoController extends Controller
                 if ($search) {
                     $query->whereHas('bike', function ($q) use ($search) {
                         $q->where('nombre', 'like', '%' . $search . '%')
-                          ->orWhere('marca', 'like', '%' . $search . '%') // 🔍 búsqueda por marca
-                          ->orWhereHas('user', function ($qq) use ($search) {
-                              $qq->where('nombre', 'like', '%' . $search . '%');
-                          });
+                            ->orWhere('marca', 'like', '%' . $search . '%') // 🔍 búsqueda por marca
+                            ->orWhereHas('user', function ($qq) use ($search) {
+                                $qq->where('nombre', 'like', '%' . $search . '%');
+                            });
                     });
                 }
-            })            
+            })
             ->orderByRaw('
                 CASE 
                     -- EN PROCESO
@@ -70,19 +70,19 @@ class MecanicoController extends Controller
 
 
 
-            foreach ($appointments as $appointment) {
-                // Si el campo ya es array, úsalo directamente. Si es string (JSON), decodifícalo.
-                $userIds = is_array($appointment->asignacion_taller)
-                    ? $appointment->asignacion_taller
-                    : json_decode($appointment->asignacion_taller, true);
-            
-                // Si por alguna razón $userIds no es un array válido, lo dejamos como array vacío
-                $userIds = is_array($userIds) ? $userIds : [];
-            
-                // Obtener los usuarios asignados
-                $appointment->usuarios_asignados = User::whereIn('id', $userIds)->get();
-            }
-            
+        foreach ($appointments as $appointment) {
+            // Si el campo ya es array, úsalo directamente. Si es string (JSON), decodifícalo.
+            $userIds = is_array($appointment->asignacion_taller)
+                ? $appointment->asignacion_taller
+                : json_decode($appointment->asignacion_taller, true);
+
+            // Si por alguna razón $userIds no es un array válido, lo dejamos como array vacío
+            $userIds = is_array($userIds) ? $userIds : [];
+
+            // Obtener los usuarios asignados
+            $appointment->usuarios_asignados = User::whereIn('id', $userIds)->get();
+        }
+
         return view('mecanico.index', compact('appointments', 'search', 'estado'));
     }
 
@@ -106,24 +106,24 @@ class MecanicoController extends Controller
                 'appointments.estado as appointment_estado'
             )
             ->get();
-    
+
         // Verificar si hay componentes sin marcar como completados
         $faltanComponentes = $data->contains(function ($item) {
             return !$item->checked;
         });
-    
+
         // Obtener información del usuario y bicicleta
         $user = $appointment->bike->user;
         $bike = $appointment->bike;
-    
+
         // Generar mensaje de finalización
         $mensaje = "✅ ¡Hola {$user->name}! Tu bicicleta {$bike->nombre} ya está lista.\n"
-                 . "Puedes pasar a recogerla en nuestro horario habitual. ¡Gracias! 🚴";
-    
+            . "Puedes pasar a recogerla en nuestro horario habitual. ¡Gracias! 🚴";
+
         // Teléfono y nombre del cliente para la vista
         $telefono = $user->telefono ?? 'No disponible';
         $nombre = $user->name;
-    
+
         // Pasar todo a la vista
         return view('mecanico.confirm', compact(
             'appointment',
@@ -134,8 +134,8 @@ class MecanicoController extends Controller
             'nombre'
         ));
     }
-    
-    
+
+
     public function complete(Request $request, Appointment $appointment)
     {
         $request->validate([
@@ -145,11 +145,11 @@ class MecanicoController extends Controller
             'proxima_revision.*' => 'nullable|date',
             'tipo_fecha.*' => 'required|in:fija,opcional',
         ]);
-    
+
         foreach ($request->revisiones as $componente_id) {
             $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
             $componente = Component::find($componente_id);
-    
+
             if ($request->tipo_fecha[$componente_id] === 'fija') {
                 $dias_a_sumar = $componente ? $componente->fecha_revision : 30;
                 $fecha_proxima = now()->addDays($dias_a_sumar);
@@ -158,7 +158,7 @@ class MecanicoController extends Controller
                     ? Carbon::parse($request->proxima_revision[$componente_id])
                     : now()->addDays(30);
             }
-    
+
             $appointment->bike->revisions()->create([
                 'componente_id' => $componente_id,
                 'fecha_revision' => now(),
@@ -166,17 +166,17 @@ class MecanicoController extends Controller
                 'proxima_revision' => $fecha_proxima,
             ]);
         }
-    
+
         $appointment->update([
             'estado' => 'completada',
             'usuario_taller_id' => auth()->id(),
         ]);
-    
+
         // Llamar al controlador de recordatorios para enviar mensaje de WhatsApp
         //app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
-    
+
         return redirect()->route('mecanico.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
-    }    
+    }
 
     public function updatedos(Request $request, $id)
     {
@@ -191,7 +191,7 @@ class MecanicoController extends Controller
             'asignacion_taller' => 'nullable|array',
             'asignacion_taller.*' => 'exists:users,id',
         ]);
-    
+
         DB::beginTransaction();
         try {
             DB::table('appointments')
@@ -201,23 +201,23 @@ class MecanicoController extends Controller
                     'prioridad' => $request->prioridad,
                     'updated_at' => now(),
                 ]);
-    
+
             $componentesActuales = DB::table('appointment_component')
                 ->where('appointment_id', $id)
                 ->pluck('id', 'componente_id')
                 ->toArray();
-    
+
             $totalPresupuesto = 0;
             $totalHoras = 0;
-    
+
             foreach ($request->componentes as $index => $componente_id) {
                 $horas_trabajo = (int) $request->horas_trabajo[$index];
                 $total_precio = (float) $request->precio[$index];
                 $descuento = isset($request->descuento[$index]) ? (float) $request->descuento[$index] : 0; // Obtener descuento
-    
+
                 $totalPresupuesto += $total_precio;
                 $totalHoras += $horas_trabajo;
-    
+
                 $datosItem = [
                     'appointment_id' => $id,
                     'horas_trabajo' => $horas_trabajo,
@@ -226,7 +226,7 @@ class MecanicoController extends Controller
                     'texto' => isset($request->textos[$index]) ? $request->textos[$index] : '', // Texto del trabajo
                     'updated_at' => now(),
                 ];
-    
+
                 if (isset($componentesActuales[$componente_id])) {
                     DB::table('appointment_component')
                         ->where('id', $componentesActuales[$componente_id])
@@ -238,13 +238,13 @@ class MecanicoController extends Controller
                     DB::table('appointment_component')->insert($datosItem);
                 }
             }
-    
+
             if (!empty($componentesActuales)) {
                 DB::table('appointment_component')
                     ->whereIn('id', $componentesActuales)
                     ->delete();
             }
-    
+
             DB::table('appointments')
                 ->where('id', $id)
                 ->update([
@@ -252,15 +252,15 @@ class MecanicoController extends Controller
                     'precio_total' => $totalPresupuesto,
                     'asignacion_taller' => $request->asignacion_taller ?? [],
                 ]);
-    
+
             DB::commit();
-    
+
             return redirect()->route('mecanico.index')->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al actualizar el presupuesto: ' . $e->getMessage());
         }
-    }    
+    }
 
 
     public function edit($id)
@@ -294,11 +294,11 @@ class MecanicoController extends Controller
             ->get();
 
 
-            $usuariosTaller = DB::table('users')
+        $usuariosTaller = DB::table('users')
             ->whereIn('role', ['admin', 'taller'])
             ->select('id', 'name')
             ->get();
-        
+
 
 
 
@@ -419,10 +419,10 @@ class MecanicoController extends Controller
             'friday'    => 300,
             'saturday'  => 200,  // 3 horas y 20 minutos
         ];
-    
+
         // Reiniciar fechas para recalcular desde cero
         Appointment::whereIn('estado', ['pendiente', 'en proceso'])->update(['fecha_asignada' => null]);
-    
+
         $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
             ->orderByRaw("
                 CASE 
@@ -434,11 +434,11 @@ class MecanicoController extends Controller
             ")
             ->orderBy('created_at', 'asc')
             ->get();
-    
+
         $fecha_actual = Carbon::today();
         $ahora = Carbon::now();
         $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
-    
+
         // Si ya cerró la tienda, empezamos desde el siguiente día laboral
         if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
             do {
@@ -446,24 +446,24 @@ class MecanicoController extends Controller
                 $dia_semana = strtolower($fecha_actual->format('l'));
             } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
         }
-    
+
         $agenda = [];
-    
+
         foreach ($appointments as $appointment) {
-            $tiempo_estimado = $appointment->horas_total;   
+            $tiempo_estimado = $appointment->horas_total;
             while (true) {
                 $dia_semana = strtolower($fecha_actual->format('l'));
-    
+
                 if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
                     $fecha_actual->addDay();
                     continue;
                 }
-    
+
                 // Inicializar disponibilidad del día si no existe en la agenda
                 if (!isset($agenda[$fecha_actual->toDateString()])) {
                     $agenda[$fecha_actual->toDateString()] = 0;
                 }
-    
+
                 // **Asignar urgentes primero si hay huecos**
                 if ($appointment->prioridad === 'urgente' || $agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
                     $appointment->fecha_asignada = $fecha_actual->toDateString();
@@ -476,7 +476,7 @@ class MecanicoController extends Controller
             }
         }
     }
-    
+
 
     public function show($id)
     {
@@ -509,38 +509,47 @@ class MecanicoController extends Controller
 
     public function showReparacion(Appointment $appointment)
     {
+        // Obtener los componentes asociados a la cita con joins completos
         $data = DB::table('appointment_component')
-        ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
-        ->join('components', 'appointment_component.componente_id', '=', 'components.id')
-        ->where('appointment_component.appointment_id', $appointment->id)
-        ->select(
-            'appointment_component.id',
-            'appointment_component.usuario_taller_id',
-            'appointment_component.texto',
-            'appointment_component.total_precio',
-            'appointment_component.horas_trabajo',
-            'appointment_component.checked',
-            'appointments.id as appointment_id',
-            'appointments.fecha_asignada',
-            'appointments.prioridad',
-            'appointments.estado',
-            'appointments.descripcion_problema',
-            'appointments.estimacion_reparacion',
-            'components.id as componente_id',
-            'components.nombre as component_nombre',
-            'components.fecha_preaviso',
-            'components.fecha_revision'
-        )
-        ->get();
-    
+            ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
+            ->join('users', 'bikes.user_id', '=', 'users.id')
+            ->where('appointment_component.appointment_id', $appointment->id)
+            ->select(
+                'appointment_component.id',
+                'appointment_component.usuario_taller_id',
+                'appointment_component.texto',
+                'appointment_component.total_precio',
+                'appointment_component.horas_trabajo',
+                'appointment_component.checked',
+                'appointments.id as appointment_id',
+                'appointments.fecha_asignada',
+                'appointments.prioridad',
+                'appointments.estado',
+                'appointments.descripcion_problema',
+                'appointments.idprograma',
+                'appointments.estimacion_reparacion',
+                'components.id as componente_id',
+                'components.nombre as component_nombre',
+                'components.fecha_preaviso',
+                'components.fecha_revision',
+                'bikes.id as bike_id',
+                'bikes.nombre as bike_nombre',
+                'bikes.marca as bike_marca',
+                'users.id as user_id',
+                'users.name as user_name',
+                'users.email as user_email',
+                'users.telefono as user_telefono'
+            )
+            ->get();
 
-            // Verificar lo que contiene la variable $data
-        ;
-
+        // Pasamos todo a la vista
         return view('mecanico.reparacion', compact('appointment', 'data'));
     }
 
-    
+
+
     public function updateReparacion(Request $request, Appointment $appointment)
     {
         // Validar los datos recibidos
@@ -549,15 +558,16 @@ class MecanicoController extends Controller
             'componentes.*.id' => 'exists:components,id',
             'componentes.*.checked' => 'boolean',
             'kilometros' => 'nullable|numeric|min:0',
-            'descripcion_problema' => 'nullable|string|max:1000', // Validar la descripción si viene
+            'descripcion_problema' => 'nullable|string|max:1000',
+            'idprograma' => 'nullable|string|max:1000', // Validar la descripción si viene
         ]);
-    
+
         $usuarioTallerId = auth()->id(); // ID del usuario autenticado
-    
+
         // Actualizar estado de los componentes seleccionados
         foreach ($request->componentes as $component) {
             $checked = isset($component['checked']) ? true : false;
-    
+
             DB::table('appointment_component')
                 ->where('appointment_id', $appointment->id)
                 ->where('componente_id', $component['id'])
@@ -566,19 +576,19 @@ class MecanicoController extends Controller
                     'usuario_taller_id' => $checked ? $usuarioTallerId : null
                 ]);
         }
-    
+
         // Actualizar los kilómetros si se proporcionaron
         if ($request->filled('kilometros')) {
             $appointment->bike->kilometros = $request->input('kilometros');
             $appointment->bike->save();
         }
-    
+
         // Actualizar la descripción del problema si se proporciona
         if ($request->filled('descripcion_problema')) {
             $appointment->descripcion_problema = $request->input('descripcion_problema');
             $appointment->save();
         }
-    
+
         return redirect()->route('mecanico.index')->with('success', 'Reparación actualizada exitosamente.');
     }
 }
