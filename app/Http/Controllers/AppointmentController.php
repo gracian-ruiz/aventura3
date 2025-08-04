@@ -13,28 +13,28 @@ use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
-public function index(Request $request)
-{
-    $search = $request->input('search');
-    $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+        $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
 
-    // Recalcular siempre antes de mostrar la vista
-    $this->recalcularFechasAsignadas();
+        // Recalcular siempre antes de mostrar la vista
+        $this->recalcularFechasAsignadas();
 
-    $appointments = Appointment::with('bike.user', 'componentes')
-        ->whereIn('estado', ['pendiente', 'en proceso'])
-        ->where(function ($query) use ($search) {
-            if ($search) {
-                $query->whereHas('bike', function ($q) use ($search) {
-                    $q->where('nombre', 'like', '%' . $search . '%')
-                      ->orWhereHas('user', function ($qq) use ($search) {
-                          $qq->where('name', 'like', '%' . $search . '%');
-                      });
-                })
-                ->orWhere('idprograma', 'like', '%' . $search . '%');
-            }
-        })
-        ->orderByRaw('
+        $appointments = Appointment::with('bike.user', 'componentes')
+            ->whereIn('estado', ['pendiente', 'en proceso'])
+            ->where(function ($query) use ($search) {
+                if ($search) {
+                    $query->whereHas('bike', function ($q) use ($search) {
+                        $q->where('nombre', 'like', '%' . $search . '%')
+                            ->orWhereHas('user', function ($qq) use ($search) {
+                                $qq->where('name', 'like', '%' . $search . '%');
+                            });
+                    })
+                        ->orWhere('idprograma', 'like', '%' . $search . '%');
+                }
+            })
+            ->orderByRaw('
             CASE 
                 -- EN PROCESO
                 WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
@@ -48,11 +48,11 @@ public function index(Request $request)
                 ELSE 8
             END
         ')
-        ->orderBy('horas_total', 'asc')
-        ->paginate(8);
+            ->orderBy('horas_total', 'asc')
+            ->paginate(8);
 
-    return view('appointments.index', compact('appointments', 'search', 'estado'));
-}
+        return view('appointments.index', compact('appointments', 'search', 'estado'));
+    }
 
 
     public function indextaller(Request $request)
@@ -74,13 +74,13 @@ public function index(Request $request)
                 if ($search) {
                     $query->whereHas('bike', function ($q) use ($search) {
                         $q->where('nombre', 'like', '%' . $search . '%')
-                          ->orWhere('marca', 'like', '%' . $search . '%') // 🔍 búsqueda por marca
-                          ->orWhereHas('user', function ($qq) use ($search) {
-                              $qq->where('nombre', 'like', '%' . $search . '%');
-                          });
+                            ->orWhere('marca', 'like', '%' . $search . '%') // 🔍 búsqueda por marca
+                            ->orWhereHas('user', function ($qq) use ($search) {
+                                $qq->where('nombre', 'like', '%' . $search . '%');
+                            });
                     });
                 }
-            })            
+            })
             ->orderByRaw('
                 CASE 
                     -- EN PROCESO
@@ -97,15 +97,15 @@ public function index(Request $request)
             ')
             ->orderBy('horas_total', 'asc')
             ->paginate(8);
-        
-    
-    
+
+
+
 
 
         return view('appointments.index', compact('appointments', 'search', 'estado'));
     }
 
-    
+
 
     public function confirmCompletion(Appointment $appointment)
     {
@@ -124,24 +124,24 @@ public function index(Request $request)
                 'appointments.estado as appointment_estado'
             )
             ->get();
-    
+
         // Verificar si hay componentes sin marcar como completados
         $faltanComponentes = $data->contains(function ($item) {
             return !$item->checked;
         });
-    
+
         // Obtener información del usuario y bicicleta
         $user = $appointment->bike->user;
         $bike = $appointment->bike;
-    
+
         // Generar mensaje de finalización
         $mensaje = "✅ ¡Hola {$user->name}! Tu bicicleta {$bike->nombre} ya está lista.\n"
-                 . "Puedes pasar a recogerla en nuestro horario habitual. ¡Gracias! 🚴";
-    
+            . "Puedes pasar a recogerla en nuestro horario habitual. ¡Gracias! 🚴";
+
         // Teléfono y nombre del cliente para la vista
         $telefono = $user->telefono ?? 'No disponible';
         $nombre = $user->name;
-    
+
         // Pasar todo a la vista
         return view('appointments.confirm', compact(
             'appointment',
@@ -152,8 +152,8 @@ public function index(Request $request)
             'nombre'
         ));
     }
-    
-    
+
+
     public function complete(Request $request, Appointment $appointment)
     {
         $request->validate([
@@ -163,11 +163,11 @@ public function index(Request $request)
             'proxima_revision.*' => 'nullable|date',
             'tipo_fecha.*' => 'required|in:fija,opcional',
         ]);
-    
+
         foreach ($request->revisiones as $componente_id) {
             $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
             $componente = Component::find($componente_id);
-    
+
             if ($request->tipo_fecha[$componente_id] === 'fija') {
                 $dias_a_sumar = $componente ? $componente->fecha_revision : 30;
                 $fecha_proxima = now()->addDays($dias_a_sumar);
@@ -176,7 +176,7 @@ public function index(Request $request)
                     ? Carbon::parse($request->proxima_revision[$componente_id])
                     : now()->addDays(30);
             }
-    
+
             $appointment->bike->revisions()->create([
                 'componente_id' => $componente_id,
                 'fecha_revision' => now(),
@@ -184,17 +184,17 @@ public function index(Request $request)
                 'proxima_revision' => $fecha_proxima,
             ]);
         }
-    
+
         $appointment->update([
             'estado' => 'completada',
             'usuario_taller_id' => auth()->id(),
         ]);
-    
+
         // Llamar al controlador de recordatorios para enviar mensaje de WhatsApp
         //app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
-    
+
         return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
-    }    
+    }
 
     public function updatedos(Request $request, $id)
     {
@@ -210,7 +210,7 @@ public function index(Request $request)
             'asignacion_taller' => 'nullable|array',
             'asignacion_taller.*' => 'exists:users,id',
         ]);
-    
+
         DB::beginTransaction();
         try {
             DB::table('appointments')
@@ -220,23 +220,23 @@ public function index(Request $request)
                     'prioridad' => $request->prioridad,
                     'updated_at' => now(),
                 ]);
-    
+
             $componentesActuales = DB::table('appointment_component')
                 ->where('appointment_id', $id)
                 ->pluck('id', 'componente_id')
                 ->toArray();
-    
+
             $totalPresupuesto = 0;
             $totalHoras = 0;
-    
+
             foreach ($request->componentes as $index => $componente_id) {
                 $horas_trabajo = (int) $request->horas_trabajo[$index];
                 $total_precio = (float) $request->precio[$index];
                 $descuento = isset($request->descuento[$index]) ? (float) $request->descuento[$index] : 0; // Obtener descuento
-    
+
                 $totalPresupuesto += $total_precio;
                 $totalHoras += $horas_trabajo;
-    
+
                 $datosItem = [
                     'appointment_id' => $id,
                     'horas_trabajo' => $horas_trabajo,
@@ -245,7 +245,7 @@ public function index(Request $request)
                     'texto' => isset($request->textos[$index]) ? $request->textos[$index] : '', // Texto del trabajo
                     'updated_at' => now(),
                 ];
-    
+
                 if (isset($componentesActuales[$componente_id])) {
                     DB::table('appointment_component')
                         ->where('id', $componentesActuales[$componente_id])
@@ -257,30 +257,30 @@ public function index(Request $request)
                     DB::table('appointment_component')->insert($datosItem);
                 }
             }
-    
+
             if (!empty($componentesActuales)) {
                 DB::table('appointment_component')
                     ->whereIn('id', $componentesActuales)
                     ->delete();
             }
-    
+
             DB::table('appointments')
                 ->where('id', $id)
                 ->update([
                     'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
                     'asignacion_taller' => $request->asignacion_taller ?? [],
-                    'idprograma'=> $request->idprograma,
+                    'idprograma' => $request->idprograma,
                 ]);
-    
+
             DB::commit();
-    
+
             return redirect()->route('appointments.index')->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al actualizar el presupuesto: ' . $e->getMessage());
         }
-    }    
+    }
 
 
     public function edit($id)
@@ -314,11 +314,11 @@ public function index(Request $request)
             ->get();
 
 
-            $usuariosTaller = DB::table('users')
+        $usuariosTaller = DB::table('users')
             ->whereIn('role', ['admin', 'taller'])
             ->select('id', 'name')
             ->get();
-        
+
 
 
 
@@ -439,10 +439,10 @@ public function index(Request $request)
             'friday'    => 300,
             'saturday'  => 200,  // 3 horas y 20 minutos
         ];
-    
+
         // Reiniciar fechas para recalcular desde cero
         Appointment::whereIn('estado', ['pendiente', 'en proceso'])->update(['fecha_asignada' => null]);
-    
+
         $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
             ->orderByRaw("
                 CASE 
@@ -454,11 +454,11 @@ public function index(Request $request)
             ")
             ->orderBy('created_at', 'asc')
             ->get();
-    
+
         $fecha_actual = Carbon::today();
         $ahora = Carbon::now();
         $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
-    
+
         // Si ya cerró la tienda, empezamos desde el siguiente día laboral
         if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
             do {
@@ -466,24 +466,24 @@ public function index(Request $request)
                 $dia_semana = strtolower($fecha_actual->format('l'));
             } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
         }
-    
+
         $agenda = [];
-    
+
         foreach ($appointments as $appointment) {
-            $tiempo_estimado = $appointment->horas_total;   
+            $tiempo_estimado = $appointment->horas_total;
             while (true) {
                 $dia_semana = strtolower($fecha_actual->format('l'));
-    
+
                 if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
                     $fecha_actual->addDay();
                     continue;
                 }
-    
+
                 // Inicializar disponibilidad del día si no existe en la agenda
                 if (!isset($agenda[$fecha_actual->toDateString()])) {
                     $agenda[$fecha_actual->toDateString()] = 0;
                 }
-    
+
                 // **Asignar urgentes primero si hay huecos**
                 if ($appointment->prioridad === 'urgente' || $agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
                     $appointment->fecha_asignada = $fecha_actual->toDateString();
@@ -496,7 +496,7 @@ public function index(Request $request)
             }
         }
     }
-    
+
 
     public function show($id)
     {
@@ -530,38 +530,42 @@ public function index(Request $request)
     public function showReparacion(Appointment $appointment)
     {
         $data = DB::table('appointment_component')
-        ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
-        ->join('components', 'appointment_component.componente_id', '=', 'components.id')
-        ->where('appointment_component.appointment_id', $appointment->id)
-        ->select(
-            'appointment_component.id',
-            'appointment_component.usuario_taller_id',
-            'appointment_component.texto',
-            'appointment_component.total_precio',
-            'appointment_component.horas_trabajo',
-            'appointment_component.checked',
-            'appointments.id as appointment_id',
-            'appointments.fecha_asignada',
-            'appointments.prioridad',
-            'appointments.estado',
-            'appointments.descripcion_problema',
-            'appointments.idprograma',
-            'appointments.estimacion_reparacion',
-            'components.id as componente_id',
-            'components.nombre as component_nombre',
-            'components.fecha_preaviso',
-            'components.fecha_revision'
-        )
-        ->get();
-    
-
-            // Verificar lo que contiene la variable $data
-        ;
+            ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
+            ->join('users', 'bikes.user_id', '=', 'users.id')
+            ->where('appointment_component.appointment_id', $appointment->id)
+            ->select(
+                'appointment_component.id',
+                'appointment_component.usuario_taller_id',
+                'appointment_component.texto',
+                'appointment_component.total_precio',
+                'appointment_component.horas_trabajo',
+                'appointment_component.checked',
+                'appointments.id as appointment_id',
+                'appointments.fecha_asignada',
+                'appointments.prioridad',
+                'appointments.estado',
+                'appointments.descripcion_problema',
+                'appointments.idprograma',
+                'appointments.estimacion_reparacion',
+                'components.id as componente_id',
+                'components.nombre as component_nombre',
+                'components.fecha_preaviso',
+                'components.fecha_revision',
+                'bikes.id as bike_id',
+                'bikes.nombre as bike_nombre',
+                'users.id as user_id',
+                'users.name as user_name',
+                'users.email as user_email'
+            )
+            ->get();
 
         return view('appointments.reparacion', compact('appointment', 'data'));
     }
 
-    
+
+
     public function updateReparacion(Request $request, Appointment $appointment)
     {
         // Validar los datos recibidos
@@ -573,13 +577,13 @@ public function index(Request $request)
             'descripcion_problema' => 'nullable|string|max:1000', // Validar la descripción si viene
             'idprograma' => 'nullable|string|max:200',
         ]);
-    
+
         $usuarioTallerId = auth()->id(); // ID del usuario autenticado
-    
+
         // Actualizar estado de los componentes seleccionados
         foreach ($request->componentes as $component) {
             $checked = isset($component['checked']) ? true : false;
-    
+
             DB::table('appointment_component')
                 ->where('appointment_id', $appointment->id)
                 ->where('componente_id', $component['id'])
@@ -588,26 +592,19 @@ public function index(Request $request)
                     'usuario_taller_id' => $checked ? $usuarioTallerId : null
                 ]);
         }
-    
+
         // Actualizar los kilómetros si se proporcionaron
         if ($request->filled('kilometros')) {
             $appointment->bike->kilometros = $request->input('kilometros');
             $appointment->bike->save();
         }
-    
+
         // Actualizar la descripción del problema si se proporciona
         if ($request->filled('descripcion_problema')) {
             $appointment->descripcion_problema = $request->input('descripcion_problema');
             $appointment->save();
         }
-    
+
         return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
     }
-    
-    
-    
-    
-    
-    
-
 }

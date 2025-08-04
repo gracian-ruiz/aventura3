@@ -10,8 +10,12 @@
 
         <div class="space-y-6">
             <div class="mt-6">
-                <h2 class="text-lg font-semibold mt-4">ID SISTEMA</h2>
-        <p class="text-gray-700">{{ $appointment->idprograma }}</p>
+                <p class="text-sm font-semibold mt-4 text-gray-600">
+                    ID SISTEMA: {{ $appointment->idprograma }}
+                </p>
+                <h1 class="text-2xl font-bold text-gray-900 mt-1">
+                    Cliente: {{ $data->first()->user_name ?? 'Sin asignar' }}
+                </h1>
                 <h1 class="block text-700 text-lg font-semibold mb-1">
                     Descripción anterior del problema:
                 </h1>
