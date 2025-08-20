@@ -275,8 +275,8 @@ Route::post('/alquiler/response', [AventuraBikeController::class, 'response'])->
 
 
 /* Route::get('/alquiler/exito', [AventuraBikeController::class, 'exito'])->name('alquiler.exito');
-Route::get('/alquiler/error', [AventuraBikeController::class, 'error'])->name('alquiler.error'); 
-Route::get('/pruebas', [AlquilerController::class, 'pruebas'])->name('pruebas');*/
+Route::get('/alquiler/error', [AventuraBikeController::class, 'error'])->name('alquiler.error'); */
+Route::get('/pruebas', [AlquilerController::class, 'pruebas'])->name('pruebas');
 
 
 
