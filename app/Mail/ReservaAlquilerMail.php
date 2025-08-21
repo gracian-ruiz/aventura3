@@ -30,7 +30,7 @@ class ReservaAlquilerMail extends Mailable
     public function build()
     {
         return $this->subject('Confirmación de reserva de bicicletas')
-                    ->bcc(['gracianmiguel1995@gmail.com', 'aventurabikepk@gmail.com']) 
+                    ->bcc(['aventurabikepk@gmail.com']) 
                     ->view('emails.reserva') // creamos este archivo en el paso siguiente
                     ->with([
                         'alquiler' => $this->alquiler,

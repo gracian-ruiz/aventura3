@@ -15,3 +15,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+vendor
+.gitignore
+vendor/composer
+/vendor/

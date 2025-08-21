@@ -111,7 +111,6 @@ class WhatsAppController extends Controller
                     ->update(['presupuesto_enviado' => true]);
 
         } catch (\Exception $e) {
-            dd($e);
             Log::error("Error al enviar mensaje de WhatsApp: " . $e->getMessage());
         }
     }

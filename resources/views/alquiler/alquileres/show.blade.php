@@ -97,7 +97,7 @@
                     <tr class="align-middle 
                         {{ $material->pivot->estado === 'finalizado' ? 'bg-red-100 text-red-700' : '' }} 
                         {{ $material->pivot->estado === 'activo' ? 'bg-green-100 text-green-700' : '' }}">
-                        <td class="px-3 py-3"><strong>{{ $material->nombre }}</strong></td>
+                        <td class="px-3 py-3"><strong>{{ $material->nombre }} - TALLA {{$material->talla}}</strong></td>
                         <td class="text-center px-3 py-3">{{ \Carbon\Carbon::parse($material->pivot->fecha_inicio)->format('d/m/Y') }}</td>
                         <td class="text-center px-3 py-3">{{ \Carbon\Carbon::parse($material->pivot->fecha_fin)->format('d/m/Y') }}</td>
                         <td class="text-end px-3 py-3">{{ number_format($material->pivot->precio_unitario, 2) }} €</td>
