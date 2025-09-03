@@ -23,8 +23,8 @@ class EnviarRecordatorios extends Command
 
     public function handle(): int
     {
-        $recordatorioController = new EnviarCorreosController();
-        $recordatorioController->enviarRecordatorios();
+        //$recordatorioController = new EnviarCorreosController();
+        //$recordatorioController->enviarRecordatorios();
 
         $this->info('Los recordatorios de revisión se han gestionado correctamente.');
         return self::SUCCESS;
