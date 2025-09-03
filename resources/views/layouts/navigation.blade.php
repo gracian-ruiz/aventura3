@@ -55,7 +55,7 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">Perfil</x-dropdown-link>
+                        {{-- <x-dropdown-link :href="route('profile.edit')">Perfil</x-dropdown-link> --}}
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
@@ -105,7 +105,7 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">Perfil</x-responsive-nav-link>
+                {{-- <x-responsive-nav-link :href="route('profile.edit')">Perfil</x-responsive-nav-link> --}}
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">

@@ -245,6 +245,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     //CORREOS
     Route::get('/enviar/correo/presupuesto/{id}', [EnviarCorreosController::class, 'enviarPresupuestoCorreo'])
     ->name('enviar.presupuesto.correo');
+
+    //CALENDARIO
+    Route::get('/calendario/alquiler', [AlquilerController::class, 'calendarioAlquiler'])->name('calendarioAlquiler');
  
 });
 
@@ -276,7 +279,7 @@ Route::post('/alquiler/response', [AventuraBikeController::class, 'response'])->
 Route::get('/alquiler/error', [AventuraBikeController::class, 'error'])->name('alquiler.error'); */
 //Route::get('/pruebas', [AlquilerController::class, 'pruebas'])->name('pruebas');
 
-Route::get('/calendario/alquiler', [AlquilerController::class, 'calendarioAlquiler'])->name('calendarioAlquiler');
+
 
 
 
