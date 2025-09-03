@@ -28,6 +28,7 @@ class ComponentController extends Controller
     {
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
+            'descripcion' => 'required|string|max:255',
             'fecha_preaviso' => 'nullable|integer|min:0',
             'fecha_revision' => 'required|integer|min:1',
             'hora_taller' => 'required|integer|min:0', // Asegurar que se recibe
@@ -50,6 +51,7 @@ class ComponentController extends Controller
     {
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
+            'descripcion' => 'required|string|max:255',
             'fecha_preaviso' => 'required|integer|min:0',
             'fecha_revision' => 'required|integer|min:1',
             'hora_taller' => 'required|integer|min:0', // Asegurar que se recibe

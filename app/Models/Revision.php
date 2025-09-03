@@ -10,7 +10,7 @@ class Revision extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['bike_id', 'componente_id', 'fecha_revision', 'descripcion', 'proxima_revision'];
+    protected $fillable = ['bike_id', 'componente_id', 'fecha_revision', 'descripcion', 'proxima_revision','revision'];
     protected $table = 'revisions';
 
     public function bike()

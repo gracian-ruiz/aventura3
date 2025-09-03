@@ -9,7 +9,7 @@ class Component extends Model // <-- Aquí debe ser el nombre correcto
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'fecha_preaviso', 'fecha_revision', 'hora_taller', 'precio','orden'];
+    protected $fillable = ['nombre', 'fecha_preaviso', 'fecha_revision', 'hora_taller', 'precio','orden','descripcion'];
     protected $table = 'components';
 
     public function revisiones()

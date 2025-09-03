@@ -3,27 +3,30 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\RecordatorioController;
-
+use App\Http\Controllers\EnviarCorreosController;
 class EnviarRecordatorios extends Command
 {
-    // Nombre del comando para ejecutarlo en la terminal
+    /**
+     * Nombre del comando para ejecutarlo en la terminal
+     */
     protected $signature = 'recordatorios:enviar';
 
-    // Descripción del comando
-    protected $description = 'Envia recordatorios de revisiones por WhatsApp';
+    /**
+     * Descripción del comando (actualizada a email si ya migraste)
+     */
+    protected $description = 'Envía recordatorios de revisiones por email';
 
     public function __construct()
     {
         parent::__construct();
     }
 
-    public function handle()
+    public function handle(): int
     {
-        // Instancia del controlador para ejecutar la función
-        $recordatorioController = new RecordatorioController();
+        $recordatorioController = new EnviarCorreosController();
         $recordatorioController->enviarRecordatorios();
 
-        $this->info('Los recordatorios de revision se han enviado correctamente.');
+        $this->info('Los recordatorios de revisión se han gestionado correctamente.');
+        return self::SUCCESS;
     }
 }

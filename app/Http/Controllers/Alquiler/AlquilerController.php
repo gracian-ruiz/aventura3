@@ -448,9 +448,56 @@ class AlquilerController extends Controller
     }
 
     // En AventuraBikeController
-public function pruebas()
+public function calendarioAlquiler()
 {
-    return view('pruebas'); // o simplemente 'index' si la vista está en resources/views/
+    //return view('pruebas'); // o simplemente 'index' si la vista está en resources/views/
+
+$resultados = DB::table('alquiler_material')
+        ->join('alquileres', 'alquileres.id', '=', 'alquiler_material.alquiler_id')
+        ->join('usuarios_alquiler', 'usuarios_alquiler.id', '=', 'alquileres.usuario_id')
+        ->join('materials', 'materials.id', '=', 'alquiler_material.material_id')
+        ->where('alquiler_material.estado', 'activo')
+        ->select(
+            'alquiler_material.alquiler_id',
+            'usuarios_alquiler.nombre as usuario',
+            'materials.nombre as material',
+            'alquiler_material.fecha_inicio',
+            'alquiler_material.fecha_fin',
+            'alquileres.estado',
+            'alquileres.fallo',
+            'alquileres.web'
+        )
+        ->get();
+
+    $eventos = $resultados->map(function ($item) {
+        // Asignar color según condiciones
+        if ($item->fallo === 1) {
+            $color = '#fcd34d'; // amarillo (bg-yellow-300)
+        } elseif ($item->web === 1 && $item->estado === 'reservado') {
+            $color = '#93c5fd'; // azul (bg-blue-300)
+        } elseif ($item->estado === 'reservado') {
+            $color = '#fca5a5'; // rojo claro (bg-red-300)
+        } elseif ($item->estado === 'activo') {
+            $color = '#4ade80'; // verde (bg-green-400)
+        } elseif ($item->estado === 'finalizado') {
+            $color = '#e5e7eb'; // gris claro (bg-gray-100)
+        } else {
+            $color = '#ffffff'; // blanco
+        }
+
+        return [
+            'title' => $item->usuario . ' - ' . $item->material,
+            'start' => $item->fecha_inicio,
+            'end' => $item->fecha_fin
+                ? \Carbon\Carbon::parse($item->fecha_fin)->addDay()->toDateString()
+                : null,
+            'url' => url('/alquileres/' . $item->alquiler_id),
+            'color' => $color,
+        ];
+    });
+
+    return view('alquiler.alquileres.calendario', ['eventos' => $eventos]);
 }
+
 
 }

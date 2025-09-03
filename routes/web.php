@@ -14,6 +14,7 @@ use App\Http\Controllers\AvisoEnviadoController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PresupuestoController;
 use App\Http\Controllers\Alquiler\UsuarioAlquilerController;
+use App\Http\Controllers\EnviarCorreosController;
 use App\Http\Controllers\MecanicoController;
 use App\Http\Controllers\WhatsappController;
 use App\Models\Bike;
@@ -119,7 +120,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('appointments.confirmCompletion');
 
     Route::get('/mecanico/{appointment}/confirm', [MecanicoController::class, 'confirmCompletion'])
-        ->name('mecanico.confirmCompletion');    
+        ->name('mecanico.confirmCompletion');
 
     Route::put('/citas/{appointment}/complete', [AppointmentController::class, 'complete'])
         ->name('appointments.complete');
@@ -127,8 +128,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
     Route::put('/mecanico/{appointment}/complete', [MecanicoController::class, 'complete'])
-    ->name('mecanico.complete');
-Route::get('/mecanico/{appointment}', [MecanicoController::class, 'show'])->name('mecanico.show');
+        ->name('mecanico.complete');
+    Route::get('/mecanico/{appointment}', [MecanicoController::class, 'show'])->name('mecanico.show');
 
 
     // ✅ Nueva ruta para update con otro nombre
@@ -150,7 +151,7 @@ Route::get('/mecanico/{appointment}', [MecanicoController::class, 'show'])->name
 
 
 
-    
+
 
 
 
@@ -167,12 +168,12 @@ Route::get('/mecanico/{appointment}', [MecanicoController::class, 'show'])->name
     Route::get('/presupuestos/{id}/pdf', [PresupuestoController::class, 'descargarPDF'])->name('presupuestos.pdf');
     Route::get('/presupuestos/{id}', [PresupuestoController::class, 'show'])->name('presupuestos.show');
     Route::patch('/presupuestos/{presupuesto}/estado', [PresupuestoController::class, 'actualizarEstado'])->name('presupuestos.actualizarEstado');
-    
+
 
 
 
     Route::get('/presupuesto/{clienteId}/{presupuestoId}/enviar', [WhatsAppController::class, 'enviarPresupuestoWhatsApp'])
-    ->name('presupuesto.enviar');
+        ->name('presupuesto.enviar');
 
 
 
@@ -182,25 +183,25 @@ Route::get('/mecanico/{appointment}', [MecanicoController::class, 'show'])->name
 
     // Listado de usuarios de alquiler
     Route::get('/usuarios_alquiler', [UsuarioAlquilerController::class, 'index'])->name('usuarios_alquiler.index');
-    
+
     // Formulario para crear nuevo usuario de alquiler
     Route::get('/usuarios_alquiler/create', [UsuarioAlquilerController::class, 'create'])->name('usuarios_alquiler.create');
-    
+
     // Guardar nuevo usuario de alquiler
     Route::post('/usuarios_alquiler', [UsuarioAlquilerController::class, 'store'])->name('usuarios_alquiler.store');
-    
+
     // Ver usuario de alquiler específico (opcional)
     Route::get('/usuarios_alquiler/{usuario_alquiler}', [UsuarioAlquilerController::class, 'show'])->name('usuarios_alquiler.show');
-    
+
     // Formulario para editar usuario de alquiler
     Route::get('/usuarios_alquiler/{usuario_alquiler}/edit', [UsuarioAlquilerController::class, 'edit'])->name('usuarios_alquiler.edit');
-    
+
     // Actualizar usuario de alquiler
     Route::put('/usuarios_alquiler/{usuario_alquiler}', [UsuarioAlquilerController::class, 'update'])->name('usuarios_alquiler.update');
-    
+
     // Eliminar usuario de alquiler
     Route::delete('/usuarios_alquiler/{usuario_alquiler}', [UsuarioAlquilerController::class, 'destroy'])->name('usuarios_alquiler.destroy');
-    
+
     Route::resource('material', MaterialController::class);
 
     Route::get('usuarios/{usuario_alquiler}/alquileres/create', [AlquilerController::class, 'create'])->name('alquiler.create');
@@ -212,44 +213,39 @@ Route::get('/mecanico/{appointment}', [MecanicoController::class, 'show'])->name
 
 
     // Ruta para obtener materiales disponibles
-Route::get('/alquileres/materiales-disponibles', [AlquilerController::class, 'bicicletasDisponibles']);
+    Route::get('/alquileres/materiales-disponibles', [AlquilerController::class, 'bicicletasDisponibles']);
 
-Route::get('/alquileres/{alquiler}/edit', [AlquilerController::class, 'edit'])->name('alquileres.edit');
-Route::put('/alquileres/{alquiler}', [AlquilerController::class, 'update'])->name('alquileres.update');
+    Route::get('/alquileres/{alquiler}/edit', [AlquilerController::class, 'edit'])->name('alquileres.edit');
+    Route::put('/alquileres/{alquiler}', [AlquilerController::class, 'update'])->name('alquileres.update');
 
-Route::delete('/alquileres/materiales/{pivotId}', [AlquilerController::class, 'eliminarMaterial'])
-    ->name('alquileres.materiales.destroy');
-
-
-Route::post('/alquileres/{alquiler}/materiales', [AlquilerController::class, 'añadirMaterial'])
-->name('alquileres.materiales.store');
-
-Route::get('/alquileres/finalizado', [\App\Http\Controllers\Alquiler\AlquilerController::class, 'finalizado'])->name('alquileres.finalizado');
+    Route::delete('/alquileres/materiales/{pivotId}', [AlquilerController::class, 'eliminarMaterial'])
+        ->name('alquileres.materiales.destroy');
 
 
+    Route::post('/alquileres/{alquiler}/materiales', [AlquilerController::class, 'añadirMaterial'])
+        ->name('alquileres.materiales.store');
 
-
-// Ruta para obtener materiales disponibles
-// web.php
-Route::post('/alquileres/{alquiler}/materiales', [AlquilerController::class, 'addMateriales'])->name('alquileres.addMateriales');
-
-Route::get('/alquileres/{id}', [AlquilerController::class, 'show'])->name('alquileres.show');
-Route::patch('alquileres/material/{pivotId}/devolver', [AlquilerController::class, 'devolverMaterial'])
-    ->name('alquileres.material.devolver');
-
-Route::patch('/alquileres/{alquiler}/finalizar', [AlquilerController::class, 'finalizar'])->name('alquileres.finalizar');
-
-Route::delete('/alquileres/{alquiler}', [AlquilerController::class, 'destroy'])->name('alquileres.destroy');
+    Route::get('/alquileres/finalizado', [\App\Http\Controllers\Alquiler\AlquilerController::class, 'finalizado'])->name('alquileres.finalizado');
 
 
 
 
+    // Ruta para obtener materiales disponibles
+    // web.php
+    Route::post('/alquileres/{alquiler}/materiales', [AlquilerController::class, 'addMateriales'])->name('alquileres.addMateriales');
 
+    Route::get('/alquileres/{id}', [AlquilerController::class, 'show'])->name('alquileres.show');
+    Route::patch('alquileres/material/{pivotId}/devolver', [AlquilerController::class, 'devolverMaterial'])
+        ->name('alquileres.material.devolver');
 
+    Route::patch('/alquileres/{alquiler}/finalizar', [AlquilerController::class, 'finalizar'])->name('alquileres.finalizar');
 
+    Route::delete('/alquileres/{alquiler}', [AlquilerController::class, 'destroy'])->name('alquileres.destroy');
 
-
-
+    //CORREOS
+    Route::get('/enviar/correo/presupuesto/{id}', [EnviarCorreosController::class, 'enviarPresupuestoCorreo'])
+    ->name('enviar.presupuesto.correo');
+ 
 });
 
 
@@ -269,14 +265,18 @@ Route::get('/aventura-alquiler/', [AventuraBikeController::class, 'bicismontaña
 Route::post('/aventura-alquiler', [AventuraBikeController::class, 'store'])->middleware('throttle:5,1')->name('addbicismontaña');
 
 Route::post('/verificar-disponibilidad', [
-    AventuraBikeController::class, 'comprobarDisponibilidad'])->name('bicicletas.disponibilidad');
+    AventuraBikeController::class,
+    'comprobarDisponibilidad'
+])->name('bicicletas.disponibilidad');
 
 Route::post('/alquiler/response', [AventuraBikeController::class, 'response'])->name('alquiler.response');
 
 
 /* Route::get('/alquiler/exito', [AventuraBikeController::class, 'exito'])->name('alquiler.exito');
 Route::get('/alquiler/error', [AventuraBikeController::class, 'error'])->name('alquiler.error'); */
-/* Route::get('/pruebas', [AlquilerController::class, 'pruebas'])->name('pruebas'); */
+//Route::get('/pruebas', [AlquilerController::class, 'pruebas'])->name('pruebas');
+
+Route::get('/calendario/alquiler', [AlquilerController::class, 'calendarioAlquiler'])->name('calendarioAlquiler');
 
 
 

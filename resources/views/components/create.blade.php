@@ -36,6 +36,10 @@
             <label for="orden" class="block text-gray-700">Orden</label>
             <input type="number" name="orden" id="orden" class="w-full border px-4 py-2 rounded-md" placeholder="Ej: 1">
         </div>
+        <div class="mb-4">
+            <label for="descripcion" class="block text-gray-700">Descripcion</label>
+            <input type="text" name="descripcion" id="descripcion" class="w-full border px-4 py-2 rounded-md" placeholder="">
+        </div>
 
         <div class="flex justify-end">
             <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">

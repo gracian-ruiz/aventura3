@@ -84,6 +84,10 @@
                                     class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                                      Ver Presupuesto
                                  </a>
+{{--                                 <a href="{{ url("/enviar/correo/presupuesto/{$presupuesto->id}") }}" 
+                                    class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                     Enviar correo
+                                 </a> --}}
 {{--                                 <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" 
                                    class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
                                     Descargar PDF
