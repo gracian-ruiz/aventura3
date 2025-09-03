@@ -22,13 +22,13 @@
     <img src="{{ asset('images/logo_taller_1.png') }}" alt="Logo Aventura Bike" class="h-20 w-auto ml-3">
 </div>
 
-<h1 style="background: red; padding: 10px; color: white; text-align: center;">
+{{-- <h1 style="background: red; padding: 10px; color: white; text-align: center;">
   ESTAMOS CERRADOS POR VACACIONES, VOLVEREMOS A LA NORMALIDAD EL DÍA 1 DE SEPTIEMBRE, DISCULPEN LAS MOLESTIAS.  
   SOLO SERÁN VÁLIDAS LAS RESERVAS A PARTIR DEL 1 DE SEPTIEMBRE.  
   <br><br>
   WE ARE CLOSED FOR HOLIDAYS, WE WILL RETURN TO NORMAL ON SEPTEMBER 1, SORRY FOR THE INCONVENIENCE.  
   ONLY RESERVATIONS FROM SEPTEMBER 1 WILL BE VALID.
-</h1>
+</h1> --}}
 
     <!-- Texto introductorio -->
 <div class="text-center my-4">
