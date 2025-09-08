@@ -31,15 +31,16 @@ class AlquilerController extends Controller
         }
     
         // Ordenar primero por fallo (1 primero), luego por estado (Activo primero), luego por fecha
-        $query->orderByDesc('fallo')
+        $query->orderBy('fecha_inicio', 'desc') // más reciente primero
+            ->orderByDesc('fallo')
             ->orderByRaw("
                 CASE 
                     WHEN estado = 'Activo' THEN 0
                     WHEN estado = 'Reservado' THEN 1
                     ELSE 2
                 END
-            ")
-            ->orderBy('fecha_inicio', 'asc');
+            ");
+
     
         $alquileres = $query->paginate(10)->withQueryString();
     
