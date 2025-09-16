@@ -246,8 +246,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/enviar/correo/presupuesto/{id}', [EnviarCorreosController::class, 'enviarPresupuestoCorreo'])
     ->name('enviar.presupuesto.correo');
 
-    //CALENDARIO
+    //CALENDARIO alquiler
     Route::get('/calendario/alquiler', [AlquilerController::class, 'calendarioAlquiler'])->name('calendarioAlquiler');
+    //CALENDARIO presupuestos
+    Route::get('/calendario-citas', [AppointmentController::class, 'calendariocitas'])->name('calendario-citas');
  
 });
 

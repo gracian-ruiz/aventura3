@@ -38,6 +38,14 @@
                                         <input type="text" name="idprograma" id="idprograma" class="w-full border px-4 py-2 rounded-md" value="{{$presupuesto->idprograma }}">
                                     </div>
                                 </div>
+                                <div class="w-1/2">
+                                    <label for="calendario" class="block text-gray-700">📅 Calendario</label>
+                                    <input type="date" 
+                                        name="calendario" 
+                                        id="calendario" 
+                                        class="w-full border px-4 py-2 rounded-md" 
+                                        value="{{ $presupuesto->calendario }}">
+                                </div>
 
 
                         <div class="mb-4">

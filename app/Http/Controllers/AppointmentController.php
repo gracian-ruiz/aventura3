@@ -9,6 +9,8 @@ use App\Models\Component;
 use Carbon\Carbon;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
+use App\Http\Controllers\Alquiler\EnviarCorreosController;
+use App\Http\Controllers\EnviarCorreosController as ControllersEnviarCorreosController;
 use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
@@ -153,7 +155,7 @@ class AppointmentController extends Controller
         ));
     }
 
-
+    //AQUI TERMINA EL PROCESO DE RAPACION CUANDO LE DAS AL BOTON DE CONFIRMAR FINALIZACION 
     public function complete(Request $request, Appointment $appointment)
     {
         $request->validate([
@@ -192,6 +194,8 @@ class AppointmentController extends Controller
 
         // Llamar al controlador de recordatorios para enviar mensaje de WhatsApp
         //app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
+        $correoController = new ControllersEnviarCorreosController();
+        $correoController->enviarCompletado($appointment->id);
 
         return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
     }
@@ -607,4 +611,35 @@ class AppointmentController extends Controller
 
         return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
     }
+
+public function calendariocitas()
+{
+    $resultados = DB::table('appointments')
+        ->join('bikes', 'bikes.id', '=', 'appointments.bike_id')
+        ->join('users', 'users.id', '=', 'bikes.user_id')
+        ->select(
+            'appointments.id as presupuesto_id',
+            'bikes.nombre as bicicleta',
+            'users.name as usuario',
+            'appointments.calendario',
+            'appointments.estado'
+        )
+        ->whereNotNull('appointments.calendario')
+        ->get();
+
+    $eventos = $resultados->map(function ($item) {
+        $color = '#4ade80'; // verde fijo (puedes cambiar según estado si quieres)
+
+        return [
+            'title' => $item->usuario . "\n" . $item->bicicleta . ' - ' . $item->presupuesto_id,
+            'start' => $item->calendario,
+            'url' => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
+            'color' => $color,
+        ];
+    });
+
+    return view('appointments.calendario', ['eventos' => $eventos]);
+}
+
+
 }

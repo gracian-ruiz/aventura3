@@ -118,7 +118,8 @@ class PresupuestoController extends Controller
             'estado' => count($componentes) > 0 ? 'presupuesto' : 'vacía',
             'descuento' => 0, // se actualiza más abajo
             'asignacion_taller' => $request->asignacion_taller ?? [],
-            'idprograma' => $request->idprograma
+            'idprograma' => $request->idprograma,
+            'calendario' => $request->calendario
         ]);
 
         $totalHoras = 0;
@@ -374,7 +375,8 @@ class PresupuestoController extends Controller
                         'horas_total' => $totalHoras,
                         'precio_total' => $totalPresupuesto,
                         'descuento' => $totalDescuento,
-                        'idprograma' => $request->idprograma
+                        'idprograma' => $request->idprograma,
+                        'calendario' => $request->calendario
                     ]);
             }
 

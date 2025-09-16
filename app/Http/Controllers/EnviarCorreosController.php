@@ -6,10 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
-
+use App\Models\Appointment;
 use App\Mail\PresupuestoMail;
+use App\Mail\CitaCompletadaMail;
 use App\Mail\RecordatorioRevisionMail;
 use App\Models\Revision;
+use Illuminate\Support\Facades\Log;
+
 
 class EnviarCorreosController extends Controller
 {
@@ -95,5 +98,25 @@ class EnviarCorreosController extends Controller
         }
 
         return $enviados;
+    }
+    public function enviarCompletado($id): void
+    {
+        $appointment = Appointment::with('bike.user')->findOrFail($id);
+
+        $cliente   = $appointment->bike->user;
+        $bicicleta = $appointment->bike;
+
+        $mensaje = "✅ ¡Hola {$cliente->name}! Tu bicicleta {$bicicleta->nombre} ya está lista.\n";
+        $mensaje .= "Puedes pasar a recogerla en nuestro horario habitual. ¡Gracias! 🚴\n\n";
+        $mensaje .= "📞 Teléfono: {$cliente->telefono}\n";
+        $mensaje .= "👤 Cliente: {$cliente->name}";
+
+        Mail::to($cliente->email)->send(new \App\Mail\CitaCompletadaMail($mensaje));
+
+    try {
+        Mail::to($cliente->email)->send(new \App\Mail\CitaCompletadaMail($mensaje));
+    } catch (\Exception $e) {
+        Log::error("Error al enviar correo de cita completada: ".$e->getMessage());
+    }
     }
 }
