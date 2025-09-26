@@ -250,6 +250,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/calendario/alquiler', [AlquilerController::class, 'calendarioAlquiler'])->name('calendarioAlquiler');
     //CALENDARIO presupuestos
     Route::get('/calendario-citas', [AppointmentController::class, 'calendariocitas'])->name('calendario-citas');
+
+    //quitar presupuesto
+    Route::patch('/appointments/{appointment}/quitar-orden-taller', [AppointmentController::class, 'quitarOrdenTaller'])
+    ->name('appointments.quitarOrdenTaller');
+
  
 });
 

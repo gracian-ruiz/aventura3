@@ -46,18 +46,31 @@
 
     <div class="mt-4 flex space-x-4">
         <!-- Botón Volver -->
-        <a href="{{ route('appointments.index') }}" class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        <a href="{{ route('appointments.index') }}" 
+        class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
             Volver a Citas
         </a>
 
         <!-- Botón Descargar Presupuesto -->
-        @if (!empty($appointment[0]->presupuesto))
-        <a href="{{ route('presupuestos.pdf', $appointment[0]->presupuesto) }}" 
-           class="btn text-white px-4 py-2 rounded-md" style="background-color: #E1251B;">
-            <i class="fas fa-file-pdf"></i> Descargar PDF
-        </a>
-    @endif
-    
+        @if (!empty($appointment[0]->appointment_id))
+            <a href="{{ route('presupuestos.pdf', $appointment[0]->appointment_id) }}" 
+            class="btn text-white px-4 py-2 rounded-md" style="background-color: #E1251B;">
+                <i class="fas fa-file-pdf"></i> Descargar PDF
+            </a>
+        @endif
+
+        <!-- Botón Quitar del Taller -->
+        <form action="{{ route('appointments.quitarOrdenTaller', $appointment[0]->appointment_id) }}" 
+            method="POST" 
+            onsubmit="return confirm('⚠️ ¿Seguro que quieres devolver esta cita al estado presupuesto?');">
+            @csrf
+            @method('PATCH')
+            <button type="submit" 
+                    class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                Quitar del Taller
+            </button>
+        </form>
     </div>
+
 </div>
 @endsection

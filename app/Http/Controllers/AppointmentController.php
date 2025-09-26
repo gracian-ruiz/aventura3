@@ -612,34 +612,47 @@ class AppointmentController extends Controller
         return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
     }
 
-public function calendariocitas()
-{
-    $resultados = DB::table('appointments')
-        ->join('bikes', 'bikes.id', '=', 'appointments.bike_id')
-        ->join('users', 'users.id', '=', 'bikes.user_id')
-        ->select(
-            'appointments.id as presupuesto_id',
-            'bikes.nombre as bicicleta',
-            'users.name as usuario',
-            'appointments.calendario',
-            'appointments.estado'
-        )
-        ->whereNotNull('appointments.calendario')
-        ->get();
+    public function calendariocitas()
+    {
+        $resultados = DB::table('appointments')
+            ->join('bikes', 'bikes.id', '=', 'appointments.bike_id')
+            ->join('users', 'users.id', '=', 'bikes.user_id')
+            ->select(
+                'appointments.id as presupuesto_id',
+                'bikes.nombre as bicicleta',
+                'users.name as usuario',
+                'appointments.calendario',
+                'appointments.estado'
+            )
+            ->whereNotNull('appointments.calendario')
+            ->get();
 
-    $eventos = $resultados->map(function ($item) {
-        $color = '#4ade80'; // verde fijo (puedes cambiar según estado si quieres)
+        $eventos = $resultados->map(function ($item) {
+            $color = '#4ade80'; // verde fijo (puedes cambiar según estado si quieres)
 
-        return [
-            'title' => $item->usuario . "\n" . $item->bicicleta . ' - ' . $item->presupuesto_id,
-            'start' => $item->calendario,
-            'url' => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
-            'color' => $color,
-        ];
-    });
+            return [
+                'title' => $item->usuario . "\n" . $item->bicicleta . ' - ' . $item->presupuesto_id,
+                'start' => $item->calendario,
+                'url' => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
+                'color' => $color,
+            ];
+        });
 
-    return view('appointments.calendario', ['eventos' => $eventos]);
-}
+        return view('appointments.calendario', ['eventos' => $eventos]);
+    }
 
+    public function quitarOrdenTaller(Appointment $appointment)
+    {
+        try {
+            // Cambiar estado a presupuesto
+            $appointment->update([
+                'estado' => 'presupuesto',
+            ]);
 
+            return redirect()->route('appointments.index')
+                ->with('success', '✅ La cita se ha pasado a estado presupuesto correctamente.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', '❌ Error al actualizar la cita: ' . $e->getMessage());
+        }
+    }
 }
