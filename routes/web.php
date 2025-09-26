@@ -255,6 +255,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::patch('/appointments/{appointment}/quitar-orden-taller', [AppointmentController::class, 'quitarOrdenTaller'])
     ->name('appointments.quitarOrdenTaller');
 
+    //calendario
+    Route::get('/calendario-asignado', [AppointmentController::class, 'calendarioAsignado'])
+    ->name('calendario-asignado');
+
+
  
 });
 
