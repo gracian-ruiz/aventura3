@@ -368,47 +368,6 @@ class MecanicoController extends Controller
         return redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
     }
 
-    public function asignarFechasCitas()
-    {
-        $horas_laborales = [
-            'Monday' => 420,
-            'Tuesday' => 420,
-            'Wednesday' => 420,
-            'Thursday' => 420,
-            'Friday' => 420,
-            'Saturday' => 240,
-        ];
-
-        $citas = Appointment::whereNull('fecha_asignada')
-            ->orderByRaw("CASE WHEN prioridad = 'urgente' THEN 1 ELSE 2 END")
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        $agenda = [];
-        $fecha_actual = now()->startOfDay();
-
-        foreach ($citas as $cita) {
-            while (true) {
-                $dia_semana = $fecha_actual->format('l');
-
-                if (isset($horas_laborales[$dia_semana])) {
-                    if (!isset($agenda[$fecha_actual->toDateString()])) {
-                        $agenda[$fecha_actual->toDateString()] = 0;
-                    }
-
-                    if ($agenda[$fecha_actual->toDateString()] + $cita->tiempo_estimado <= $horas_laborales[$dia_semana]) {
-                        $cita->fecha_asignada = $fecha_actual->toDateString();
-                        $cita->save();
-                        $agenda[$fecha_actual->toDateString()] += $cita->tiempo_estimado;
-                        break;
-                    }
-                }
-
-                $fecha_actual->addDay();
-            }
-        }
-    }
-
     private function recalcularFechasAsignadas()
     {
         $horas_laborales = [
