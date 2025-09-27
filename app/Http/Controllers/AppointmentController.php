@@ -420,7 +420,6 @@ class AppointmentController extends Controller
 
         $fecha_actual = Carbon::today();
         $ahora = Carbon::now();
-        dd($ahora);
         $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
 
         // Si ya cerró la tienda, empezamos desde el siguiente día laboral
