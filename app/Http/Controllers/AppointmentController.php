@@ -18,7 +18,7 @@ class AppointmentController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
+        $estado = $request->input('estado', 'pendiente'); // por defecto 'pendiente'
 
         // Recalcular siempre antes de mostrar la vista
         $this->recalcularFechasAsignadas();
@@ -36,25 +36,12 @@ class AppointmentController extends Controller
                         ->orWhere('idprograma', 'like', '%' . $search . '%');
                 }
             })
-            ->orderByRaw('
-            CASE 
-                -- EN PROCESO
-                WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
-                WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
-                WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
-                WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
-                -- PENDIENTE
-                WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total < 30 THEN 5
-                WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total >= 30 THEN 6
-                WHEN estado = "pendiente" AND prioridad = "normal" AND horas_total < 30 THEN 7
-                ELSE 8
-            END
-        ')
-            ->orderBy('horas_total', 'asc')
+            ->orderBy('fecha_asignada', 'asc') // 🔹 Ahora el criterio único
             ->paginate(8);
 
         return view('appointments.index', compact('appointments', 'search', 'estado'));
     }
+
 
 
     public function indextaller(Request $request)
@@ -393,6 +380,85 @@ class AppointmentController extends Controller
     }
 
     private function recalcularFechasAsignadas()
+    {
+        $horas_laborales = [
+            'monday'    => 300,  // 5 horas
+            'tuesday'   => 300,
+            'wednesday' => 300,
+            'thursday'  => 300,
+            'friday'    => 300,
+            'saturday'  => 200,  // 3 horas y 20 minutos
+        ];
+
+        // Reiniciar fechas para recalcular desde cero
+        DB::table('appointments')
+            ->whereIn('estado', ['pendiente', 'en proceso'])
+            ->update(['fecha_asignada' => null]);
+
+        // Obtener citas con orden de prioridad
+        $appointments = DB::table('appointments')
+            ->whereIn('estado', ['pendiente', 'en proceso'])
+            ->orderByRaw("
+            CASE 
+                WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total < 30 THEN 1
+                WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total >= 30 THEN 2
+                WHEN estado = 'en proceso' AND prioridad = 'normal' AND horas_total < 30 THEN 3
+                WHEN estado = 'en proceso' AND prioridad = 'normal' AND horas_total >= 30 THEN 4
+                WHEN estado = 'pendiente' AND prioridad = 'urgente' AND horas_total < 30 THEN 5
+                WHEN estado = 'pendiente' AND prioridad = 'urgente' AND horas_total >= 30 THEN 6
+                WHEN estado = 'pendiente' AND prioridad = 'normal' AND horas_total < 30 THEN 7
+                ELSE 8
+            END
+        ")
+            ->orderBy('horas_total', 'asc')
+            ->get();
+
+        $fecha_actual = Carbon::today();
+        $ahora = Carbon::now();
+        $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
+
+        // Si ya cerró la tienda, empezamos desde el siguiente día laboral
+        if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
+            do {
+                $fecha_actual->addDay();
+                $dia_semana = strtolower($fecha_actual->format('l'));
+            } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
+        }
+
+        $agenda = [];
+
+        foreach ($appointments as $appointment) {
+            $tiempo_estimado = $appointment->horas_total;
+            while (true) {
+                $dia_semana = strtolower($fecha_actual->format('l'));
+
+                if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
+                    $fecha_actual->addDay();
+                    continue;
+                }
+
+                // Inicializar disponibilidad del día si no existe en la agenda
+                if (!isset($agenda[$fecha_actual->toDateString()])) {
+                    $agenda[$fecha_actual->toDateString()] = 0;
+                }
+
+                // Comprobar si cabe en el día
+                if ($appointment->prioridad === 'urgente' || $agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
+                    DB::table('appointments')
+                        ->where('id', $appointment->id)
+                        ->update(['fecha_asignada' => $fecha_actual->toDateString()]);
+
+                    $agenda[$fecha_actual->toDateString()] += $tiempo_estimado;
+                    break;
+                } else {
+                    $fecha_actual->addDay();
+                }
+            }
+        }
+    }
+
+
+    private function recalcularFechasAsignadas2()
     {
         $horas_laborales = [
             'monday'    => 300,  // 5 horas
