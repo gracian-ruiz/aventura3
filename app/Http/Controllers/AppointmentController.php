@@ -396,8 +396,8 @@ class AppointmentController extends Controller
             ->update(['fecha_asignada' => null]);
 
         // Obtener citas con orden de prioridad
-$appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
-    ->orderByRaw("
+        $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
+            ->orderByRaw("
         CASE 
             WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total < 30 THEN 1
             WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total >= 30 THEN 2
@@ -409,9 +409,9 @@ $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
             ELSE 8
         END
     ")
-    ->orderBy('created_at', 'asc') // ⏳ primero por fecha de entrada
-    ->orderBy('id', 'asc')         // 🔑 luego por id para evitar empates
-    ->get();
+            ->orderBy('created_at', 'asc') // ⏳ primero por fecha de entrada
+            ->orderBy('id', 'asc')         // 🔑 luego por id para evitar empates
+            ->get();
 
 
         $fecha_actual = Carbon::today();
@@ -630,10 +630,21 @@ $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
         }
 
         // Actualizar la descripción del problema si se proporciona
-        if ($request->filled('descripcion_problema')) {
-            $appointment->descripcion_problema = $request->input('descripcion_problema');
+        // Actualizar la descripción del problema
+        if ($request->has('descripcion_problema')) {
+            $descripcion = $request->input('descripcion_problema');
+
+            if (strtolower(trim($descripcion)) === 'nada') {
+                // Si el usuario pone "nada", lo dejamos vacío (NULL en BD)
+                $appointment->descripcion_problema = null;
+            } else {
+                // Guardamos el valor normal
+                $appointment->descripcion_problema = $descripcion;
+            }
+
             $appointment->save();
         }
+
 
         return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
     }

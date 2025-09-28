@@ -543,8 +543,17 @@ class MecanicoController extends Controller
         }
 
         // Actualizar la descripción del problema si se proporciona
-        if ($request->filled('descripcion_problema')) {
-            $appointment->descripcion_problema = $request->input('descripcion_problema');
+        if ($request->has('descripcion_problema')) {
+            $descripcion = $request->input('descripcion_problema');
+
+            if (strtolower(trim($descripcion)) === 'nada') {
+                // Si el usuario pone "nada", lo dejamos vacío (NULL en BD)
+                $appointment->descripcion_problema = null;
+            } else {
+                // Guardamos el valor normal
+                $appointment->descripcion_problema = $descripcion;
+            }
+
             $appointment->save();
         }
 
