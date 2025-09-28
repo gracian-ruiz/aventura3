@@ -24,11 +24,11 @@
                 </span>
                 <br>
                 <label for="descripcion_problema" class="block text-700 text-lg mb-1 font-semibold">
-                                        Descripción actual del problema, si escribes la palabra "nada" se quitaria el incidencia y ya no estaria en rojo(quitandose el problema que hbiera de la descripcion a vacio)
+                    Descripción actual del problema
                 </label>
                 <textarea name="descripcion_problema" id="descripcion_problema"
                           class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Describe el problema actual...">{{ old('descripcion_problema') }}</textarea>
+                          placeholder="Descripción actual del problema, si escribes la palabra -  nada - se quitaria el incidencia y ya no estaria en rojo(quitandose el problema que hbiera de la descripcion a vacio)">{{ old('descripcion_problema') }}</textarea>
             </div>
             
             <h3 class="text-xl font-semibold text-gray-800">Componentes de la Cita</h3>
