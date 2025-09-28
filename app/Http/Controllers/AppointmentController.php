@@ -725,6 +725,8 @@ class AppointmentController extends Controller
             ];
         });
 
+        dd($eventos);
+
         return view('appointments.calendario_asignado', ['eventos' => $eventos]);
     }
 }
