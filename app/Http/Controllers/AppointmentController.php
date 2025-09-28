@@ -695,32 +695,36 @@ class AppointmentController extends Controller
 
 
 
-    public function calendarioAsignado()
-    {
-        // Tomamos solo las citas que tengan fecha_asignada (ya calculada en recalcularFechasAsignadas)
-        $resultados = Appointment::with('bike.user')
-            ->whereNotNull('fecha_asignada')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->get();
+public function calendarioAsignado()
+{
+    $resultados = Appointment::with('bike.user')
+        ->whereNotNull('fecha_asignada')
+        ->whereIn('estado', ['pendiente', 'en proceso'])
+        ->get();
 
-        // Mapear al formato que necesita FullCalendar
-        $eventos = $resultados->map(function ($item) {
-            // Color según estado
-            $color = match ($item->estado) {
-                'pendiente'   => '#facc15', // amarillo
-                'en proceso'  => '#60a5fa', // azul
-                'completada'  => '#22c55e', // verde
-                default       => '#a1a1aa', // gris
-            };
+    $eventos = $resultados->map(function ($item) {
+        // Color por defecto según estado
+        $color = match ($item->estado) {
+            'pendiente'   => '#facc15', // amarillo
+            'en proceso'  => '#60a5fa', // azul
+            'completada'  => '#22c55e', // verde
+            default       => '#a1a1aa', // gris
+        };
 
-            return [
-                'title' => $item->bike->user->name . " - " . $item->bike->nombre . " (#{$item->id})",
-                'start' => $item->fecha_asignada,
-                'url'   => route('appointments.show', $item->id),
-                'color' => $color,
-            ];
-        });
+        // Si tiene descripción del problema, marcar en rojo
+        if (!empty($item->descripcion_problema)) {
+            $color = '#ef4444'; // 🔴 rojo
+        }
 
-        return view('appointments.calendario_asignado', ['eventos' => $eventos]);
-    }
+        return [
+            'title' => $item->bike->user->name . " - " . $item->bike->nombre . " (#{$item->id})",
+            'start' => $item->fecha_asignada,
+            'url'   => route('appointments.show', $item->id),
+            'color' => $color,
+        ];
+    });
+
+    return view('appointments.calendario_asignado', ['eventos' => $eventos]);
+}
+
 }
