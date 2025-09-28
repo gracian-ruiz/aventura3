@@ -396,22 +396,23 @@ class AppointmentController extends Controller
             ->update(['fecha_asignada' => null]);
 
         // Obtener citas con orden de prioridad
-        $appointments = DB::table('appointments')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->orderByRaw("
-            CASE 
-                WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total < 30 THEN 1
-                WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total >= 30 THEN 2
-                WHEN estado = 'en proceso' AND prioridad = 'normal' AND horas_total < 30 THEN 3
-                WHEN estado = 'en proceso' AND prioridad = 'normal' AND horas_total >= 30 THEN 4
-                WHEN estado = 'pendiente' AND prioridad = 'urgente' AND horas_total < 30 THEN 5
-                WHEN estado = 'pendiente' AND prioridad = 'urgente' AND horas_total >= 30 THEN 6
-                WHEN estado = 'pendiente' AND prioridad = 'normal' AND horas_total < 30 THEN 7
-                ELSE 8
-            END
-        ")
-            ->orderBy('horas_total', 'asc')
-            ->get();
+$appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
+    ->orderByRaw("
+        CASE 
+            WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total < 30 THEN 1
+            WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total >= 30 THEN 2
+            WHEN estado = 'en proceso' AND prioridad = 'normal' AND horas_total < 30 THEN 3
+            WHEN estado = 'en proceso' AND prioridad = 'normal' AND horas_total >= 30 THEN 4
+            WHEN estado = 'pendiente' AND prioridad = 'urgente' AND horas_total < 30 THEN 5
+            WHEN estado = 'pendiente' AND prioridad = 'urgente' AND horas_total >= 30 THEN 6
+            WHEN estado = 'pendiente' AND prioridad = 'normal' AND horas_total < 30 THEN 7
+            ELSE 8
+        END
+    ")
+    ->orderBy('created_at', 'asc') // ⏳ primero por fecha de entrada
+    ->orderBy('id', 'asc')         // 🔑 luego por id para evitar empates
+    ->get();
+
 
         $fecha_actual = Carbon::today();
         $ahora = Carbon::now();
