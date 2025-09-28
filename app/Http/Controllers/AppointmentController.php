@@ -700,7 +700,7 @@ class AppointmentController extends Controller
         $resultados = Appointment::with('bike.user')
             ->whereNotNull('fecha_asignada')
             ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->orderBy('fecha_asignada', 'asc') // 👈 ordenar por fecha asignada
+            ->orderBy('fecha_asignada', 'asc') // 📅 ordenar cronológicamente
             ->get();
 
         $eventos = $resultados->map(function ($item) {
@@ -712,9 +712,9 @@ class AppointmentController extends Controller
                 default       => '#a1a1aa', // gris
             };
 
-            // Si tiene descripción del problema, marcar en rojo
-            if (!empty($item->descripcion_problema)) {
-                $color = '#ef4444'; // 🔴 rojo
+            // 🔴 Si tiene descripción (y no es "nada"), marcar en rojo
+            if (!empty($item->descripcion_problema) && strtolower(trim($item->descripcion_problema)) !== 'nada') {
+                $color = '#ef4444';
             }
 
             return [
