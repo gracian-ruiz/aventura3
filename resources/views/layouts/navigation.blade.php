@@ -21,8 +21,8 @@
                     <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-nav-link>
 {{--                     <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">Mensajes</x-nav-link> --}}
                     <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">Histórico Citas</x-nav-link>
-                    <x-nav-link :href="route('calendario-citas')" :active="request()->routeIs('calendario-citas')">Calendario</x-nav-link>
-                    <x-nav-link :href="route('calendario-asignado')" :active="request()->routeIs('calendario-asignado')">Calendario</x-nav-link>
+                    <x-nav-link :href="route('calendario-citas')" :active="request()->routeIs('calendario-citas')">Calendario Manual</x-nav-link>
+                    <x-nav-link :href="route('calendario-asignado')" :active="request()->routeIs('calendario-asignado')">Calendario Automatico</x-nav-link>
                 @endif
             </div>
 
