@@ -15,32 +15,34 @@ use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
-    public function index(Request $request)
-    {
-        $search = $request->input('search');
-        $estado = $request->input('estado', 'pendiente'); // por defecto 'pendiente'
+public function index(Request $request)
+{
+    $search = $request->input('search');
+    $estado = $request->input('estado', 'pendiente'); // por defecto 'pendiente'
 
-        // Recalcular siempre antes de mostrar la vista
-        $this->recalcularFechasAsignadas();
+    $this->recalcularFechasAsignadas();
 
-        $appointments = Appointment::with('bike.user', 'componentes')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->whereHas('bike', function ($q1) use ($search) {
-                        $q1->where('nombre', 'like', '%' . $search . '%')
-                            ->orWhereHas('user', function ($q2) use ($search) {
-                                $q2->where('name', 'like', '%' . $search . '%');
-                            });
-                    })
-                    ->orWhere('idprograma', 'like', '%' . $search . '%');
-                });
-            })
-            ->orderBy('fecha_asignada', 'asc')
-            ->paginate(8);
+    $appointments = Appointment::with('bike.user', 'componentes')
+        ->whereIn('estado', ['pendiente', 'en proceso'])
+        ->when($search, function ($query) use ($search) {
+            $searchLower = strtolower($search);
+            $query->where(function ($q) use ($searchLower) {
+                $q->whereHas('bike', function ($q1) use ($searchLower) {
+                    $q1->whereRaw('LOWER(nombre) LIKE ?', ["%{$searchLower}%"])
+                        ->orWhereHas('user', function ($q2) use ($searchLower) {
+                            $q2->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"]);
+                        });
+                })
+                ->orWhereRaw('LOWER(idprograma) LIKE ?', ["%{$searchLower}%"])
+                ->orWhereRaw('LOWER(descripcion_problema) LIKE ?', ["%{$searchLower}%"]);
+            });
+        })
+        ->orderBy('fecha_asignada', 'asc')
+        ->paginate(8);
 
-        return view('appointments.index', compact('appointments', 'search', 'estado'));
-    }
+    return view('appointments.index', compact('appointments', 'search', 'estado'));
+}
+
 
 
     public function indextaller(Request $request)
