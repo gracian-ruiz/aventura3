@@ -716,7 +716,7 @@ class AppointmentController extends Controller
         $resultados = Appointment::with('bike.user')
             ->whereNotNull('fecha_asignada')
             ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->orderBy('fecha_asignada', 'asc') // 📅 ordenar cronológicamente
+            ->orderBy('tiempo_reparacion', 'asc') // 📅 ordenar cronológicamente
             ->get();
 
         $eventos = $resultados->map(function ($item) {
