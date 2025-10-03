@@ -149,6 +149,7 @@ class PresupuestoController extends Controller
 
             $presupuesto->update([
                 'horas_total' => $totalHoras,
+                'tiempo_reparacion' => $totalHoras,
                 'precio_total' => round($totalPrecio, 2),
                 'descuento' => $totalDescuento,
             ]);
@@ -373,6 +374,7 @@ class PresupuestoController extends Controller
                     ->where('id', $id)
                     ->update([
                         'horas_total' => $totalHoras,
+                        'tiempo_reparacion' => $totalHoras,
                         'precio_total' => $totalPresupuesto,
                         'descuento' => $totalDescuento,
                         'idprograma' => $request->idprograma,

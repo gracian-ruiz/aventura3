@@ -25,23 +25,22 @@ class AppointmentController extends Controller
 
         $appointments = Appointment::with('bike.user', 'componentes')
             ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->where(function ($query) use ($search) {
-                if ($search) {
-                    $query->whereHas('bike', function ($q) use ($search) {
-                        $q->where('nombre', 'like', '%' . $search . '%')
-                            ->orWhereHas('user', function ($qq) use ($search) {
-                                $qq->where('name', 'like', '%' . $search . '%');
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('bike', function ($q1) use ($search) {
+                        $q1->where('nombre', 'like', '%' . $search . '%')
+                            ->orWhereHas('user', function ($q2) use ($search) {
+                                $q2->where('name', 'like', '%' . $search . '%');
                             });
                     })
-                        ->orWhere('idprograma', 'like', '%' . $search . '%');
-                }
+                    ->orWhere('idprograma', 'like', '%' . $search . '%');
+                });
             })
-            ->orderBy('fecha_asignada', 'asc') // 🔹 Ahora el criterio único
+            ->orderBy('fecha_asignada', 'asc')
             ->paginate(8);
 
         return view('appointments.index', compact('appointments', 'search', 'estado'));
     }
-
 
 
     public function indextaller(Request $request)
@@ -262,6 +261,7 @@ class AppointmentController extends Controller
                     'precio_total' => $totalPresupuesto,
                     'asignacion_taller' => $request->asignacion_taller ?? [],
                     'idprograma' => $request->idprograma,
+                    'calendario' => $request->calendario
                 ]);
 
             DB::commit();
@@ -604,23 +604,43 @@ class AppointmentController extends Controller
             'componentes.*.id' => 'exists:components,id',
             'componentes.*.checked' => 'boolean',
             'kilometros' => 'nullable|numeric|min:0',
-            'descripcion_problema' => 'nullable|string|max:1000', // Validar la descripción si viene
+            'descripcion_problema' => 'nullable|string|max:1000',
             'idprograma' => 'nullable|string|max:200',
         ]);
 
         $usuarioTallerId = auth()->id(); // ID del usuario autenticado
+        $tiempoTotalRestado = 0;
 
         // Actualizar estado de los componentes seleccionados
         foreach ($request->componentes as $component) {
             $checked = isset($component['checked']) ? true : false;
 
-            DB::table('appointment_component')
+            // Obtener datos del pivote
+            $pivot = DB::table('appointment_component')
                 ->where('appointment_id', $appointment->id)
                 ->where('componente_id', $component['id'])
-                ->update([
-                    'checked' => $checked,
-                    'usuario_taller_id' => $checked ? $usuarioTallerId : null
-                ]);
+                ->first();
+
+            if ($pivot) {
+                // ⚡️ Si antes no estaba marcado y ahora sí -> restamos horas_trabajo
+                if ($checked && !$pivot->checked) {
+                    $tiempoTotalRestado += (int) $pivot->horas_trabajo;
+                }
+
+                DB::table('appointment_component')
+                    ->where('appointment_id', $appointment->id)
+                    ->where('componente_id', $component['id'])
+                    ->update([
+                        'checked' => $checked,
+                        'usuario_taller_id' => $checked ? $usuarioTallerId : null
+                    ]);
+            }
+        }
+
+        // Restar tiempo al appointment si corresponde
+        if ($tiempoTotalRestado > 0) {
+            $appointment->tiempo_reparacion = max(0, $appointment->tiempo_reparacion - $tiempoTotalRestado);
+            $appointment->save();
         }
 
         // Actualizar los kilómetros si se proporcionaron
@@ -630,21 +650,17 @@ class AppointmentController extends Controller
         }
 
         // Actualizar la descripción del problema si se proporciona
-        // Actualizar la descripción del problema
         if ($request->has('descripcion_problema')) {
             $descripcion = $request->input('descripcion_problema');
 
             if (strtolower(trim($descripcion)) === 'nada') {
-                // Si el usuario pone "nada", lo dejamos vacío (NULL en BD)
                 $appointment->descripcion_problema = null;
             } else {
-                // Guardamos el valor normal
                 $appointment->descripcion_problema = $descripcion;
             }
 
             $appointment->save();
         }
-
 
         return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
     }

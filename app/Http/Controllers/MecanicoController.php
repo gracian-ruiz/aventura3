@@ -251,6 +251,7 @@ class MecanicoController extends Controller
                     'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
                     'asignacion_taller' => $request->asignacion_taller ?? [],
+                    'calendario' => $request->calendario
                 ]);
 
             DB::commit();
@@ -518,22 +519,47 @@ class MecanicoController extends Controller
             'componentes.*.checked' => 'boolean',
             'kilometros' => 'nullable|numeric|min:0',
             'descripcion_problema' => 'nullable|string|max:1000',
-            'idprograma' => 'nullable|string|max:1000', // Validar la descripción si viene
+            'idprograma' => 'nullable|string|max:1000',
         ]);
 
         $usuarioTallerId = auth()->id(); // ID del usuario autenticado
+        $ajusteTiempo = 0; // acumulador de cambios
 
         // Actualizar estado de los componentes seleccionados
         foreach ($request->componentes as $component) {
             $checked = isset($component['checked']) ? true : false;
 
-            DB::table('appointment_component')
+            // Obtener datos actuales del pivote
+            $pivot = DB::table('appointment_component')
                 ->where('appointment_id', $appointment->id)
                 ->where('componente_id', $component['id'])
-                ->update([
-                    'checked' => $checked,
-                    'usuario_taller_id' => $checked ? $usuarioTallerId : null
-                ]);
+                ->first();
+
+            if ($pivot) {
+                // Si antes no estaba marcado y ahora sí → restamos horas
+                if ($checked && !$pivot->checked) {
+                    $ajusteTiempo -= (int) $pivot->horas_trabajo;
+                }
+
+                // Si antes estaba marcado y ahora se desmarca → sumamos horas
+                if (!$checked && $pivot->checked) {
+                    $ajusteTiempo += (int) $pivot->horas_trabajo;
+                }
+
+                DB::table('appointment_component')
+                    ->where('appointment_id', $appointment->id)
+                    ->where('componente_id', $component['id'])
+                    ->update([
+                        'checked' => $checked,
+                        'usuario_taller_id' => $checked ? $usuarioTallerId : null
+                    ]);
+            }
+        }
+
+        // Aplicar el ajuste al campo tiempo_reparacion
+        if ($ajusteTiempo !== 0) {
+            $appointment->tiempo_reparacion = max(0, $appointment->tiempo_reparacion + $ajusteTiempo);
+            $appointment->save();
         }
 
         // Actualizar los kilómetros si se proporcionaron
@@ -547,10 +573,8 @@ class MecanicoController extends Controller
             $descripcion = $request->input('descripcion_problema');
 
             if (strtolower(trim($descripcion)) === 'nada') {
-                // Si el usuario pone "nada", lo dejamos vacío (NULL en BD)
                 $appointment->descripcion_problema = null;
             } else {
-                // Guardamos el valor normal
                 $appointment->descripcion_problema = $descripcion;
             }
 

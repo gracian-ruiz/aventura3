@@ -37,8 +37,10 @@ class Appointment extends Model
         'descuento',
         'asignacion_taller',
         'idprograma',
-        'calendario'
+        'calendario',
+        'tiempo_reparacion' 
     ];
+
 
     public function bike()
     {
