@@ -15,37 +15,48 @@ use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
-public function index(Request $request)
-{
-    $search = $request->input('search');
-    $estado = $request->input('estado', 'pendiente'); // por defecto 'pendiente'
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+        $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
+        $estado = $request->input('estado', 'pendiente'); // por defecto 'pendiente'
 
-    $this->recalcularFechasAsignadas();
+        // Recalcular siempre antes de mostrar la vista
+        $this->recalcularFechasAsignadas();
 
-    $appointments = Appointment::with('bike.user', 'componentes')
-        ->whereIn('estado', ['pendiente', 'en proceso'])
-        ->when($search, function ($query) use ($search) {
-            $searchLower = strtolower($search);
+        $appointments = Appointment::with('bike.user', 'componentes')
+            ->whereIn('estado', ['pendiente', 'en proceso'])
+            ->where(function ($query) use ($search) {
+                if ($search) {
+                    $query->whereHas('bike', function ($q) use ($search) {
+                        $q->where('nombre', 'like', '%' . $search . '%')
+                            ->orWhereHas('user', function ($qq) use ($search) {
+                                $qq->where('name', 'like', '%' . $search . '%');
+                            });
+                    })
+                        ->orWhere('idprograma', 'like', '%' . $search . '%');
+                }
+            })
+            ->orderByRaw('
+            CASE 
+                -- EN PROCESO
+                WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
+                WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
+                WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
+                WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
+                -- PENDIENTE
+                WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total < 30 THEN 5
+                WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total >= 30 THEN 6
+                WHEN estado = "pendiente" AND prioridad = "normal" AND horas_total < 30 THEN 7
+                ELSE 8
+            END
+        ')
+            ->orderBy('horas_total', 'asc')
+            ->orderBy('fecha_asignada', 'asc') // 🔹 Ahora el criterio único
+            ->paginate(8);
 
-            $query->where(function ($q) use ($searchLower) {
-                // Búsqueda en bicicleta y usuario
-                $q->whereHas('bike', function ($q1) use ($searchLower) {
-                    $q1->whereRaw('LOWER(nombre) LIKE ?', ["%{$searchLower}%"])
-                        ->orWhereRaw('LOWER(marca) LIKE ?', ["%{$searchLower}%"])
-                        ->orWhereHas('user', function ($q2) use ($searchLower) {
-                            $q2->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"]);
-                        });
-                })
-                // Búsqueda directa en appointment
-                ->orWhereRaw('LOWER(idprograma) LIKE ?', ["%{$searchLower}%"])
-                ->orWhereRaw('LOWER(descripcion_problema) LIKE ?', ["%{$searchLower}%"]);
-            });
-        })
-        ->orderBy('fecha_asignada', 'asc')
-        ->paginate(8);
-
-    return view('appointments.index', compact('appointments', 'search', 'estado'));
-}
+        return view('appointments.index', compact('appointments', 'search', 'estado'));
+    }
 
 
 
