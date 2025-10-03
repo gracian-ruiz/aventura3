@@ -26,13 +26,17 @@ public function index(Request $request)
         ->whereIn('estado', ['pendiente', 'en proceso'])
         ->when($search, function ($query) use ($search) {
             $searchLower = strtolower($search);
+
             $query->where(function ($q) use ($searchLower) {
+                // Búsqueda en bicicleta y usuario
                 $q->whereHas('bike', function ($q1) use ($searchLower) {
                     $q1->whereRaw('LOWER(nombre) LIKE ?', ["%{$searchLower}%"])
+                        ->orWhereRaw('LOWER(marca) LIKE ?', ["%{$searchLower}%"])
                         ->orWhereHas('user', function ($q2) use ($searchLower) {
                             $q2->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"]);
                         });
                 })
+                // Búsqueda directa en appointment
                 ->orWhereRaw('LOWER(idprograma) LIKE ?', ["%{$searchLower}%"])
                 ->orWhereRaw('LOWER(descripcion_problema) LIKE ?', ["%{$searchLower}%"]);
             });
@@ -42,6 +46,7 @@ public function index(Request $request)
 
     return view('appointments.index', compact('appointments', 'search', 'estado'));
 }
+
 
 
 
