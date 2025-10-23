@@ -19,6 +19,7 @@ use App\Http\Controllers\MecanicoController;
 use App\Http\Controllers\WhatsappController;
 use App\Models\Bike;
 use App\Models\Material;
+use App\Http\Controllers\ClienteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -291,6 +292,13 @@ Route::post('/alquiler/response', [AventuraBikeController::class, 'response'])->
 Route::get('/alquiler/error', [AventuraBikeController::class, 'error'])->name('alquiler.error'); */
 //Route::get('/pruebas', [AlquilerController::class, 'pruebas'])->name('pruebas');
 
+
+Route::middleware(['auth', 'user'])->group(function () {
+    Route::get('/miperfil', [ClienteController::class, 'perfil'])->name('cliente.perfil');
+    Route::get('/mibicicleta/{bike}/revisiones', [ClienteController::class, 'revisiones'])->name('cliente.revisiones');
+    Route::get('/mibicicleta/{bike}/historial', [ClienteController::class, 'historial'])->name('cliente.historial');
+    Route::get('/reparacion-completa/{appointment}', [App\Http\Controllers\ClienteController::class, 'reparacionCompleta'])->name('cliente.reparacion_completa');
+});
 
 
 

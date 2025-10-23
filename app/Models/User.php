@@ -57,8 +57,9 @@ class User extends Authenticatable
 
     public function bikes()
     {
-        return $this->hasMany(Bike::class);
+        return $this->hasMany(\App\Models\Bike::class, 'user_id');
     }
+
 
 
 }
