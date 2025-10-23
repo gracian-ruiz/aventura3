@@ -8,7 +8,6 @@
             background-color: #f9fafb;
         }
         #calendar {
-            max-width: 1200px; /* 🔹 más ancho que antes */
             margin: 0 auto;
             font-size: 16px;   /* 🔹 aumenta el tamaño base */
         }
