@@ -690,7 +690,8 @@ class AppointmentController extends Controller
             ->join('users', 'users.id', '=', 'bikes.user_id')
             ->select(
                 'appointments.id as presupuesto_id',
-                'bikes.nombre as bicicleta',
+                'bikes.nombre as bike_nombre',
+                'bikes.marca as bike_marca',
                 'users.name as usuario',
                 'appointments.calendario',
                 'appointments.estado'
@@ -699,6 +700,7 @@ class AppointmentController extends Controller
             ->get();
 
         $eventos = $resultados->map(function ($item) {
+            // 🎨 Colores según el estado
             $color = match ($item->estado) {
                 'pendiente'   => '#facc15', // amarillo
                 'en proceso'  => '#60a5fa', // azul
@@ -706,16 +708,20 @@ class AppointmentController extends Controller
                 default       => '#a1a1aa', // gris
             };
 
+            // 🧾 Mostrar cliente y bicicleta (marca + nombre) en 2 líneas
+            $titulo = "<b>{$item->usuario}</b><br>{$item->bike_marca} - {$item->bike_nombre}";
+
             return [
-                'title' => "<b>{$item->usuario}</b><br>{$item->bicicleta}", // 👈 aquí el salto HTML
+                'title' => $titulo,
                 'start' => $item->calendario,
-                'url' => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
+                'url'   => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
                 'color' => $color,
             ];
         });
 
         return view('appointments.calendario', ['eventos' => $eventos]);
     }
+
 
 
     public function quitarOrdenTaller(Appointment $appointment)

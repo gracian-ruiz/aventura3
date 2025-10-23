@@ -51,11 +51,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         events: @json($eventos),
 
-        /* 👇 Permite mostrar HTML dentro del evento */
+        // 🔹 Permitir mostrar HTML (cliente + bicicleta en 2 líneas)
         eventContent: function(arg) {
-            let italicEl = document.createElement('div');
-            italicEl.innerHTML = arg.event.title; // 👈 acepta HTML
-            return { domNodes: [italicEl] };
+            let div = document.createElement('div');
+            div.innerHTML = arg.event.title;
+            return { domNodes: [div] };
         },
 
         eventClick: function(info) {
@@ -67,5 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
     calendar.render();
 });
 </script>
+
 
 @endsection
