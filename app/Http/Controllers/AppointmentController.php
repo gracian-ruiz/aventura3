@@ -699,10 +699,15 @@ class AppointmentController extends Controller
             ->get();
 
         $eventos = $resultados->map(function ($item) {
-            $color = '#4ade80'; // verde fijo (puedes cambiar según estado si quieres)
+            $color = match ($item->estado) {
+                'pendiente'   => '#facc15', // amarillo
+                'en proceso'  => '#60a5fa', // azul
+                'completada'  => '#22c55e', // verde
+                default       => '#a1a1aa', // gris
+            };
 
             return [
-                'title' => $item->usuario . "\n" . $item->bicicleta . ' - ' . $item->presupuesto_id,
+                'title' => "<b>{$item->usuario}</b><br>{$item->bicicleta}", // 👈 aquí el salto HTML
                 'start' => $item->calendario,
                 'url' => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
                 'color' => $color,
@@ -711,6 +716,7 @@ class AppointmentController extends Controller
 
         return view('appointments.calendario', ['eventos' => $eventos]);
     }
+
 
     public function quitarOrdenTaller(Appointment $appointment)
     {

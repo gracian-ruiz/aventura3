@@ -36,27 +36,36 @@
 
     <div id="calendar"></div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('calendar');
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
 
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'es',
-            height: 'auto',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,listWeek'
-            },
-            events: @json($eventos),
-            eventClick: function(info) {
-                window.open(info.event.url, '_blank');
-                info.jsEvent.preventDefault();
-            }
-        });
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,listWeek'
+        },
+        events: @json($eventos),
 
-        calendar.render();
+        /* 👇 Permite mostrar HTML dentro del evento */
+        eventContent: function(arg) {
+            let italicEl = document.createElement('div');
+            italicEl.innerHTML = arg.event.title; // 👈 acepta HTML
+            return { domNodes: [italicEl] };
+        },
+
+        eventClick: function(info) {
+            window.open(info.event.url, '_blank');
+            info.jsEvent.preventDefault();
+        }
     });
-    </script>
+
+    calendar.render();
+});
+</script>
+
 @endsection
