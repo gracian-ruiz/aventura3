@@ -194,6 +194,7 @@ class AppointmentController extends Controller
         $appointment->update([
             'estado' => 'completada',
             'usuario_taller_id' => auth()->id(),
+            'calendario' => null,
         ]);
 
         // Llamar al controlador de recordatorios para enviar mensaje de WhatsApp
