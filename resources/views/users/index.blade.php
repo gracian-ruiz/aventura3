@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
+<div class="w-full mt-8 px-0">
     <h1 class="text-2xl font-bold text-center mb-4">Gestión de Usuarios</h1>
     
     <!-- Formulario de Búsqueda -->

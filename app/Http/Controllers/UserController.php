@@ -31,7 +31,7 @@ class UserController extends Controller
                       ->orWhere('telefono', 'LIKE', "%{$search}%"); // <-- Nuevo filtro por teléfono
                 });
             })
-            ->paginate(5);
+            ->paginate(10);
     
         return view('users.index', compact('users', 'search'));
     }

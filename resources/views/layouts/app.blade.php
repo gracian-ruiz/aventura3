@@ -35,11 +35,11 @@
         @endif
 
         <!-- Page Content -->
-        <main class="flex-grow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-4 md:px-3 lg:px-8 text-base sm:text-sm md:text-xs">
-                @yield('content')
-            </div>
-        </main>        
+<main class="flex-grow w-full">
+  <div class="w-full py-4 px-3 sm:py-6 sm:px-6 md:px-12 text-base sm:text-sm md:text-xs">
+    @yield('content')
+  </div>
+</main>     
     </div>
     @yield('scripts')
 </body>
