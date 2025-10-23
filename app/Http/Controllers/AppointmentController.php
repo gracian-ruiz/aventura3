@@ -684,44 +684,56 @@ class AppointmentController extends Controller
         return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
     }
 
-    public function calendariocitas()
-    {
-        $resultados = DB::table('appointments')
-            ->join('bikes', 'bikes.id', '=', 'appointments.bike_id')
-            ->join('users', 'users.id', '=', 'bikes.user_id')
-            ->select(
-                'appointments.id as presupuesto_id',
-                'bikes.nombre as bike_nombre',
-                'bikes.marca as bike_marca',
-                'users.name as usuario',
-                'appointments.calendario',
-                'appointments.estado'
-            )
-            ->whereNotNull('appointments.calendario')
-            ->get();
+public function calendariocitas()
+{
+    // 📅 Fecha actual
+    $hoy = now()->toDateString();
 
-        $eventos = $resultados->map(function ($item) {
-            // 🎨 Colores según el estado
-            $color = match ($item->estado) {
-                'pendiente'   => '#facc15', // amarillo
-                'en proceso'  => '#60a5fa', // azul
-                'completada'  => '#22c55e', // verde
-                default       => '#a1a1aa', // gris
-            };
+    // 🔁 Mover TODAS las citas con fecha pasada (no completadas) al día de hoy
+    DB::table('appointments')
+        ->whereNotNull('calendario')
+        ->where('estado', '!=', 'completada') // solo las activas
+        ->where('calendario', '<', $hoy)      // todas las fechas anteriores a hoy
+        ->update(['calendario' => $hoy]);
 
-            // 🧾 Mostrar cliente y bicicleta (marca + nombre) en 2 líneas
-            $titulo = "<b>{$item->usuario}</b><br>{$item->bike_marca} - {$item->bike_nombre}";
+    // 🔍 Obtener solo citas activas (sin completadas)
+    $resultados = DB::table('appointments')
+        ->join('bikes', 'bikes.id', '=', 'appointments.bike_id')
+        ->join('users', 'users.id', '=', 'bikes.user_id')
+        ->select(
+            'appointments.id as presupuesto_id',
+            'bikes.nombre as bike_nombre',
+            'bikes.marca as bike_marca',
+            'users.name as usuario',
+            'appointments.calendario',
+            'appointments.estado'
+        )
+        ->whereNotNull('appointments.calendario')
+        ->where('appointments.estado', '!=', 'completada') // 🔹 no mostrar completadas
+        ->get();
 
-            return [
-                'title' => $titulo,
-                'start' => $item->calendario,
-                'url'   => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
-                'color' => $color,
-            ];
-        });
+    // 🎨 Preparar los eventos para el calendario
+    $eventos = $resultados->map(function ($item) {
+        $color = match ($item->estado) {
+            'pendiente'   => '#facc15', // amarillo
+            'en proceso'  => '#60a5fa', // azul
+            default       => '#a1a1aa', // gris
+        };
 
-        return view('appointments.calendario', ['eventos' => $eventos]);
-    }
+        // 🧾 Mostrar cliente y bicicleta (marca + nombre)
+        $titulo = "<b>{$item->usuario}</b><br>{$item->bike_marca} - {$item->bike_nombre}";
+
+        return [
+            'title' => $titulo,
+            'start' => $item->calendario,
+            'url'   => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
+            'color' => $color,
+        ];
+    });
+
+    return view('appointments.calendario', ['eventos' => $eventos]);
+}
+
 
 
 
