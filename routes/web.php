@@ -297,7 +297,12 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/miperfil', [ClienteController::class, 'perfil'])->name('cliente.perfil');
     Route::get('/mibicicleta/{bike}/revisiones', [ClienteController::class, 'revisiones'])->name('cliente.revisiones');
     Route::get('/mibicicleta/{bike}/historial', [ClienteController::class, 'historial'])->name('cliente.historial');
-    Route::get('/reparacion-completa/{appointment}', [App\Http\Controllers\ClienteController::class, 'reparacionCompleta'])->name('cliente.reparacion_completa');
+    Route::get('/reparacion-completa/{appointment}', [ClienteController::class, 'reparacionCompleta'])->name('cliente.reparacion_completa');
+    Route::get('/mibicicleta/{bike}/pedir-cita', [ClienteController::class, 'cita'])
+    ->name('cliente.cita');
+    Route::post('/mibicicleta/guardar-cita', [ClienteController::class, 'guardarCita'])
+    ->name('cliente.guardarCita');
+
 });
 
 

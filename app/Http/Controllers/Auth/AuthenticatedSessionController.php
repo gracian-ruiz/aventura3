@@ -40,6 +40,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('cliente.perfil'); // 👉 /miperfil
         }
 
+        if ($user->role === 'premium') {
+            return redirect()->route('cliente.perfil'); // 👉 /miperfil
+        }
+
         // Por defecto si no tiene rol reconocido
         return redirect('/');
     }

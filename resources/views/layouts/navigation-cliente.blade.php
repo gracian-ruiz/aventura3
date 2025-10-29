@@ -63,9 +63,6 @@
                             <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
                                 Cerrar sesión
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('usuarios_alquiler.index')">
-                                Usuarios Alquiler
-                            </x-dropdown-link>
                         </form>
                     </x-slot>
                 </x-dropdown>

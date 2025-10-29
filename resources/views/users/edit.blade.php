@@ -39,6 +39,7 @@
                 <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>Usuario</option>
                 <option value="taller" {{ $user->role === 'taller' ? 'selected' : '' }}>Taller</option>
                 <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Administrador</option>
+                <option value="premium" {{ $user->role === 'premium' ? 'selected' : '' }}>Premium</option>
             </select>
         </div>
 

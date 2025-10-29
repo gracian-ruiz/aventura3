@@ -78,6 +78,7 @@
                 <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Usuario</option>
                 <option value="taller" {{ old('role') == 'taller' ? 'selected' : '' }}>Taller</option>
                 <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrador</option>
+                <option value="premium" {{ old('role') == 'premium' ? 'selected' : '' }}>Premium</option>
             </select>
             @error('role')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>

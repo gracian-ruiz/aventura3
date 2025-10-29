@@ -26,7 +26,7 @@
                                     <i class="bi bi-pencil-square"></i> Editar
                                 </a>
 
-                                <a href="{{ route('appointments.create', ['bike_id' => $bike->id]) }}" class="btn btn-success btn-sm">
+                                <a href="{{ route('cliente.cita', $bike->id) }}" class="btn btn-success btn-sm">
                                     <i class="bi bi-calendar-check"></i> Pedir Cita
                                 </a>
 

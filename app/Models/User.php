@@ -55,6 +55,11 @@ class User extends Authenticatable
         return $this->role === 'user';
     }
 
+    public function isPremium()
+    {
+        return $this->role === 'user';
+    }
+
     public function bikes()
     {
         return $this->hasMany(\App\Models\Bike::class, 'user_id');

@@ -18,38 +18,40 @@ class PresupuestoController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('appointments')
+        $search = $request->input('search');
+
+        $presupuestos = DB::table('appointments')
             ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->leftJoin('users', 'bikes.user_id', '=', 'users.id')
             ->select(
                 'appointments.*',
                 'bikes.nombre as bike_nombre',
-                'bikes.marca as marca',
-                'users.name as user_nombre'
+                'bikes.marca as bike_marca',
+                'users.name as user_nombre',
+                'users.role as user_role'
             )
-            ->whereIn('appointments.estado', ['presupuesto', 'denegado', 'vacia']);
+            ->whereIn('appointments.estado', ['presupuesto', 'denegado', 'vacia'])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('users.name', 'like', "%{$search}%")
+                        ->orWhere('bikes.nombre', 'like', "%{$search}%")
+                        ->orWhere('bikes.marca', 'like', "%{$search}%")
+                        ->orWhere('appointments.idprograma', 'like', "%{$search}%");
+                });
+            })
+            ->orderByRaw('
+                CASE 
+                    WHEN users.role = "premium" THEN 0
+                    WHEN appointments.prioridad = "urgente" THEN 1
+                    ELSE 2
+                END
+            ')
+            ->orderBy('appointments.created_at', 'asc')
+            ->paginate(10)
+            ->appends(['search' => $search]);
 
-        // Filtro de búsqueda por usuario, nombre de bici, marca o idprograma
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('users.name', 'like', "%$search%")
-                    ->orWhere('bikes.nombre', 'like', "%$search%")
-                    ->orWhere('bikes.marca', 'like', "%$search%")
-                    ->orWhere('appointments.idprograma', 'like', "%$search%");
-            });
-        }
-
-        // Ordenar por prioridad y fecha
-        $query->orderByRaw("CASE WHEN appointments.prioridad = 'urgente' THEN 0 ELSE 1 END")
-            ->orderBy('appointments.created_at', 'asc');
-
-        $presupuestos = $query->paginate(10)->appends(['search' => $request->search]);
-
-        return view('presupuestos.index', compact('presupuestos'));
+        return view('presupuestos.index', compact('presupuestos', 'search'));
     }
-
-
 
     public function create($userId)
     {

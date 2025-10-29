@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Bike;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class ClienteController extends Controller
 {
@@ -96,5 +97,48 @@ class ClienteController extends Controller
             ->get();
 
         return view('cliente.reparacion_completa', compact('appointment', 'data'));
+    }
+
+    public function cita($bike_id)
+    {
+        $bike = Bike::where('id', $bike_id)
+            ->where('user_id', Auth::id()) // seguridad: solo sus bicis
+            ->firstOrFail();
+
+        // Generar los próximos 14 días hábiles (lunes a sábado)
+        $fechasDisponibles = [];
+        $fecha = now();
+
+        for ($i = 0; $i < 14; $i++) {
+            $diaSemana = strtolower($fecha->format('l'));
+            if ($diaSemana !== 'sunday') {
+                $fechasDisponibles[] = $fecha->format('Y-m-d');
+            }
+            $fecha->addDay();
+        }
+
+        return view('cliente.cita', compact('bike', 'fechasDisponibles'));
+    }
+
+    public function guardarCita(Request $request)
+    {
+        $request->validate([
+            'bike_id' => 'required|exists:bikes,id',
+            'fecha' => 'required|date|after_or_equal:today',
+            'descripcion_problema' => 'required|string|max:1000',
+        ]);
+
+        Appointment::create([
+            'bike_id' => $request->bike_id,
+            'user_id' => Auth::id(),
+            'fecha_asignada' => $request->fecha,
+            'descripcion_problema' => $request->descripcion_problema,
+            'estado' => 'presupuesto',
+            'prioridad' => 'normal',
+            'estimacion_reparacion' => 0,
+            'calendario' => $request->fecha,
+        ]);
+
+        return redirect()->route('cliente.perfil')->with('success', '✅ Cita creada correctamente.');
     }
 }

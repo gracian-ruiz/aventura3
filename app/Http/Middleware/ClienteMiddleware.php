@@ -10,7 +10,7 @@ class ClienteMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->role === 'user') {
+        if (Auth::check() && in_array(Auth::user()->role, ['user', 'premium'])) {
             return $next($request);
         }
 
