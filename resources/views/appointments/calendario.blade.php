@@ -31,8 +31,6 @@
         }
     </style>
 
-    <h2 style="text-align:center;">📅 Alquileres por Usuario y Bicicleta</h2>
-
     <div id="calendar"></div>
 
 <script>
