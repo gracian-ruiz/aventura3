@@ -4,7 +4,6 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 40px;
             background-color: #f9fafb;
         }
         #calendar {

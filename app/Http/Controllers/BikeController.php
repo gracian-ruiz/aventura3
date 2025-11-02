@@ -19,7 +19,7 @@ class BikeController extends Controller
         $bikes = Bike::when($search, function ($query) use ($search) {
             return $query->where('nombre', 'LIKE', "%{$search}%")
                          ->orWhere('marca', 'LIKE', "%{$search}%");
-        })->paginate(5);
+        })->paginate(10);
 
         return view('bikes.index', compact('bikes', 'search'));
     }

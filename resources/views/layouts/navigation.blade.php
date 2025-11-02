@@ -16,10 +16,26 @@
                     <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-nav-link>
                     <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Orden de taller</x-nav-link>
                     <x-nav-link :href="route('mecanico.index')" :active="request()->routeIs('mecanico.index')">Orden de taller Asignado</x-nav-link>
-{{--                     <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-nav-link> --}}
-                    <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">Bicicletas</x-nav-link>
-                    <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-nav-link>
-{{--                     <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">Mensajes</x-nav-link> --}}
+                {{--<x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-nav-link> --}}
+                    <!-- 🔽 Bicicletas con submenú -->
+                    <div x-data="{ openBikes: false }" class="relative flex items-center">
+                        <button @click="openBikes = !openBikes"
+                            class="inline-flex items-center h-16 px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none transition duration-150 ease-in-out">
+                            <span class="flex items-center">Bicicletas</span>
+                            <svg class="w-4 h-4 ml-1 mt-[2px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <!-- Submenú -->
+                        <div x-show="openBikes" @click.away="openBikes = false"
+                            x-transition
+                            class="absolute top-full left-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                            <a href="{{ route('bikes.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">Bicicletas</a>
+                            <a href="{{ route('components.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">Componentes</a>
+                        </div>
+                    </div>
+                {{--<x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">Mensajes</x-nav-link> --}}
                     <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">Histórico Citas</x-nav-link>
                     <x-nav-link :href="route('calendario-citas')" :active="request()->routeIs('calendario-citas')">Calendario Manual</x-nav-link>
                     <x-nav-link :href="route('calendario-asignado')" :active="request()->routeIs('calendario-asignado')">Calendario Automatico</x-nav-link>
