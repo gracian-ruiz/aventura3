@@ -17,7 +17,7 @@ class StoreAppointmentRequest extends FormRequest
             'bike_id' => 'required|exists:bikes,id',
             'componentes' => 'required|array|min:1',
             'componentes.*' => 'exists:components,id',
-            'prioridad' => 'required|in:normal,urgente',
+            'prioridad' => 'required|in:normal,urgente,premium',
             'descripcion_problema' => 'required|string',
             'estimacion_reparacion' => 'nullable|string',
             'tiempo_estimado' => 'required|integer|min:1',

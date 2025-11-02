@@ -16,7 +16,7 @@ class UpdateAppointmentRequest extends FormRequest
         return [
             'bike_id' => 'required|exists:bikes,id',
             'componente_id' => 'nullable|exists:components,id',
-            'prioridad' => 'required|in:normal,urgente',
+            'prioridad' => 'required|in:normal,urgente,premium',
             'tiempo_estimado' => 'nullable|integer|min:1',
         ];
     }

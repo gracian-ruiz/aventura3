@@ -29,6 +29,7 @@
                                             <select name="prioridad" class="w-full border px-4 py-2 rounded-md" required>
                                                 <option value="normal" {{ $presupuesto->prioridad == 'normal' ? 'selected' : '' }}>Normal</option>
                                                 <option value="urgente" {{ $presupuesto->prioridad == 'urgente' ? 'selected' : '' }}>Urgente</option>
+                                                <option value="premium" {{ $presupuesto->prioridad == 'premium' ? 'selected' : '' }}>Premium</option>
                                             </select>
                                     </div>
 

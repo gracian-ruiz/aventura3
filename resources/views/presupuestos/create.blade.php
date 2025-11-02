@@ -25,6 +25,7 @@
                 <select name="prioridad" id="prioridad" class="w-full border px-4 py-2 rounded-md" required>
                     <option value="normal">Normal</option>
                     <option value="urgente">Urgente</option>
+                    <option value="premium">Premium</option>
                 </select>
             </div>
 

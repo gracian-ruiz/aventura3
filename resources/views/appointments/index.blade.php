@@ -8,6 +8,29 @@
 @endif
 
 <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
+    <!-- 🔹 Filtros -->
+    <div class="flex justify-center space-x-3 mb-6">
+        @php
+            $botones = [
+                'todos' => 'Todos',
+                'proceso' => 'En proceso',
+                'incidencia' => 'Incidencias',
+                'sin-hacer' => 'Sin hacer',
+                'premium' => 'Premium',
+            ];
+        @endphp
+
+        @foreach ($botones as $key => $label)
+            <a href="{{ route('appointments.index', ['filtro' => $key, 'search' => request('search')]) }}"
+            class="px-4 py-2 rounded-md font-semibold transition
+            {{ request('filtro', 'todos') === $key 
+                    ? 'bg-blue-600 text-white shadow-md scale-105' 
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300' }}">
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
     <h1 class="text-2xl font-bold text-center mb-4">Orden Pendientes para reparar</h1>
 
     <!-- Buscador -->
@@ -60,10 +83,21 @@
                         </td>
                         <td class="py-2 px-4">
                             <span class="px-2 py-1 rounded-full text-xs font-bold 
-                                {{ $appointment->prioridad == 'urgente' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white' }}">
+                                @if ($appointment->prioridad == 'urgente')
+                                    bg-red-500 text-white
+                                @elseif ($appointment->prioridad == 'premium')
+                                    bg-yellow-400 text-black border border-yellow-600 shadow-sm premium
+                                @else
+                                    bg-blue-500 text-white
+                                @endif">
                                 {{ ucfirst($appointment->prioridad) }}
                             </span>
                         </td>
+                        <style>
+                            .premium{
+                                background: rgb(242, 255, 99)
+                            }
+                        </style>
                         <td class="py-2 px-4">{{ $appointment->horas_total }} min</td>
                         <td class="py-2 px-4">
                             {{ \Carbon\Carbon::parse($appointment->created_at)->addHour()->format('d/m/Y H:i') }}

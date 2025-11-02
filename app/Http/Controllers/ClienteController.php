@@ -137,6 +137,7 @@ class ClienteController extends Controller
             'prioridad' => 'normal',
             'estimacion_reparacion' => 0,
             'calendario' => $request->fecha,
+            'fecha_fija' => true,
         ]);
 
         return redirect()->route('cliente.perfil')->with('success', '✅ Cita creada correctamente.');

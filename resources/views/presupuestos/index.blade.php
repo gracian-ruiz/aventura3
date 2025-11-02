@@ -43,12 +43,23 @@
                         <td class="py-2 px-4">{{ $presupuesto->user_nombre ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ $presupuesto->marca ?? 'N/A' }} {{ $presupuesto->bike_nombre ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ date('d/m/Y', strtotime($presupuesto->created_at)) }}</td>
-                        <td class="py-2 px-4">
+                        <td class="py-2 px-4 text-center">
                             <span class="px-2 py-1 rounded-full text-xs font-bold 
-                                {{ $presupuesto->prioridad == 'urgente' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white' }}">
+                                @if ($presupuesto->prioridad == 'urgente')
+                                    bg-red-500 text-white
+                                @elseif ($presupuesto->prioridad == 'premium')
+                                    bg-amber-400 text-black border border-amber-600 shadow-sm premium
+                                @else
+                                    bg-blue-500 text-white
+                                @endif">
                                 {{ ucfirst($presupuesto->prioridad) }}
                             </span>
                         </td>
+                        <style>
+                            .premium{
+                                background: rgb(242, 255, 99)
+                            }
+                        </style>
                         <td class="py-2 px-4 text-center">
                                 <form action="{{ route('presupuestos.actualizarEstado', $presupuesto->id) }}" method="POST" class="mb-1">
                                     @csrf

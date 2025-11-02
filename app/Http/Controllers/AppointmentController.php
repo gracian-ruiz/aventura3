@@ -12,51 +12,83 @@ use App\Http\Requests\UpdateAppointmentRequest;
 use App\Http\Controllers\Alquiler\EnviarCorreosController;
 use App\Http\Controllers\EnviarCorreosController as ControllersEnviarCorreosController;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
-    public function index(Request $request)
-    {
-        $search = $request->input('search');
-        $estado = $request->input('estado', 'pendiente'); // Estado seleccionado, por defecto 'pendiente'
-        $estado = $request->input('estado', 'pendiente'); // por defecto 'pendiente'
+public function index(Request $request)
+{
+    $search = $request->input('search');
+    $filtro = $request->input('filtro', 'todos'); // Por defecto: 'todos'
 
-        // Recalcular siempre antes de mostrar la vista
-        $this->recalcularFechasAsignadas();
+    // Recalcular siempre antes de mostrar la vista
+    $this->recalcularFechasAsignadas();
 
-        $appointments = Appointment::with('bike.user', 'componentes')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->where(function ($query) use ($search) {
-                if ($search) {
-                    $query->whereHas('bike', function ($q) use ($search) {
-                        $q->where('nombre', 'like', '%' . $search . '%')
-                            ->orWhereHas('user', function ($qq) use ($search) {
-                                $qq->where('name', 'like', '%' . $search . '%');
-                            });
-                    })
-                        ->orWhere('idprograma', 'like', '%' . $search . '%');
-                }
-            })
-            ->orderByRaw('
-            CASE 
-                -- EN PROCESO
-                WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
-                WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
-                WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
-                WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
-                -- PENDIENTE
-                WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total < 30 THEN 5
-                WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total >= 30 THEN 6
-                WHEN estado = "pendiente" AND prioridad = "normal" AND horas_total < 30 THEN 7
-                ELSE 8
-            END
-        ')
-            ->orderBy('horas_total', 'asc')
-            ->orderBy('fecha_asignada', 'asc') // 🔹 Ahora el criterio único
-            ->paginate(8);
+    $query = Appointment::with('bike.user', 'componentes');
 
-        return view('appointments.index', compact('appointments', 'search', 'estado'));
+    // 🔹 Aplicar filtros
+    switch ($filtro) {
+        case 'proceso':
+            $query
+                  ->where('descripcion_problema', '=', null)
+                  ->where('estado','en proceso');
+            break;
+
+        case 'sin-hacer':
+            $query->where('estado', 'pendiente');
+            break;
+
+        case 'premium':
+            $query->where('prioridad', 'premium');
+            break;
+
+        case 'incidencia':
+            $query->whereNotNull('descripcion_problema')
+                  ->where('descripcion_problema', '!=', '')
+                  ->whereIn('estado', ['en proceso', 'pendiente']);
+            break;
+
+        default: // 🔸 “Todos” (como tu versión original)
+            $query->whereIn('estado', ['pendiente', 'en proceso'])
+                ->orderByRaw("
+                    CASE
+                        WHEN estado = 'en proceso' THEN 1
+                        WHEN estado = 'pendiente' THEN 2
+                        ELSE 3
+                    END
+                "); // primero en proceso, luego pendiente
+            break;
     }
+
+    // 🔍 Buscador
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('bike', function ($q2) use ($search) {
+                $q2->where('nombre', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($qq) use ($search) {
+                        $qq->where('name', 'like', "%{$search}%");
+                    });
+            })
+            ->orWhere('idprograma', 'like', "%{$search}%");
+        });
+    }
+
+    // 🔹 Orden por prioridad y fecha
+    $query->orderByRaw("
+        CASE
+            WHEN prioridad = 'premium' THEN 0
+            WHEN prioridad = 'urgente' THEN 1
+            WHEN prioridad = 'normal' THEN 2
+            ELSE 3
+        END
+    ")->orderBy('fecha_asignada', 'asc');
+
+    // 🔹 Paginar
+    $appointments = $query->paginate(8)->appends(['search' => $search, 'filtro' => $filtro]);
+
+    return view('appointments.index', compact('appointments', 'search', 'filtro'));
+}
+
 
 
 
@@ -398,153 +430,179 @@ class AppointmentController extends Controller
         return redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
     }
 
-    private function recalcularFechasAsignadas()
-    {
-        $horas_laborales = [
-            'monday'    => 300,  // 5 horas
-            'tuesday'   => 300,
-            'wednesday' => 300,
-            'thursday'  => 300,
-            'friday'    => 300,
-            'saturday'  => 200,  // 3 horas y 20 minutos
-        ];
+private function recalcularFechasAsignadas2()
+{
+    $horas_laborales = [
+        'monday'    => 300,  // 5 horas
+        'tuesday'   => 300,
+        'wednesday' => 300,
+        'thursday'  => 300,
+        'friday'    => 300,
+        'saturday'  => 200,  // 3h 20min
+    ];
 
-        // Reiniciar fechas para recalcular desde cero
-        DB::table('appointments')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->update(['fecha_asignada' => null]);
+    // 🔸 No borramos las fechas fijas de los Premium
+    DB::table('appointments')
+        ->whereIn('estado', ['pendiente', 'en proceso'])
+        ->where('fecha_fija', false)
+        ->update(['fecha_asignada' => null]);
 
-        // Obtener citas con orden de prioridad
-        $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
-            ->orderByRaw("
-        CASE 
-            WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total < 30 THEN 1
-            WHEN estado = 'en proceso' AND prioridad = 'urgente' AND horas_total >= 30 THEN 2
-            WHEN estado = 'en proceso' AND prioridad = 'normal' AND horas_total < 30 THEN 3
-            WHEN estado = 'en proceso' AND prioridad = 'normal' AND horas_total >= 30 THEN 4
-            WHEN estado = 'pendiente' AND prioridad = 'urgente' AND horas_total < 30 THEN 5
-            WHEN estado = 'pendiente' AND prioridad = 'urgente' AND horas_total >= 30 THEN 6
-            WHEN estado = 'pendiente' AND prioridad = 'normal' AND horas_total < 30 THEN 7
-            ELSE 8
-        END
-    ")
-            ->orderBy('created_at', 'asc') // ⏳ primero por fecha de entrada
-            ->orderBy('id', 'asc')         // 🔑 luego por id para evitar empates
-            ->get();
+    // 🔸 Obtener todas las citas que necesitan asignación
+    $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
+        ->orderByRaw("
+            CASE
+                WHEN fecha_fija = 1 THEN 0        -- 📅 Premium con fecha fija (no se tocarán)
+                WHEN prioridad = 'premium' THEN 1 -- 💎 Premium sin fecha fija
+                WHEN prioridad = 'urgente' THEN 2 -- 🔴 Urgente
+                ELSE 3                            -- 🟡 Normal
+            END
+        ")
+        ->orderBy('created_at', 'asc')
+        ->orderBy('id', 'asc')
+        ->get();
 
+    $fecha_actual = Carbon::today();
+    $ahora = Carbon::now();
+    $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
 
-        $fecha_actual = Carbon::today();
-        $ahora = Carbon::now();
-        $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
+    // 🔹 Si ya cerró la tienda, pasar al siguiente día laboral
+    if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
+        do {
+            $fecha_actual->addDay();
+            $dia_semana = strtolower($fecha_actual->format('l'));
+        } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
+    }
 
-        // Si ya cerró la tienda, empezamos desde el siguiente día laboral
-        if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
-            do {
-                $fecha_actual->addDay();
-                $dia_semana = strtolower($fecha_actual->format('l'));
-            } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
+    $agenda = [];
+
+    foreach ($appointments as $appointment) {
+        // 🔹 Saltar premium con fecha fija
+        if ($appointment->fecha_fija) {
+            continue;
         }
 
-        $agenda = [];
+        $tiempo_estimado = $appointment->horas_total ?: 30; // por si no está definido
 
-        foreach ($appointments as $appointment) {
-            $tiempo_estimado = $appointment->horas_total;
-            while (true) {
-                $dia_semana = strtolower($fecha_actual->format('l'));
+        while (true) {
+            $dia_semana = strtolower($fecha_actual->format('l'));
 
-                if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
-                    $fecha_actual->addDay();
-                    continue;
-                }
+            // Saltar domingos o días no laborales
+            if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
+                $fecha_actual->addDay();
+                continue;
+            }
 
-                // Inicializar disponibilidad del día si no existe en la agenda
-                if (!isset($agenda[$fecha_actual->toDateString()])) {
-                    $agenda[$fecha_actual->toDateString()] = 0;
-                }
+            // Inicializar el día si no existe aún
+            if (!isset($agenda[$fecha_actual->toDateString()])) {
+                $agenda[$fecha_actual->toDateString()] = 0;
+            }
 
-                // Comprobar si cabe en el día
-                if ($appointment->prioridad === 'urgente' || $agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
-                    DB::table('appointments')
-                        ->where('id', $appointment->id)
-                        ->update(['fecha_asignada' => $fecha_actual->toDateString()]);
+            // 🔹 Si cabe la cita en el día
+            if ($agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
+                DB::table('appointments')
+                    ->where('id', $appointment->id)
+                    ->update(['fecha_asignada' => $fecha_actual->toDateString()]);
 
-                    $agenda[$fecha_actual->toDateString()] += $tiempo_estimado;
-                    break;
-                } else {
-                    $fecha_actual->addDay();
-                }
+                $agenda[$fecha_actual->toDateString()] += $tiempo_estimado;
+                break;
+            } else {
+                // Si no cabe, pasar al siguiente día laboral
+                $fecha_actual->addDay();
             }
         }
     }
+}
 
 
-    private function recalcularFechasAsignadas2()
-    {
-        $horas_laborales = [
-            'monday'    => 300,  // 5 horas
-            'tuesday'   => 300,
-            'wednesday' => 300,
-            'thursday'  => 300,
-            'friday'    => 300,
-            'saturday'  => 200,  // 3 horas y 20 minutos
+
+private function recalcularFechasAsignadas()
+{
+    Log::info('🔄 Iniciando recalcularFechasAsignadas()');
+    $startTotal = microtime(true);
+
+    $horas_laborales = [
+        'monday'    => 300,
+        'tuesday'   => 300,
+        'wednesday' => 300,
+        'thursday'  => 300,
+        'friday'    => 300,
+        'saturday'  => 200,
+    ];
+
+    $fecha_inicio = now()->startOfDay();
+    $minutos_dia = 300; // 5h por día base
+    $acumulado = 0;
+    $agenda = [];
+
+    // 🔸 Reset de fechas
+    DB::table('appointments')
+        ->whereIn('estado', ['pendiente', 'en proceso'])
+        ->where('fecha_fija', false)
+        ->update(['fecha_asignada' => null]);
+
+    // 🔸 Obtener todas las citas
+    $appointments = DB::table('appointments')
+        ->select('id', 'horas_total', 'fecha_fija', 'prioridad', 'created_at')
+        ->whereIn('estado', ['pendiente', 'en proceso'])
+        ->orderByRaw("
+            CASE
+                WHEN fecha_fija = 1 THEN 0
+                WHEN prioridad = 'premium' THEN 1
+                WHEN prioridad = 'urgente' THEN 2
+                ELSE 3
+            END
+        ")
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    $updates = [];
+
+    foreach ($appointments as $a) {
+        if ($a->fecha_fija) continue;
+
+        $tiempo = $a->horas_total ?: 30;
+
+        // Calcula en qué día cae según los minutos acumulados
+        $dia_offset = floor($acumulado / $minutos_dia);
+
+        // Ajustar si cae en domingo o día sin horas laborales
+        $fecha = $fecha_inicio->copy()->addDays($dia_offset);
+        while (true) {
+            $dia_semana = strtolower($fecha->format('l'));
+            if (isset($horas_laborales[$dia_semana])) break;
+            $fecha->addDay(); // salta domingos
+        }
+
+        $updates[] = [
+            'id' => $a->id,
+            'fecha_asignada' => $fecha->toDateString(),
         ];
 
-        // Reiniciar fechas para recalcular desde cero
-        Appointment::whereIn('estado', ['pendiente', 'en proceso'])->update(['fecha_asignada' => null]);
-
-        $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
-            ->orderByRaw("
-                CASE 
-                    WHEN estado = 'en proceso' AND prioridad = 'urgente' THEN 0  -- Urgentes en proceso primero
-                    WHEN prioridad = 'urgente' THEN 1  -- Luego urgentes en pendiente
-                    WHEN tiempo_estimado < 30 THEN 2  -- Luego las de menos de 30 minutos
-                    ELSE 3 
-                END
-            ")
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        $fecha_actual = Carbon::today();
-        $ahora = Carbon::now();
-        $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
-
-        // Si ya cerró la tienda, empezamos desde el siguiente día laboral
-        if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
-            do {
-                $fecha_actual->addDay();
-                $dia_semana = strtolower($fecha_actual->format('l'));
-            } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
-        }
-
-        $agenda = [];
-
-        foreach ($appointments as $appointment) {
-            $tiempo_estimado = $appointment->horas_total;
-            while (true) {
-                $dia_semana = strtolower($fecha_actual->format('l'));
-
-                if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
-                    $fecha_actual->addDay();
-                    continue;
-                }
-
-                // Inicializar disponibilidad del día si no existe en la agenda
-                if (!isset($agenda[$fecha_actual->toDateString()])) {
-                    $agenda[$fecha_actual->toDateString()] = 0;
-                }
-
-                // **Asignar urgentes primero si hay huecos**
-                if ($appointment->prioridad === 'urgente' || $agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
-                    $appointment->fecha_asignada = $fecha_actual->toDateString();
-                    $appointment->save();
-                    $agenda[$fecha_actual->toDateString()] += $tiempo_estimado;
-                    break;
-                } else {
-                    $fecha_actual->addDay();
-                }
-            }
-        }
+        $agenda[$fecha->toDateString()] = ($agenda[$fecha->toDateString()] ?? 0) + $tiempo;
+        $acumulado += $tiempo;
     }
+
+    // 🔸 Actualización masiva
+    if ($updates) {
+        $query = "UPDATE appointments SET fecha_asignada = CASE id ";
+        $ids = [];
+
+        foreach ($updates as $u) {
+            $query .= "WHEN {$u['id']} THEN '{$u['fecha_asignada']}' ";
+            $ids[] = $u['id'];
+        }
+
+        $query .= "END WHERE id IN (" . implode(',', $ids) . ")";
+        DB::statement($query);
+    }
+
+    $timeTotal = round(microtime(true) - $startTotal, 2);
+    Log::info("✅ recalcularFechasAsignadas() completado en {$timeTotal}s con ".count($updates)." citas");
+}
+
+
+
+
 
 
     public function show($id)
@@ -762,22 +820,40 @@ public function calendariocitas()
             ->orderBy('tiempo_reparacion', 'asc') // 📅 ordenar cronológicamente
             ->get();
 
+        // 🎨 Preparar eventos para el calendario
         $eventos = $resultados->map(function ($item) {
-            // Color por defecto según estado
-            $color = match ($item->estado) {
-                'pendiente'   => '#facc15', // amarillo
-                'en proceso'  => '#60a5fa', // azul
-                'completada'  => '#22c55e', // verde
-                default       => '#a1a1aa', // gris
-            };
+            // 🟢 Color base por estado
+$color = match (true) {
+    $item->prioridad === 'premium' => '#F6C90E',  // dorado
+    $item->prioridad === 'urgente' => '#D7263D',  // rojo oscuro
+    $item->estado === 'pendiente'  => '#FFA552',  // naranja suave
+    $item->estado === 'en proceso' => '#4A90E2',  // azul profesional
+    $item->estado === 'completada' => '#00C49A',  // verde menta
+    !empty($item->descripcion_problema) => '#9B5DE5', // violeta problema
+    default => '#E0E0E0',  // gris neutro
+};
 
-            // 🔴 Si tiene descripción (y no es "nada"), marcar en rojo
+
+            // 🔴 Si tiene descripción de problema no vacía → rojo
             if (!empty($item->descripcion_problema) && strtolower(trim($item->descripcion_problema)) !== 'nada') {
                 $color = '#ef4444';
             }
 
+            // 💎 Si es prioridad premium → dorado
+            if ($item->prioridad === 'premium') {
+                $color = '#FFD700'; // dorado brillante
+            }
+
+            // 🔥 Si es urgente → rojo intenso (solo si no hay descripción)
+            elseif ($item->prioridad === 'urgente' && empty($item->descripcion_problema)) {
+                $color = '#dc2626'; // rojo fuerte
+            }
+
+            // 🧾 Título con cliente + bici (marca + nombre)
+            $titulo = "<b>{$item->bike->user->name}</b><br>{$item->bike->marca} - {$item->bike->nombre}";
+
             return [
-                'title' => $item->bike->user->name . " - " . $item->bike->nombre . " (#{$item->id})",
+                'title' => $titulo,
                 'start' => $item->fecha_asignada,
                 'url'   => route('appointments.show', $item->id),
                 'color' => $color,
