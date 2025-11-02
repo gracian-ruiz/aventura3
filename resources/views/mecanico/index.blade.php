@@ -7,7 +7,8 @@
     </div>
 @endif
 
-<div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
+<!-- 🔹 Contenedor de ancho completo -->
+<div class="w-full px-4 sm:px-6 lg:px-10 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Órdenes pendientes para reparar</h1>
 
     <!-- 🔎 Buscador + Filtros -->
@@ -35,8 +36,9 @@
         </div>
     @endif
 
+    <!-- 🔹 Tabla a pantalla completa -->
     <div class="overflow-x-auto mt-6">
-        <table class="min-w-full bg-white shadow-md rounded-lg">
+        <table class="w-full bg-white shadow-md rounded-lg">
             <thead class="bg-gray-800 text-white">
                 <tr>
                     <th class="py-2 px-4 text-left">Bicicleta</th>
