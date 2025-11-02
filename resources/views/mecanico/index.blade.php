@@ -8,13 +8,23 @@
 @endif
 
 <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
-    <h1 class="text-2xl font-bold text-center mb-4">Orden Pendientes para reparar</h1>
+    <h1 class="text-2xl font-bold text-center mb-4">Órdenes pendientes para reparar</h1>
 
-    <!-- Buscador -->
-    <form action="{{ route('mecanico.index') }}" method="GET" class="mb-4 flex items-center">
+    <!-- 🔎 Buscador + Filtros -->
+    <form action="{{ route('mecanico.index') }}" method="GET" class="mb-4 flex flex-wrap items-center gap-2">
         <input type="text" name="search" placeholder="Buscar por bicicleta, usuario o componente..." 
-               class="border px-4 py-2 rounded-md w-1/2" value="{{ request('search') }}">
-        <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+               class="border px-4 py-2 rounded-md flex-1 min-w-[250px]"
+               value="{{ request('search') }}">
+
+        <select name="filtro" class="border px-4 py-2 rounded-md">
+            <option value="todos" {{ request('filtro') == 'todos' ? 'selected' : '' }}>Todos</option>
+            <option value="proceso" {{ request('filtro') == 'proceso' ? 'selected' : '' }}>En proceso</option>
+            <option value="sin-hacer" {{ request('filtro') == 'sin-hacer' ? 'selected' : '' }}>Pendientes</option>
+            <option value="premium" {{ request('filtro') == 'premium' ? 'selected' : '' }}>Premium</option>
+            <option value="incidencia" {{ request('filtro') == 'incidencia' ? 'selected' : '' }}>Con incidencia</option>
+        </select>
+
+        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
             Buscar
         </button>
     </form>
@@ -33,21 +43,20 @@
                     <th class="py-2 px-4 text-left">Usuario</th>
                     <th class="py-2 px-4 text-left">Componentes</th>
                     <th class="py-2 px-4 text-left">Prioridad</th>
-                    <th class="py-2 px-4 text-left">Tiempo de Reparacion</th>
+                    <th class="py-2 px-4 text-left">Tiempo de Reparación</th>
                     <th class="py-2 px-4 text-center">Acciones</th>
-                    <th class="py-2 px-4 text-left">Mecanico</th>
+                    <th class="py-2 px-4 text-left">Mecánico</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
-                @foreach ($appointments as $appointment)
-                <tr class="hover:bg-gray-100
-                @if(!empty($appointment->descripcion_problema))
-                    bg-red-200
-                @elseif($appointment->estado == 'en proceso')
-                    bg-yellow-200
-                @endif
-            ">
-            
+                @forelse ($appointments as $appointment)
+                    <tr class="hover:bg-gray-100
+                        @if(!empty($appointment->descripcion_problema))
+                            bg-red-200
+                        @elseif($appointment->estado == 'en proceso')
+                            bg-yellow-200
+                        @endif
+                    ">
                         <td class="py-2 px-4">{{ $appointment->bike->marca }} {{ $appointment->bike->nombre }} {{ $appointment->bike->color }}</td>
                         <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
                         <td class="py-2 px-4">
@@ -59,7 +68,7 @@
                         </td>
                         <td class="py-2 px-4">
                             <span class="px-2 py-1 rounded-full text-xs font-bold 
-                                {{ $appointment->prioridad == 'urgente' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white' }}">
+                                {{ $appointment->prioridad == 'urgente' ? 'bg-red-500 text-white' : ($appointment->prioridad == 'premium' ? 'bg-yellow-600 text-white' : 'bg-blue-500 text-white') }}">
                                 {{ ucfirst($appointment->prioridad) }}
                             </span>
                         </td>
@@ -80,32 +89,35 @@
                             <!-- Botón Completar (solo si está en proceso) -->
                             @if($appointment->estado == 'en proceso')
                                 <a href="{{ route('mecanico.confirmCompletion', $appointment->id) }}" 
-                                    class="block px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 my-1">
+                                   class="block px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 my-1">
                                     Finalizar
                                 </a>
-                            @endif
-
-                            @if($appointment->estado == 'en proceso')
-                            <a href="{{ route('mecanico.reparacion.show', $appointment->id) }}" 
-                                class="block px-3 py-1 bg-black text-white rounded-md hover:bg-gray-800 my-1">
-                                Reparación
-                            </a>
+                                <a href="{{ route('mecanico.reparacion.show', $appointment->id) }}" 
+                                   class="block px-3 py-1 bg-black text-white rounded-md hover:bg-gray-800 my-1">
+                                   Reparación
+                                </a>
                             @endif
                         </td>
                         <td class="py-2 px-4">
                             @foreach ($appointment->usuarios_asignados as $usuario)
-                            <h1>{{ $usuario->name }}</h1>
-                            <br> {{-- O $usuario->nombre si usas 'nombre' como campo --}}
-                            @endforeach</td>
+                                <span class="block">{{ $usuario->name }}</span>
+                            @endforeach
+                        </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-gray-500">
+                            No se encontraron resultados para los filtros aplicados.
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 
     <!-- Paginación -->
     <div class="mt-6">
-        {{ $appointments->appends(['search' => request('search')])->links() }}
+        {{ $appointments->appends(['search' => request('search'), 'filtro' => request('filtro')])->links() }}
     </div>
 </div>
 @endsection
