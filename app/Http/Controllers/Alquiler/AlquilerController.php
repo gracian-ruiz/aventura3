@@ -275,101 +275,134 @@ class AlquilerController extends Controller
     
     
 
-    public function eliminarMaterial($pivotId)
-    {
-        $pivot = DB::table('alquiler_material')->where('id', $pivotId)->first();
-    
-        if (!$pivot) {
-            return back()->with('error', 'Material no encontrado.');
-        }
-    
-        // Obtener el alquiler y actualizar precios
-        $alquiler = Alquiler::findOrFail($pivot->alquiler_id);
-    
-        $alquiler->total_precio -= $pivot->subtotal;
-        $alquiler->descuento -= $pivot->descuento;
-        $alquiler->reserva_precio -= $pivot->reserva_precio;
-    
-        $alquiler->total_precio = max(0, $alquiler->total_precio);
-        $alquiler->descuento = max(0, $alquiler->descuento);
-    
-        $alquiler->save();
-    
-        // Eliminar el registro de la tabla intermedia
-        DB::table('alquiler_material')->where('id', $pivotId)->delete();
-    
-        return redirect()
-            ->route('alquileres.edit', $alquiler->id)
-            ->with('success', 'Material eliminado correctamente.');
+public function eliminarMaterial($pivotId)
+{
+    $pivot = DB::table('alquiler_material')->where('id', $pivotId)->first();
+
+    if (!$pivot) {
+        return back()->with('error', 'Material no encontrado.');
     }
+
+    // Obtener el alquiler y actualizar precios
+    $alquiler = Alquiler::findOrFail($pivot->alquiler_id);
+
+    $alquiler->total_precio -= $pivot->subtotal;
+    $alquiler->descuento -= $pivot->descuento;
+    $alquiler->reserva_precio -= $pivot->reserva_precio;
+
+    $alquiler->total_precio = max(0, $alquiler->total_precio);
+    $alquiler->descuento = max(0, $alquiler->descuento);
+
+    $alquiler->save();
+
+    // Eliminar el registro de la tabla intermedia
+    DB::table('alquiler_material')->where('id', $pivotId)->delete();
+
+    // 🔽 NUEVO BLOQUE: recalcular fechas del alquiler después de eliminar el material
+    $rangoFechas = DB::table('alquiler_material')
+        ->where('alquiler_id', $alquiler->id)
+        ->selectRaw('MIN(fecha_inicio) as fecha_inicio, MAX(fecha_fin) as fecha_fin')
+        ->first();
+
+    if ($rangoFechas && $rangoFechas->fecha_inicio && $rangoFechas->fecha_fin) {
+        // 🔹 Actualizar fechas si todavía quedan materiales
+        $alquiler->update([
+            'fecha_inicio' => $rangoFechas->fecha_inicio,
+            'fecha_fin' => $rangoFechas->fecha_fin,
+        ]);
+    } else {
+        // 🔹 Si ya no quedan materiales, se limpian las fechas del alquiler
+        $alquiler->update([
+            'fecha_inicio' => null,
+            'fecha_fin' => null,
+        ]);
+    }
+
+    return redirect()
+        ->route('alquileres.edit', $alquiler->id)
+        ->with('success', 'Material eliminado correctamente y fechas actualizadas.');
+}
+
     
 
 
 
-    public function addMateriales(Request $request, Alquiler $alquiler)
-    {
+public function addMateriales(Request $request, Alquiler $alquiler)
+{
+    $request->validate([
+        'materiales' => 'required|array|min:1',
+    ]);
+
+    // Filtrar materiales seleccionados
+    $materialesSeleccionados = array_filter($request->input('materiales'), function ($material) {
+        return isset($material['selected']) && $material['selected'] === 'on';
+    });
+
+    if (empty($materialesSeleccionados)) {
+        return back()->withErrors(['materiales' => 'Debes seleccionar al menos un material.'])->withInput();
+    }
+
+    // Inicializar las variables de total solo para el material nuevo
+    $totalPrecioNuevo = 0;
+    $totalDescuentoNuevo = 0;
+    $totalReservaNuevo = 0;
+
+    // Validar y asociar los materiales seleccionados al alquiler
+    foreach ($materialesSeleccionados as $index => $material) {
         $request->validate([
-            'materiales' => 'required|array|min:1',
+            "materiales.$index.precio_unitario" => 'required|numeric|min:0',
+            "materiales.$index.descuento" => 'required|numeric|min:0',
+            "materiales.$index.reserva_precio" => 'required|numeric|min:0',
         ]);
 
-        // Filtrar materiales seleccionados
-        $materialesSeleccionados = array_filter($request->input('materiales'), function ($material) {
-            return isset($material['selected']) && $material['selected'] === 'on';
-        });
+        // Calcular subtotal por material
+        $precioUnitario = $material['precio_unitario'];
+        $descuento = $material['descuento'];
+        $reserva = $material['reserva_precio'];
 
-        if (empty($materialesSeleccionados)) {
-            return back()->withErrors(['materiales' => 'Debes seleccionar al menos un material.'])->withInput();
-        }
+        $subtotal = ($precioUnitario) - $descuento;
 
-        // Inicializar las variables de total solo para el material nuevo
-        $totalPrecioNuevo = 0;
-        $totalDescuentoNuevo = 0;
-        $totalReservaNuevo = 0;
+        // Actualizar los totales solo para los materiales nuevos
+        $totalPrecioNuevo += $subtotal;
+        $totalDescuentoNuevo += $descuento;
+        $totalReservaNuevo += $reserva;
 
-        // Validar y asociar los materiales seleccionados al alquiler
-        foreach ($materialesSeleccionados as $index => $material) {
-            $request->validate([
-                "materiales.$index.precio_unitario" => 'required|numeric|min:0',
-                "materiales.$index.descuento" => 'required|numeric|min:0',
-                "materiales.$index.reserva_precio" => 'required|numeric|min:0',
-            ]);
-
-            // Calcular subtotal por material
-            $precioUnitario = $material['precio_unitario'];
-            $descuento = $material['descuento'];
-            $reserva = $material['reserva_precio'];
-
-            $subtotal = ($precioUnitario) - $descuento;
-
-            // Actualizar los totales solo para los materiales nuevos
-            $totalPrecioNuevo += $subtotal;
-            $totalDescuentoNuevo += $descuento;
-            $totalReservaNuevo += $reserva;
-
-            // Asociar el material al alquiler
-            $alquiler->materiales()->attach(
-                $material['id'],
-                [
-                    'precio_unitario' => $precioUnitario,
-                    'descuento' => $descuento,
-                    'subtotal' => $subtotal,
-                    'reserva_precio' => $reserva,
-                    'fecha_inicio' => $request->input('fecha_inicio'),
-                    'fecha_fin' => $request->input('fecha_fin'),
-                ]
-            );
-        }
-
-        // Actualizar el alquiler solo con los totales nuevos
-        $alquiler->total_precio += $totalPrecioNuevo; // Se suma al total existente
-        $alquiler->descuento += $totalDescuentoNuevo; // Se suma al descuento existente
-        $alquiler->reserva_precio += $totalReservaNuevo;
-
-        // Guardar los cambios en el alquiler
-        $alquiler->save();
-
-        return redirect()->route('alquileres.edit', $alquiler->id)->with('success', 'Materiales añadidos correctamente.');
+        // Asociar el material al alquiler
+        $alquiler->materiales()->attach(
+            $material['id'],
+            [
+                'precio_unitario' => $precioUnitario,
+                'descuento' => $descuento,
+                'subtotal' => $subtotal,
+                'reserva_precio' => $reserva,
+                'fecha_inicio' => $request->input('fecha_inicio'),
+                'fecha_fin' => $request->input('fecha_fin'),
+            ]
+        );
     }
+
+    // Actualizar el alquiler solo con los totales nuevos
+    $alquiler->total_precio += $totalPrecioNuevo; 
+    $alquiler->descuento += $totalDescuentoNuevo; 
+    $alquiler->reserva_precio += $totalReservaNuevo;
+    $alquiler->save();
+
+    // 🔽 NUEVO BLOQUE: actualizar fechas del alquiler según el rango total de materiales
+    $rangoFechas = DB::table('alquiler_material')
+        ->where('alquiler_id', $alquiler->id)
+        ->selectRaw('MIN(fecha_inicio) as fecha_inicio, MAX(fecha_fin) as fecha_fin')
+        ->first();
+
+    if ($rangoFechas && $rangoFechas->fecha_inicio && $rangoFechas->fecha_fin) {
+        $alquiler->update([
+            'fecha_inicio' => $rangoFechas->fecha_inicio,
+            'fecha_fin' => $rangoFechas->fecha_fin,
+        ]);
+    }
+
+    return redirect()->route('alquileres.edit', $alquiler->id)->with('success', 'Materiales añadidos correctamente y fechas actualizadas.');
+}
+
 
     public function show($id)
     {
