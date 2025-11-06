@@ -16,9 +16,17 @@ class ClienteController extends Controller
     public function perfil()
     {
         $user = Auth::user();
-        $bikes = $user->bikes; // ya funciona perfectamente
+
+        // 🔹 Cargar bicicletas con su cita más reciente (ordenada por fecha o creación)
+        $bikes = Bike::where('user_id', $user->id)
+            ->with(['appointments' => function ($q) {
+                $q->orderByDesc('calendario')->take(1); // solo la última cita por bicicleta
+            }])
+            ->get();
+            
         return view('cliente.perfil', compact('user', 'bikes'));
     }
+
 
 
     /**
@@ -105,13 +113,29 @@ class ClienteController extends Controller
             ->where('user_id', Auth::id()) // seguridad: solo sus bicis
             ->firstOrFail();
 
-        // Generar los próximos 14 días hábiles (lunes a sábado)
-        $fechasDisponibles = [];
-        $fecha = now();
+        // 🔹 Verificar si el usuario es premium (ajusta el campo según tu tabla)
+        $esPremium = Auth::user()->role === 'premium';
 
-        for ($i = 0; $i < 14; $i++) {
+        // 🔹 Obtener la última fecha asignada en appointments
+        $ultimaFecha = DB::table('appointments')->max('fecha_asignada');
+
+        if ($ultimaFecha) {
+            $ultimaFecha = \Carbon\Carbon::parse($ultimaFecha);
+        } else {
+            $ultimaFecha = now();
+        }
+
+        // 🔹 Determinar desde cuándo puede empezar a elegir
+        $fechaInicio = $esPremium ? now() : $ultimaFecha->copy()->addDays(2);
+
+        // 🔹 Generar las fechas disponibles (14 días para no premium, 30 días para premium)
+        $fechasDisponibles = [];
+        $fecha = $fechaInicio->copy();
+        $limiteDias = $esPremium ? 30 : 14; // premium puede elegir más rango
+
+        for ($i = 0; $i < $limiteDias; $i++) {
             $diaSemana = strtolower($fecha->format('l'));
-            if ($diaSemana !== 'sunday') {
+            if ($diaSemana !== 'sunday') { // excluir domingos
                 $fechasDisponibles[] = $fecha->format('Y-m-d');
             }
             $fecha->addDay();
@@ -119,6 +143,8 @@ class ClienteController extends Controller
 
         return view('cliente.cita', compact('bike', 'fechasDisponibles'));
     }
+
+
 
     public function guardarCita(Request $request)
     {
@@ -128,13 +154,17 @@ class ClienteController extends Controller
             'descripcion_problema' => 'required|string|max:1000',
         ]);
 
+        // 🔹 Determinar la prioridad según el tipo de usuario
+        $user = Auth::user();
+        $prioridad = ($user->role === 'premium') ? 'premium' : 'normal';
+        // 🔸 Cambia "tipo" por el nombre real del campo en tu tabla users (ej: role, nivel, is_premium...)
+
         Appointment::create([
             'bike_id' => $request->bike_id,
-            'user_id' => Auth::id(),
-            'fecha_asignada' => $request->fecha,
-            'descripcion_problema' => $request->descripcion_problema,
+            'user_id' => $user->id,
+            'descripcion_cliente' => $request->descripcion_problema,
             'estado' => 'presupuesto',
-            'prioridad' => 'normal',
+            'prioridad' => $prioridad, // 👈 cambia según el tipo de usuario
             'estimacion_reparacion' => 0,
             'calendario' => $request->fecha,
             'fecha_fija' => true,

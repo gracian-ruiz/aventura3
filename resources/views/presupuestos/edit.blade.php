@@ -39,14 +39,30 @@
                                         <input type="text" name="idprograma" id="idprograma" class="w-full border px-4 py-2 rounded-md" value="{{$presupuesto->idprograma }}">
                                     </div>
                                 </div>
-                                <div class="w-1/2">
-                                    <label for="calendario" class="block text-gray-700">📅 Calendario</label>
-                                    <input type="date" 
-                                        name="calendario" 
-                                        id="calendario" 
-                                        class="w-full border px-4 py-2 rounded-md" 
-                                        value="{{ $presupuesto->calendario }}">
+                                <div class="mb-4 flex gap-4">
+                                    <!-- 📅 Calendario -->
+                                    <div class="w-1/2">
+                                        <label for="calendario" class="block text-gray-700">📅 Calendario</label>
+                                        <input type="date" 
+                                            name="calendario" 
+                                            id="calendario" 
+                                            class="w-full border px-4 py-2 rounded-md" 
+                                            value="{{ $presupuesto->calendario }}">
+                                    </div>
+
+                                    <!-- 💬 Problema del Cliente -->
+                                    @if(!is_null($presupuesto->descripcion_cliente))
+                                        <div class="w-1/2">
+                                            <label for="descripcion_cliente" class="block text-gray-700">💬 Problema del Cliente</label>
+                                            <textarea name="descripcion_cliente"
+                                                    id="descripcion_cliente"
+                                                    rows="2"
+                                                    class="w-full border px-4 py-2 rounded-md resize-y"
+                                                    placeholder="Descripción del problema...">{{ $presupuesto->descripcion_cliente }}</textarea>
+                                        </div>
+                                    @endif
                                 </div>
+
 
 
                         <div class="mb-4">

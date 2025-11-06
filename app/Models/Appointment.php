@@ -39,7 +39,8 @@ class Appointment extends Model
         'idprograma',
         'calendario',
         'tiempo_reparacion',
-        'fecha_fija' 
+        'fecha_fija',
+        'descripcion_cliente' 
     ];
 
 
