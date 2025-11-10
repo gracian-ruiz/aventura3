@@ -62,15 +62,7 @@ class AppointmentController extends Controller
 
         // 🔍 Buscador
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('bike', function ($q2) use ($search) {
-                    $q2->where('nombre', 'like', "%{$search}%")
-                        ->orWhereHas('user', function ($qq) use ($search) {
-                            $qq->where('name', 'like', "%{$search}%");
-                        });
-                })
-                    ->orWhere('idprograma', 'like', "%{$search}%");
-            });
+            $query->buscar($search);
         }
 
         // 🔹 Orden por prioridad y fecha

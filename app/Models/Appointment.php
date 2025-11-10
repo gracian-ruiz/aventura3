@@ -60,4 +60,21 @@ class Appointment extends Model
             ->withPivot('horas_trabajo', 'total_precio', 'texto','checked','usuario_taller_id');
     }
 
+    public function scopeBuscar($query, $search)
+    {
+        if (!$search) return $query;
+
+        return $query->where(function ($q) use ($search) {
+            $q->whereHas('bike', function ($q2) use ($search) {
+                $q2->where('nombre', 'like', "%{$search}%")
+                ->orWhere('marca', 'like', "%{$search}%")
+                ->orWhereHas('user', function ($qq) use ($search) {
+                        $qq->where('name', 'like', "%{$search}%");
+                });
+            })
+            ->orWhere('idprograma', 'like', "%{$search}%");
+        });
+    }
+
+
 }
