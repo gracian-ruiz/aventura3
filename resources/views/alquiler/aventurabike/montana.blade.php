@@ -239,7 +239,7 @@
         <div class="row g-3">
 
             <!-- MTB 29 -->
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
                         <h6 class="mb-0">{{ __('messages.mtb_29') }}</h6>
@@ -261,7 +261,7 @@
             </div>
 
             <!-- MTB 26 -->
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
                         <h6 class="mb-0">{{ __('messages.mtb_26') }}</h6>
@@ -282,7 +282,7 @@
             </div>
 
             <!-- Carretera -->
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
                         <h6 class="mb-0">{{ __('messages.road') }}</h6>
@@ -306,7 +306,7 @@
             </div>
 
             <!-- Eléctricas -->
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
                         <h6 class="mb-0">{{ __('messages.electric-doble') }}</h6>
@@ -328,7 +328,7 @@
             </div>
 
                         <!-- Eléctricas -->
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
                         <h6 class="mb-0">{{ __('messages.electric') }}</h6>
@@ -349,7 +349,7 @@
             </div>
 
             <!-- Paseo -->
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
                         <h6 class="mb-0">{{ __('messages.city') }}</h6>
