@@ -57,7 +57,7 @@ return [
     'mtb_26' => 'MTB 26” – €15/day',
     'road' => 'Road – €25/day',
     'electric' => 'Electric  – €45/day',
-    'electric' => 'Electric Full – €65/day',
+    'electric-doble' => 'Electric Full – €65/day',
     'city' => 'City',
     'model' => 'Model',
     'size' => 'Size',

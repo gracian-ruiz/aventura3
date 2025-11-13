@@ -309,7 +309,7 @@
             <div class="col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
-                        <h6 class="mb-0">{{ __('messages.electric') }}</h6>
+                        <h6 class="mb-0">{{ __('messages.electric-doble') }}</h6>
                     </div>
                     <div class="card-body p-2">
                         <table class="table table-sm table-bordered mb-0">

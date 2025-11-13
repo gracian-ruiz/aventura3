@@ -58,7 +58,7 @@ return [
     'mtb_26' => 'MTB 26” – 15€/día',
     'road' => 'Carretera – 25€/día',
     'electric' => 'Eléctricas – 45€/día',
-    'electric' => 'Eléctricas Dobles – 45€/día',
+    'electric-doble' => 'Eléctricas Dobles – 65€/día',
     'city' => 'Paseo',
     'model' => 'Modelo',
     'size' => 'Talla',
