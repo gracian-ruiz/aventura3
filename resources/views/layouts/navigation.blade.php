@@ -109,6 +109,8 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('mecanico.index')" :active="request()->routeIs('mecanico.index')">Orden de taller Asignado</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('calendario-citas')" :active="request()->routeIs('calendario-citas')">Calendario Manual</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('calendario-asignado')" :active="request()->routeIs('calendario-asignado')">Calendario Automatico</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">Bicicletas</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">Histórico Citas</x-responsive-nav-link>
