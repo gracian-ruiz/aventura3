@@ -10,7 +10,7 @@ use App\Models\AlquilerMaterial;
 use App\Models\UsuarioAlquiler;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Storage;
 
 class AlquilerController extends Controller
 {
@@ -150,7 +150,7 @@ class AlquilerController extends Controller
                 $ruta = $file->storeAs('app/private/dnis', $nombreArchivo);
 
                 DB::table('usuario_alquiler_fotos')->insert([
-                    'usuario_alquiler_id' => $request->input('usuario_id'),
+                    'alquiler_id' => $alquiler->id,
                     'ruta' => $ruta,
                     'tipo' => 'dni',
                     'created_at' => now(),
@@ -271,6 +271,22 @@ class AlquilerController extends Controller
             'incidencia' => $request->incidencia,
             'fallo' => $request->fallo,
         ]);
+
+        // Guardar las imágenes después de crear el alquiler
+        if ($request->hasFile('imagenes_dni')) {
+            foreach ($request->file('imagenes_dni') as $index => $file) {
+                $nombreArchivo = time() . "_dni_" . $index . '.' . $file->getClientOriginalExtension();
+                $ruta = $file->storeAs('app/private/dnis', $nombreArchivo);
+
+                DB::table('usuario_alquiler_fotos')->insert([
+                    'alquiler_id' => $alquiler->id,
+                    'ruta' => $ruta,
+                    'tipo' => 'dni',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
 
         return redirect()->route('alquileres.index')->with('success', 'Alquiler actualizado correctamente.');
     }
@@ -488,6 +504,24 @@ class AlquilerController extends Controller
                     $pivot->save();
                 }
             }
+
+            // 🔥 BORRAR FOTOS DEL USUARIO AL FINALIZAR ALQUILER
+            $fotos = DB::table('usuario_alquiler_fotos')
+                ->where('alquiler_id', $alquiler->id)
+                ->get();
+
+            foreach ($fotos as $foto) {
+                // Eliminar el archivo físico del almacenamiento
+                if (Storage::exists($foto->ruta)) {
+                    Storage::delete($foto->ruta);
+                }
+            }
+
+            // Eliminar registros de BD
+            DB::table('usuario_alquiler_fotos')
+                ->where('alquiler_id', $alquiler->id)
+                ->delete();
+
 
             return redirect()->route('alquileres.show', $alquiler->id)
                 ->with('success', 'El alquiler y sus materiales han sido finalizados.');

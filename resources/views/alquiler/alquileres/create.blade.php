@@ -14,7 +14,11 @@
         </div>
     @endif
 
-    <form action="{{ route('alquiler.store', ['usuario_alquiler' => $usuario_alquiler->id]) }}" method="POST" id="form-alquiler">
+    <form action="{{ route('alquiler.store', ['usuario_alquiler' => $usuario_alquiler->id]) }}"
+      method="POST"
+      id="form-alquiler"
+      enctype="multipart/form-data">
+
         @csrf
 
         <!-- Usuario -->

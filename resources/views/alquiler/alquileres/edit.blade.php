@@ -5,7 +5,7 @@
     <h1 class="text-2xl font-bold mb-4">Editar Alquiler</h1>
 
     {{-- Formulario para actualizar datos del alquiler --}}
-    <form action="{{ route('alquileres.update', $alquiler) }}" method="POST" class="mb-10">
+    <form action="{{ route('alquileres.update', $alquiler) }}" method="POST" class="mb-10" enctype="multipart/form-data">
         @csrf
         @method('PUT')
     
@@ -38,6 +38,19 @@
             <label class="block font-medium text-gray-700 mb-1" for="observaciones">Observaciones</label>
             <textarea name="observaciones" id="observaciones" rows="3" class="w-full border-gray-300 rounded-md shadow-sm">{{ old('observaciones', $alquiler->observaciones) }}</textarea>
             @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+                <!-- 📸 Subida de imágenes del DNI -->
+        <div class="mb-6">
+            <label for="imagenes_dni" class="block text-gray-700 font-semibold mb-2">
+                Imágenes del DNI / Documentos del cliente
+            </label>
+            <input type="file" id="imagenes_dni" name="imagenes_dni[]" accept="image/*" multiple
+                class="w-full border px-4 py-2 rounded-md bg-gray-50 cursor-pointer"
+                onchange="previewImages(event)">
+            <p class="text-sm text-gray-600 mt-1">
+                Puedes subir varias fotos (anverso y reverso). Solo se permiten imágenes JPG, PNG, JPEG.
+            </p>
+            <div id="preview-container" class="flex flex-wrap gap-3 mt-3"></div>
         </div>
 
         <div class="mb-4">
