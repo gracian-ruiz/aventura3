@@ -46,6 +46,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// ...
+
+// 🌐 Ruta para cambiar idioma (ES / EN)
+Route::get('lang/{lang}', function ($lang) {
+    session(['locale' => $lang]);
+    app()->setLocale($lang);
+    return back();
+});
+
+// 👇 Mantén esto al final
+require __DIR__ . '/auth.php';
+
+
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', function () {
@@ -159,9 +172,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
     Route::resource('presupuestos', PresupuestoController::class);
-    Route::get('/bikes/by-user/{userId}', function ($userId) {
-        return response()->json(Bike::where('user_id', $userId)->get());
-    });
 
     Route::get('/presupuestos/create/{user}', [PresupuestoController::class, 'create'])->name('presupuestos.create');
 
@@ -181,6 +191,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     //ALQUILER
 
+    Route::get('/admin/dni/{id}', [AventuraBikeController::class, 'mostrarDniPrivado'])
+    ->middleware('auth') // o un middleware('admin')
+    ->name('admin.dni.mostrar');
 
     // Listado de usuarios de alquiler
     Route::get('/usuarios_alquiler', [UsuarioAlquilerController::class, 'index'])->name('usuarios_alquiler.index');

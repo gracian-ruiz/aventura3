@@ -12,9 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservaAlquilerMail;
-
-
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class AventuraBikeController extends Controller
 {
@@ -92,19 +91,30 @@ class AventuraBikeController extends Controller
             'bicicletas.*.talla' => 'required|string',
             'bicicletas.*.tipo' => 'required|string',
             'bicicletas.*.cantidad' => 'required|integer|min:1',
+            'acepta_condiciones' => 'accepted',
             'observaciones' => 'nullable|string|max:1000',
-
+        ], [
+            // 🧾 Mensajes personalizados
+            'bicicletas.required' => 'Debes añadir al menos una bicicleta para la reserva.',
+            'bicicletas.*.fecha_inicio.required' => 'Debes indicar la fecha de inicio del alquiler.',
+            'bicicletas.*.fecha_fin.required' => 'Debes indicar la fecha de fin del alquiler.',
+            'bicicletas.*.fecha_fin.after_or_equal' => 'La fecha de fin no puede ser anterior a la de inicio.',
+            'bicicletas.*.talla.required' => 'Por favor, selecciona la talla de la bicicleta.',
+            'bicicletas.*.tipo.required' => 'Por favor, selecciona el tipo de bicicleta.',
+            'bicicletas.*.cantidad.required' => 'Indica cuántas bicicletas deseas alquilar.',
+            'bicicletas.*.cantidad.min' => 'Debe alquilar al menos una bicicleta.',
+            'acepta_condiciones.accepted' => 'Debes aceptar las condiciones generales del alquiler para continuar.',
         ]);
 
+        // 🕵️‍♂️ Honeypot anti-spam
         if (!empty($request->input('website'))) {
             return back()->with('error', 'Detección de spam. Solicitud rechazada.');
         }
-        
-    
+
         DB::beginTransaction();
-    
+
         try {
-            // 1️⃣ Buscar o crear el usuario
+            // 👤 Crear o buscar usuario
             $usuario = UsuarioAlquiler::firstOrCreate(
                 ['dni' => $request->dni],
                 [
@@ -114,14 +124,14 @@ class AventuraBikeController extends Controller
                     'direccion' => $request->direccion,
                 ]
             );
-    
-            // 2️⃣ Obtener fechas globales
+
+            // 📅 Fechas globales
             $fechasInicio = collect($request->bicicletas)->pluck('fecha_inicio');
             $fechasFin = collect($request->bicicletas)->pluck('fecha_fin');
             $fechaInicioGlobal = $fechasInicio->min();
             $fechaFinGlobal = $fechasFin->max();
-    
-            // 3️⃣ Crear alquiler con web=true
+
+            // 🚲 Crear alquiler
             $alquiler = Alquiler::create([
                 'usuario_id' => $usuario->id,
                 'fecha_inicio' => $fechaInicioGlobal,
@@ -130,25 +140,23 @@ class AventuraBikeController extends Controller
                 'total_precio' => 0,
                 'reserva_precio' => 0,
                 'descuento' => 0,
-                'web' => true, // <- importante
-                'oberservaciones'=> $request->input('observaciones'),
-                'notificacion' => true
-
+                'web' => true,
+                'observaciones' => $request->input('observaciones'),
+                'notificacion' => true,
             ]);
-    
+
             $totalPrecio = 0;
             $reservaTotal = 0;
-            $incidencias = [];
             $fallo = false;
-    
+            $incidencias = [];
+
             foreach ($request->bicicletas as $bicicleta) {
                 $tipo = $bicicleta['tipo'];
                 $talla = $bicicleta['talla'];
                 $cantidad = $bicicleta['cantidad'];
                 $fechaInicio = $bicicleta['fecha_inicio'];
                 $fechaFin = $bicicleta['fecha_fin'];
-    
-                // Buscar materiales disponibles
+
                 $materialesDisponibles = Material::where('tipo', $tipo)
                     ->where('talla', $talla)
                     ->whereNotIn('id', function ($query) use ($fechaInicio, $fechaFin) {
@@ -167,7 +175,7 @@ class AventuraBikeController extends Controller
                     })
                     ->take($cantidad)
                     ->get();
-    
+
                     if ($materialesDisponibles->count() < $cantidad) {
                         $fallo = true;
                         $disponibles = $materialesDisponibles->count();
@@ -181,13 +189,12 @@ class AventuraBikeController extends Controller
                     
                         continue; // no intentamos insertar, solo registramos la incidencia
                     }
-                    
-    
+
                 foreach ($materialesDisponibles as $m) {
                     $dias = Carbon::parse($fechaInicio)->diffInDays(Carbon::parse($fechaFin)) + 1;
                     $precioUnitario = $m->precio_dia * $dias;
                     $reservaPrecio = $m->reserva_precio * $dias;
-    
+
                     $alquiler->materiales()->attach($m->id, [
                         'fecha_inicio' => $fechaInicio,
                         'fecha_fin' => $fechaFin,
@@ -196,13 +203,13 @@ class AventuraBikeController extends Controller
                         'reserva_precio' => $reservaPrecio,
                         'subtotal' => $precioUnitario,
                     ]);
-    
+
                     $totalPrecio += $precioUnitario;
                     $reservaTotal += $reservaPrecio;
                 }
             }
-    
-            // 4️⃣ Guardar totales e incidencias si hubo
+
+            // 💾 Actualizar totales
             $alquiler->update([
                 'total_precio' => $totalPrecio,
                 'reserva_precio' => $reservaTotal,
@@ -210,22 +217,58 @@ class AventuraBikeController extends Controller
                 'incidencia' => $fallo ? implode(' | ', $incidencias) : null,
             ]);
 
-            // Enviar correo al usuario y a un email fijo
-            Mail::to($usuario->email)
-            ->send(new \App\Mail\ReservaAlquilerMail($alquiler, $usuario, $request->bicicletas, $request->input('observaciones')
-                       ));
-        
-        
+            // 📸 Guardar imágenes del DNI en zona PRIVADA
+            if ($request->hasFile('imagenes_dni')) {
+                foreach ($request->file('imagenes_dni') as $index => $file) {
+                    $nombreArchivo = time() . "_dni_" . $index . '.' . $file->getClientOriginalExtension();
+                    $ruta = $file->storeAs('private/dnis', $nombreArchivo); // 👈 sin 'public'
 
-    
+                    DB::table('usuario_alquiler_fotos')->insert([
+                        'alquiler_id' => $alquiler->id,
+                        'ruta' => $ruta,
+                        'tipo' => 'dni',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            // ✉️ Enviar correo solo si no estás en local
+            try {
+                if (app()->environment('production')) {
+                    Mail::to($usuario->email)
+                        ->send(new \App\Mail\ReservaAlquilerMail(
+                            $alquiler,
+                            $usuario,
+                            $request->bicicletas,
+                            $request->input('observaciones')
+                        ));
+                    Log::info('Correo de reserva enviado correctamente a: ' . $usuario->email);
+                } else {
+                    Log::info('📬 Correo NO enviado (modo local)');
+                }
+            } catch (\Exception $mailError) {
+                Log::error('Error al enviar correo de reserva: ' . $mailError->getMessage());
+            }
+
             DB::commit();
-    
-            return back()->with('success', 'Formulario enviado correctamente');
-
+            return back()->with('success', '✅ ¡Reserva enviada correctamente! Pronto recibirás un correo de confirmación.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Error al crear el alquiler: ' . $e->getMessage()])->withInput();
+            Log::error('❌ Error en reserva: ' . $e->getMessage());
+            return back()->with('error', '⚠️ Ha ocurrido un error al procesar tu reserva. Inténtalo de nuevo.');
         }
+    }
+    public function mostrarDniPrivado($id)
+    {
+        $foto = DB::table('usuario_alquiler_fotos')->where('id', $id)->first();
+
+        if (!$foto || !Storage::exists($foto->ruta)) {
+            abort(404, 'Imagen no encontrada');
+        }
+
+        // 📂 Muestra la imagen de forma segura sin hacerla pública
+        return response()->file(storage_path('app/' . $foto->ruta));
     }
     
 }

@@ -36,6 +36,20 @@
             <label for="observaciones" class="block font-medium text-gray-700 mb-1">Notas</label>
             <textarea name="observaciones" id="observaciones" rows="3" class="w-full border-gray-300 rounded-md shadow-sm"></textarea>
         </div>
+        <!-- 📸 Subida de imágenes del DNI -->
+        <div class="mb-6">
+            <label for="imagenes_dni" class="block text-gray-700 font-semibold mb-2">
+                Imágenes del DNI / Documentos del cliente
+            </label>
+            <input type="file" id="imagenes_dni" name="imagenes_dni[]" accept="image/*" multiple
+                class="w-full border px-4 py-2 rounded-md bg-gray-50 cursor-pointer"
+                onchange="previewImages(event)">
+            <p class="text-sm text-gray-600 mt-1">
+                Puedes subir varias fotos (anverso y reverso). Solo se permiten imágenes JPG, PNG, JPEG.
+            </p>
+            <div id="preview-container" class="flex flex-wrap gap-3 mt-3"></div>
+        </div>
+
 
 
 

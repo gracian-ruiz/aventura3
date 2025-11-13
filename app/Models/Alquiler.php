@@ -39,5 +39,11 @@ class Alquiler extends Model
                     'fecha_fin',)
                     ->withTimestamps();
     }
+
+    public function fotos()
+    {
+        return $this->hasMany(UsuarioAlquilerFoto::class, 'alquiler_id');
+    }
+
 }
 
