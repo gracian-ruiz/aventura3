@@ -238,7 +238,7 @@ class AppointmentController extends Controller
             'precio' => 'required|array',
             'textos' => 'nullable|array',
             'idprograma' => 'nullable',
-            'prioridad' => 'required|in:normal,urgente',
+            'prioridad' => 'required|in:normal,urgente,premium',
             'descuento' => 'nullable|array', // Validación de descuentos
             'asignacion_taller' => 'nullable|array',
             'asignacion_taller.*' => 'exists:users,id',

@@ -150,7 +150,7 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.size') }}</label>
-                        <select name="bicicletas[0][talla]" class="w-full border rounded-md">
+                        <select name="bicicletas[0][talla]" required class="w-full border rounded-md">
                             <option value="">{{ __('messages.select_size') }}</option>
                             <option value="XSS">Niño / Child</option>
                             <option value="XS">XS (145–160 cm)</option>
@@ -163,7 +163,7 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.type') }}</label>
-                        <select name="bicicletas[0][tipo]" class="w-full border rounded-md">
+                        <select name="bicicletas[0][tipo]" required class="w-full border rounded-md">
                             <option value="">{{ __('messages.select_type') }}</option>
                             <option value="Mtb">Montaña / Mountain</option>
                             <option value="Carretera">Carretera / Road</option>
@@ -174,7 +174,7 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.quantity') }}</label>
-                        <select name="bicicletas[0][cantidad]" class="w-full border rounded-md">
+                        <select name="bicicletas[0][cantidad]" required class="w-full border rounded-md">
                             <option value="">{{ __('messages.select_quantity') }}</option>
                             @for($i = 1; $i <= 6; $i++)
                                 <option value="{{ $i }}">{{ $i }}</option>
@@ -186,11 +186,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.start_date') }}</label>
-                        <input type="date" name="bicicletas[0][fecha_inicio]" class="w-full border-gray-300 rounded-md shadow-sm">
+                        <input type="date" name="bicicletas[0][fecha_inicio]" required class="w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.end_date') }}</label>
-                        <input type="date" name="bicicletas[0][fecha_fin]" class="w-full border-gray-300 rounded-md shadow-sm">
+                        <input type="date" name="bicicletas[0][fecha_fin]" required class="w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                 </div>
             </div>

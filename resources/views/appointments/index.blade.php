@@ -97,7 +97,7 @@
                                 @if ($appointment->prioridad == 'urgente')
                                     bg-red-500 text-white
                                 @elseif ($appointment->prioridad == 'premium')
-                                    bg-yellow-400 text-black border border-yellow-600 shadow-sm
+                                    bg-black text-white border border-gray-700 shadow-sm
                                 @else
                                     bg-blue-500 text-white
                                 @endif">

@@ -209,7 +209,7 @@ class MecanicoController extends Controller
             'horas_trabajo' => 'required|array',
             'precio' => 'required|array',
             'textos' => 'nullable|array',
-            'prioridad' => 'required|in:normal,urgente',
+            'prioridad' => 'required|in:normal,urgente,premium',
             'descuento' => 'nullable|array', // Validación de descuentos
             'asignacion_taller' => 'nullable|array',
             'asignacion_taller.*' => 'exists:users,id',
