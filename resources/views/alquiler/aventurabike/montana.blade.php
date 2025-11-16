@@ -31,12 +31,15 @@
 
     <!-- Texto introductorio -->
 <div class="text-center my-4">
-    <p class="mb-3">
+{{--     <p class="mb-3">
         {{ __('messages.form_intro') }}
-    </p>
+    </p> --}}
 
     <!-- AVISO IMPORTANTE -->
     <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 mb-4" role="alert">
+        <p class="font-bold text-base" style="color: red">
+            {{ __('messages.recogida') }}:
+        </p>
         <p class="font-bold text-base">
             🕒 {{ __('messages.important') }}:
         </p>

@@ -12,6 +12,7 @@ return [
     'saturday_time' => 'Sábados hasta las 13:00',
     'contact_info' => 'Ante cualquier duda, puedes <strong>enviar un <a href="https://wa.me/34950013448" target="_blank" class="text-green-700 underline">mensaje de WhatsApp</a> o llamar al <a href="tel:950013448" class="text-blue-700 underline">950 013 448</a></strong>.',
     'see_models' => 'Pincha aquí para ver los modelos',
+    'recogida' => 'HACER LA RESERVA CON 2 HORAS MINIMO DE ANTELACIÓN A LA RECOGIDA DE LA BICICLETA',
 
     // Campos del formulario
     'name' => 'Nombre',

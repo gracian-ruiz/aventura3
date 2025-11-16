@@ -12,6 +12,8 @@ return [
     'saturday_time' => 'Saturdays until 1:00 PM',
     'contact_info' => 'If you have any questions, you can <strong><a href="https://wa.me/34950013448" target="_blank" class="text-green-700 underline">send a WhatsApp message</a> or call <a href="tel:950013448" class="text-blue-700 underline">950 013 448</a></strong>.',
     'see_models' => 'Click here to see the models',
+    'recogida' => 'MAKE THE RESERVATION AT LEAST 2 HOURS BEFORE PICKING UP THE BIKE',
+
 
     // Form fields
     'name' => 'Name',
