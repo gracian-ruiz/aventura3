@@ -295,7 +295,6 @@
                             <tbody>
                                 <tr><td>Giant Propel</td><td>S</td></tr>
                                 <tr><td>Scott Addict 20</td><td>L</td></tr>
-                                <tr><td>Trek Emonda</td><td>M</td></tr>
                                 <tr><td>BH Prisma Carbono</td><td>M</td></tr>
                                 <tr><td>Pinarello Dogma</td><td>XS</td></tr>
                                 <tr><td>Wilier</td><td>M</td></tr>
@@ -317,7 +316,6 @@
                                 <tr><th>{{ __('messages.model') }}</th><th>{{ __('messages.size') }}</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>Giant Fathom Pro</td><td>S</td></tr>
                                 <tr><td>SCOTT STRIKE 930</td><td>M</td></tr>
                                 <tr><td>OLYMPIA EX900 TRAIL</td><td>M</td></tr>
                                 <tr><td>OLYMPIA EX900 SPORT</td><td>M</td></tr>

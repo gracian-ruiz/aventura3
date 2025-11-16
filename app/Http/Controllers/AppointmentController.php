@@ -39,7 +39,7 @@ class AppointmentController extends Controller
                 break;
 
             case 'premium':
-                $query->where('prioridad', 'premium');
+                $query->where('prioridad', 'premium')->where('estado', 'en proceso');
                 break;
 
             case 'incidencia':
