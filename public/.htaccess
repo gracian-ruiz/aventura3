@@ -5,6 +5,12 @@
 
     RewriteEngine On
 
+    # Permitir iframe SOLO desde aventurabike.es
+    <IfModule mod_headers.c>
+        Header always unset X-Frame-Options
+        Header always set Content-Security-Policy "frame-ancestors https://aventurabike.es"
+    </IfModule>
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
