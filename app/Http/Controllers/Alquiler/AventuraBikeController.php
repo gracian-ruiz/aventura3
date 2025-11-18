@@ -22,6 +22,11 @@ class AventuraBikeController extends Controller
 
         return view('alquiler.aventurabike.montana');
     }
+        public function bicismontañados()
+    {
+
+        return view('alquiler.aventurabike.montana2');
+    }
 
 
     public function comprobarDisponibilidad(Request $request)
