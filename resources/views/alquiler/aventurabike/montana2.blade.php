@@ -3,7 +3,6 @@
 @section('content')
 <div class="w-full max-w-none mx-0 px-2 sm:px-4 lg:px-8 mt-0 bg-white shadow-md rounded-lg p-4">
 
-
     <!-- Mensajes -->
     @if(session('error'))
         <div class="mb-4 p-4 bg-red-200 text-red-700 rounded">
@@ -29,69 +28,95 @@
 
     <!-- Formulario -->
     <form action="{{ route('addbicismontaña') }}" method="POST" enctype="multipart/form-data">
-
         @csrf
 
         <!-- Datos personales -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+
             <div>
-                <label for="nombre" class="block text-gray-700 font-semibold mb-2">{{ __('messages.name') }}</label>
-                <input type="text" id="nombre" name="nombre" value="{{ old('nombre') }}" class="w-full px-4 py-2 border rounded-md" required>
+                <label class="block text-gray-700 font-semibold mb-2">
+                    Nombre / Name
+                </label>
+                <input type="text" name="nombre" value="{{ old('nombre') }}" class="w-full px-4 py-2 border rounded-md" required>
             </div>
 
             <div>
-                <label for="apellido" class="block text-gray-700 font-semibold mb-2">{{ __('messages.surname') }}</label>
-                <input type="text" id="apellido" name="apellido" value="{{ old('apellido') }}" class="w-full px-4 py-2 border rounded-md" required>
+                <label class="block text-gray-700 font-semibold mb-2">
+                    Apellidos / Surname
+                </label>
+                <input type="text" name="apellido" value="{{ old('apellido') }}" class="w-full px-4 py-2 border rounded-md" required>
             </div>
 
             <div>
-                <label for="email" class="block text-gray-700 font-semibold mb-2">{{ __('messages.email') }}</label>
-                <input type="email" id="email" name="email" value="{{ old('email') }}" class="w-full px-4 py-2 border rounded-md" required>
+                <label class="block text-gray-700 font-semibold mb-2">
+                    Correo electrónico / Email
+                </label>
+                <input type="email" name="email" value="{{ old('email') }}" class="w-full px-4 py-2 border rounded-md" required>
             </div>
 
             <div>
-                <label for="telefono" class="block text-gray-700 font-semibold mb-2">{{ __('messages.phone') }}</label>
-                <input type="text" name="telefono" id="telefono" value="{{ old('telefono') }}" class="w-full border px-4 py-2 rounded-md" placeholder="Ejemplo / Example: 612345678" required>
+                <label class="block text-gray-700 font-semibold mb-2">
+                    Teléfono / Phone
+                </label>
+                <input type="text" name="telefono" value="{{ old('telefono') }}" class="w-full border px-4 py-2 rounded-md" placeholder="Ejemplo / Example: 612345678" required>
             </div>
 
             <div>
-                <label for="dni" class="block text-gray-700 font-semibold mb-2">{{ __('messages.dni') }}</label>
-                <input type="text" id="dni" name="dni" value="{{ old('dni') }}" class="w-full px-4 py-2 border rounded-md" required>
+                <label class="block text-gray-700 font-semibold mb-2">
+                    DNI / ID Number
+                </label>
+                <input type="text" name="dni" value="{{ old('dni') }}" class="w-full px-4 py-2 border rounded-md" required>
             </div>
 
             <div>
-                <label for="direccion" class="block text-gray-700 font-semibold mb-2">{{ __('messages.address') }}</label>
-                <input type="text" id="direccion" name="direccion" value="{{ old('direccion') }}" class="w-full px-4 py-2 border rounded-md" required>
+                <label class="block text-gray-700 font-semibold mb-2">
+                    Dirección / Address
+                </label>
+                <input type="text" name="direccion" value="{{ old('direccion') }}" class="w-full px-4 py-2 border rounded-md" required>
             </div>
         </div>
 
-        <!-- 📸 Subir varias imágenes del DNI -->
+        <!-- Imágenes DNI -->
         <div class="mb-6">
-            <label for="imagenes_dni" class="block text-gray-700 font-semibold mb-2">{{ __('messages.dni_images') }}</label>
-            <input type="file" id="imagenes_dni" name="imagenes_dni[]" accept="image/*" multiple class="w-full border px-4 py-2 rounded-md bg-gray-50 cursor-pointer" required>
-            <p class="text-sm text-gray-600 mt-1">{{ __('messages.dni_images_hint') }}</p>
+            <label class="block text-gray-700 font-semibold mb-2">
+                Imágenes del DNI / ID Photos (you can upload several)
+            </label>
+
+            <input type="file" name="imagenes_dni[]" accept="image/*" multiple
+                   class="w-full border px-4 py-2 rounded-md bg-gray-50 cursor-pointer" required>
+
+            <p class="text-sm text-gray-600 mt-1">
+                Puedes subir varias fotos (anverso y reverso).  
+                You can upload multiple images (front and back).
+            </p>
         </div>
 
         <!-- Observaciones -->
         <div class="mb-4">
-            <label for="observaciones" class="block text-gray-700 font-semibold mb-2">{{ __('messages.notes') }}</label>
-            <textarea id="observaciones" name="observaciones" rows="4" class="w-full px-4 py-2 border rounded-md">{{ old('observaciones') }}</textarea>
+            <label class="block text-gray-700 font-semibold mb-2">
+                Observaciones / Notes
+            </label>
+            <textarea name="observaciones" rows="4" class="w-full px-4 py-2 border rounded-md">{{ old('observaciones') }}</textarea>
         </div>
 
         <!-- Bicicletas -->
-        <h2 class="text-lg font-bold mt-6 mb-2">{{ __('messages.bicycles_to_rent') }}</h2>
+        <h2 class="text-lg font-bold mt-6 mb-2">Bicicletas a alquilar / Bicycles to Rent</h2>
 
         <div id="bicicletas-container">
             <div class="bicicleta-item border p-4 mb-4 rounded-md bg-blue-100">
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <!-- Honeypot -->
-                    <div style="display: none;">
-                        <input type="text" name="website" tabindex="-1" autocomplete="off">
+
+                    <div style="display:none;">
+                        <input type="text" name="website">
                     </div>
+
                     <div>
-                        <label class="block text-gray-700 mb-1">{{ __('messages.size') }}</label>
+                        <label class="block text-gray-700 mb-1">
+                            Talla / Size
+                        </label>
                         <select name="bicicletas[0][talla]" required class="w-full border rounded-md">
-                            <option value="">{{ __('messages.select_size') }}</option>
+                            <option value="">Selecciona / Select</option>
                             <option value="XSS">Niño / Child</option>
                             <option value="XS">XS (145–160 cm)</option>
                             <option value="S">S (160–170 cm)</option>
@@ -101,10 +126,13 @@
                             <option value="XXL">XXL (195+ cm)</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-gray-700 mb-1">{{ __('messages.type') }}</label>
+                        <label class="block text-gray-700 mb-1">
+                            Tipo / Type
+                        </label>
                         <select name="bicicletas[0][tipo]" required class="w-full border rounded-md">
-                            <option value="">{{ __('messages.select_type') }}</option>
+                            <option value="">Selecciona / Select</option>
                             <option value="Mtb">Montaña / Mountain</option>
                             <option value="Carretera">Carretera / Road</option>
                             <option value="Electrica">Eléctrica / Electric</option>
@@ -112,11 +140,14 @@
                             <option value="Niños">Niños / Kids</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-gray-700 mb-1">{{ __('messages.quantity') }}</label>
+                        <label class="block text-gray-700 mb-1">
+                            Cantidad / Quantity
+                        </label>
                         <select name="bicicletas[0][cantidad]" required class="w-full border rounded-md">
-                            <option value="">{{ __('messages.select_quantity') }}</option>
-                            @for($i = 1; $i <= 6; $i++)
+                            <option value="">Selecciona / Select</option>
+                            @for($i=1;$i<=6;$i++)
                                 <option value="{{ $i }}">{{ $i }}</option>
                             @endfor
                         </select>
@@ -125,28 +156,34 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                     <div>
-                        <label class="block text-gray-700 mb-1">{{ __('messages.start_date') }}</label>
+                        <label class="block text-gray-700 mb-1">
+                            Fecha inicio / Start date
+                        </label>
                         <input type="date" name="bicicletas[0][fecha_inicio]" required class="w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-gray-700 mb-1">{{ __('messages.end_date') }}</label>
+                        <label class="block text-gray-700 mb-1">
+                            Fecha fin / End date
+                        </label>
                         <input type="date" name="bicicletas[0][fecha_fin]" required class="w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <button type="button" onclick="agregarBicicleta()" class="bg-blue-500 text-white px-4 py-2 rounded-md mt-4">
-            {{ __('messages.add_bike') }}
+        <button type="button" onclick="agregarBicicleta()"
+                class="bg-blue-500 text-white px-4 py-2 rounded-md mt-4">
+            Añadir otra bicicleta / Add another bicycle
         </button>
 
-                <!-- 🧾 Condiciones -->
+        <!-- Condiciones -->
         <div class="mt-8 border-t pt-5">
-            <button type="button" onclick="document.getElementById('condicionesTexto').classList.toggle('hidden')" class="w-full bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md font-semibold flex justify-between items-center transition">
-                <span>📜 {{ __('messages.toggle_terms') }}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
+            <button type="button"
+                onclick="document.getElementById('condicionesTexto').classList.toggle('hidden')"
+                class="w-full bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md font-semibold flex justify-between items-center transition">
+                📜 Ver / Ocultar Condiciones Generales  
+                View / Hide General Rental Terms
             </button>
 
             <div id="condicionesTexto" class="hidden mt-3 p-3 border rounded-md bg-gray-50 text-sm text-gray-800 overflow-y-auto max-h-72 leading-relaxed">
@@ -154,24 +191,29 @@
             </div>
 
             <div class="mt-4 flex items-center justify-center gap-3">
-                <input type="checkbox" id="acepta_condiciones" name="acepta_condiciones" required class="h-5 w-5 text-green-500 border-gray-300 rounded focus:ring-2 focus:ring-green-400">
-                <label for="acepta_condiciones" class="text-gray-700 text-sm leading-tight">
-                    {{ __('messages.accept_terms') }}
+                <input type="checkbox" name="acepta_condiciones" required
+                       class="h-5 w-5 text-green-500 border-gray-300 rounded focus:ring-2 focus:ring-green-400">
+                <label class="text-gray-700 text-sm leading-tight">
+                    Acepto las condiciones / I accept the terms
                 </label>
             </div>
         </div>
 
         <!-- Botones -->
         <div class="flex justify-between mt-6">
-            <a href="{{ route('usuarios_alquiler.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
-                {{ __('messages.cancel') }}
+            <a href="{{ route('usuarios_alquiler.index') }}"
+               class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                Cancelar / Cancel
             </a>
-            <button type="submit" class="px-6 py-2 bg-green-400 hover:bg-green-500 text-black rounded-md font-semibold">
-                {{ __('messages.submit_booking') }}
+
+            <button type="submit"
+                    class="px-6 py-2 bg-green-400 hover:bg-green-500 text-black rounded-md font-semibold">
+                Enviar Reserva / Submit Booking
             </button>
         </div>
     </form>
 </div>
+
 
 <div>
     <main class="flex-grow" id="modelos">
@@ -182,12 +224,15 @@
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
-                        <h6 class="mb-0">{{ __('messages.mtb_29') }}</h6>
+                        <h6 class="mb-0">MTB 29” – 25€/día / €25 per day</h6>
                     </div>
                     <div class="card-body p-2">
                         <table class="table table-sm table-bordered mb-0">
                             <thead class="table-light">
-                                <tr><th>{{ __('messages.model') }}</th><th>{{ __('messages.size') }}</th></tr>
+                                <tr>
+                                    <th>Modelo / Model</th>
+                                    <th>Talla / Size</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <tr><td>Scott Spark RC WC</td><td>L</td></tr>
@@ -204,12 +249,15 @@
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
-                        <h6 class="mb-0">{{ __('messages.mtb_26') }}</h6>
+                        <h6 class="mb-0">MTB 26” – 15€/día / €15 per day</h6>
                     </div>
                     <div class="card-body p-2">
                         <table class="table table-sm table-bordered mb-0">
                             <thead class="table-light">
-                                <tr><th>{{ __('messages.model') }}</th><th>{{ __('messages.size') }}</th></tr>
+                                <tr>
+                                    <th>Modelo / Model</th>
+                                    <th>Talla / Size</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <tr><td>Mondraker Pensacola</td><td>M</td></tr>
@@ -221,16 +269,19 @@
                 </div>
             </div>
 
-            <!-- Carretera -->
+            <!-- Carretera / Road -->
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
-                        <h6 class="mb-0">{{ __('messages.road') }}</h6>
+                        <h6 class="mb-0">Carretera – 25€/día / Road – €25 per day</h6>
                     </div>
                     <div class="card-body p-2">
                         <table class="table table-sm table-bordered mb-0">
                             <thead class="table-light">
-                                <tr><th>{{ __('messages.model') }}</th><th>{{ __('messages.size') }}</th></tr>
+                                <tr>
+                                    <th>Modelo / Model</th>
+                                    <th>Talla / Size</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <tr><td>Giant Propel</td><td>S</td></tr>
@@ -244,16 +295,19 @@
                 </div>
             </div>
 
-            <!-- Eléctricas -->
+            <!-- E-bikes dobles -->
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
-                        <h6 class="mb-0">{{ __('messages.electric-doble') }}</h6>
+                        <h6 class="mb-0">Eléctricas Doble Suspensión – 65€/día / Electric Full Suspension – €65 per day</h6>
                     </div>
                     <div class="card-body p-2">
                         <table class="table table-sm table-bordered mb-0">
                             <thead class="table-light">
-                                <tr><th>{{ __('messages.model') }}</th><th>{{ __('messages.size') }}</th></tr>
+                                <tr>
+                                    <th>Modelo / Model</th>
+                                    <th>Talla / Size</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <tr><td>SCOTT STRIKE 930</td><td>M</td></tr>
@@ -265,16 +319,19 @@
                 </div>
             </div>
 
-                        <!-- Eléctricas -->
+            <!-- E-bikes rígidas -->
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
-                        <h6 class="mb-0">{{ __('messages.electric') }}</h6>
+                        <h6 class="mb-0">Eléctricas – 45€/día / Electric – €45 per day</h6>
                     </div>
                     <div class="card-body p-2">
                         <table class="table table-sm table-bordered mb-0">
                             <thead class="table-light">
-                                <tr><th>{{ __('messages.model') }}</th><th>{{ __('messages.size') }}</th></tr>
+                                <tr>
+                                    <th>Modelo / Model</th>
+                                    <th>Talla / Size</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <tr><td>OLYMPIA BLAKE</td><td>S</td></tr>
@@ -286,25 +343,25 @@
                 </div>
             </div>
 
-            <!-- Paseo -->
+            <!-- Paseo / City -->
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white p-2">
-                        <h6 class="mb-0">{{ __('messages.city') }}</h6>
+                        <h6 class="mb-0">Paseo / City</h6>
                     </div>
                     <div class="card-body p-2">
                         <table class="table table-sm table-bordered mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>{{ __('messages.model') }}</th>
-                                    <th>{{ __('messages.size') }}</th>
-                                    <th>{{ __('messages.price') }}</th>
+                                    <th>Modelo / Model</th>
+                                    <th>Talla / Size</th>
+                                    <th>Precio / Price</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr><td>Sonora Domingos</td><td>S, M, L</td><td>18€</td></tr>
-                                <tr><td>Bicicleta de niño</td><td>-</td><td>18€</td></tr>
-                                <tr><td>Paseo eléctrica</td><td>-</td><td>25€</td></tr>
+                                <tr><td>Bicicleta de niño / Kids bike</td><td>-</td><td>18€</td></tr>
+                                <tr><td>Paseo eléctrica / Electric city bike</td><td>-</td><td>25€</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -314,12 +371,13 @@
         </div>
 
         <p class="text-muted mt-3 small fst-italic">
-            {{ __('messages.availability_note') }}
+            Las bicicletas se entregan según disponibilidad.  
+            Bicycles will be provided depending on availability.
         </p>
     </div>
     </main>
-
 </div>
+
 
 <script>
     let index = 1;
