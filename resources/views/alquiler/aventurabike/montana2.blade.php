@@ -3,9 +3,6 @@
 @section('content')
 <div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mt-0 bg-white shadow-md rounded-lg p-6">
 
-
-
-
     <!-- Mensajes -->
     @if(session('error'))
         <div class="mb-4 p-4 bg-red-200 text-red-700 rounded">

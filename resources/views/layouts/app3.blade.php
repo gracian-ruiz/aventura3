@@ -33,7 +33,7 @@
 
         <!-- Page Content -->
         <main class="flex-grow w-100">
-            <div class="w-100 px-3 py-0">
+            <div class="w-100 px-3 pt-3">
                 @yield('content')
             </div>
         </main>
