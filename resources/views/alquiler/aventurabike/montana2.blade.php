@@ -6,37 +6,6 @@
 
     <!-- Texto introductorio -->
 <div class="text-center my-4">
-{{--     <p class="mb-3">
-        {{ __('messages.form_intro') }}
-    </p> --}}
-
-    <!-- AVISO IMPORTANTE -->
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 mb-4" role="alert">
-        <p class="font-bold text-base" style="color: red">
-            {{ __('messages.recogida') }}:
-        </p>
-        <p class="font-bold text-base">
-            🕒 {{ __('messages.important') }}:
-        </p>
-        <ul class="text-sm mt-2 text-left sm:text-center">
-            <li class="mb-1">
-                📅 <strong>{{ __('messages.saturday_hours') }}.</strong><br>
-                🕛 <strong>{{ __('messages.sunday_closed') }}.</strong>
-            </li>
-            <li class="mb-1">
-                🚲 {{ __('messages.pickup_option') }}
-            </li>
-        </ul>
-        <p class="text-xs text-gray-600 mt-2 sm:text-center">{{ __('messages.saturday_time') }}</p>
-    </div>
-
-    <p class="mb-3">
-        {!! __('messages.contact_info') !!}
-    </p>
-
-    <p class="mb-4">
-        {{ __('messages.stock_notice') ?? 'En caso de problemas de stock o disponibilidad, nos pondremos en contacto contigo lo antes posible.' }}
-    </p>
 
     <a href="#modelos" class="btn btn-primary btn-sm">{{ __('messages.see_models') }}</a>
 </div>
