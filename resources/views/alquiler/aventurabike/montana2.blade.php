@@ -4,12 +4,6 @@
 <div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mt-0 bg-white shadow-md rounded-lg p-6 pt-0" style="padding-top: 5px!important">
 
 
-    <!-- Texto introductorio -->
-<div class="text-center my-4">
-
-    <a href="#modelos" class="btn btn-primary btn-sm">{{ __('messages.see_models') }}</a>
-</div>
-
 
     <!-- Mensajes -->
     @if(session('error'))
