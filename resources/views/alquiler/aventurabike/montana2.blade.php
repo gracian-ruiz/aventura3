@@ -376,4 +376,11 @@
         index++;
     }
 </script>
+<script>
+window.onload = function () {
+    const height = document.body.scrollHeight;
+    parent.postMessage({ height: height }, "*");
+};
+</script>
+
 @endsection
