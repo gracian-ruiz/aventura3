@@ -1,7 +1,8 @@
 @extends('layouts.app3')
 
 @section('content')
-<div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mt-0 bg-white shadow-md rounded-lg p-6">
+<div class="w-full max-w-none mx-0 px-2 sm:px-4 lg:px-8 mt-0 bg-white shadow-md rounded-lg p-4">
+
 
     <!-- Mensajes -->
     @if(session('error'))
