@@ -338,10 +338,24 @@
     }
 </script>
 <script>
-window.onload = function () {
+function enviarAltura() {
     const height = document.body.scrollHeight;
     parent.postMessage({ height: height }, "*");
-};
+}
+
+// Enviar cuando la página termine de cargar
+window.addEventListener("load", function () {
+    enviarAltura();
+    setTimeout(enviarAltura, 300);
+    setTimeout(enviarAltura, 800);
+    setTimeout(enviarAltura, 1500);
+});
+
+// Enviar cuando cambie el tamaño (móvil girado, zoom, etc.)
+window.addEventListener("resize", function () {
+    setTimeout(enviarAltura, 200);
+});
 </script>
+
 
 @endsection
