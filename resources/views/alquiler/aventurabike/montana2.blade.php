@@ -1,7 +1,7 @@
 @extends('layouts.app3')
 
 @section('content')
-<div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mt-0 bg-white shadow-md rounded-lg p-6 pt-0">
+<div class="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mt-0 bg-white shadow-md rounded-lg p-6 pt-0" style="padding-top: 5px">
 
 
     <!-- Texto introductorio -->
