@@ -187,17 +187,45 @@
             </button>
 
             <div id="condicionesTexto" class="hidden mt-3 p-3 border rounded-md bg-gray-50 text-sm text-gray-800 overflow-y-auto max-h-72 leading-relaxed">
-                {!! __('messages.general_terms_text') !!}
+
+                <!-- 🇪🇸 Español -->
+                <strong>CONDICIONES GENERALES DEL ALQUILER DE MATERIAL</strong><br><br>
+
+                1.- Queda prohibido el alquiler de material a los menores de dieciocho (18) años de edad. La contratación del alquiler para los menores de dieciocho (18) años de edad requerirá del consentimiento de sus representantes legales.<br><br>
+
+                2.- Es obligatorio contestar a todas las preguntas contenidas en el formulario, de forma que la prestación de los servicios ofertados y el suministro y alquiler de material queda supeditado al cumplimiento de esta obligación.<br><br>
+
+                3.- El usuario del material alquilado queda obligado a la custodia, conservación y devolución del material que se le entregue, siendo directamente responsable de su deterioro y de los daños derivados de su pérdida y robo, así como de todos aquellos que excedan de su desgaste normal conforme a un uso idóneo y diligente según su destino.<br><br>
+
+                4.- El usuario o, en su caso, su representante legal queda expresamente informado y conoce que la práctica del deporte constituye una práctica deportiva que entraña un riesgo cierto de sufrir caídas o lesiones, que pueden verse acrecentados entre otros factores por la edad y condiciones físicas de los usuarios, la adecuada utilización del material, las circunstancias climatológicas y el estado del terreno, por lo que la estación no asume responsabilidad alguna por las lesiones que pueda sufrir con ocasión de la práctica de este deporte y del uso del material alquilado.<br><br>
+
+                <strong>Tratamiento de datos personales:</strong> Conforme a lo previsto en la Ley orgánica 15/1999, de 13 de diciembre, de protección de datos de carácter personal, y de los reglamentos dictados en su desarrollo, por la firma del presente documento se le informa y presta expresamente su consentimiento para que los datos de carácter personal propios o de su representado que de forma voluntaria se facilitan a Aventura Bike S.C. tales como nombre, apellidos, documento nacional de identidad/tarjeta de residente/NIF, fecha de nacimiento, nacionalidad, sexo, dirección postal y/o electrónica, teléfono, persona de contacto, datos bancarios, así como los que se recaben adicionalmente por tal causa pasen a formar parte, según corresponda, a nuestros ficheros.
+
+                <br><br><hr class="my-4"><br>
+
+                <!-- 🇬🇧 English -->
+                <strong>GENERAL CONDITIONS OF RENTAL SHOP</strong><br><br>
+
+                1. Equipment hire to persons under eighteen (18) years of age is prohibited. The rental agreement for minors under eighteen (18) years of age requires the consent of their legal representatives.<br><br>
+
+                2. It is mandatory to answer all the questions on the form, so that the provision of the services offered and the supply and rental of equipment is subject to compliance with this obligation.<br><br>
+
+                3. The user of the rented equipment is obliged to its custody, preservation, and return, being directly responsible for its deterioration and any damage resulting from its loss or theft, as well as for all those that exceed normal wear and tear due to appropriate and diligent use according to its purpose.<br><br>
+
+                4. The user or, where appropriate, their legal representative is expressly informed and acknowledges that practicing this sport involves an inherent risk of falls or injuries, which may be increased by factors such as age, physical condition, proper use of the equipment, weather conditions, and terrain state. Therefore, Aventura Bike does not assume any liability for injuries that may occur during the practice of this sport and the use of rented equipment.<br><br>
+
+                <strong>Processing of personal data:</strong> Pursuant to the Organic Law 15/1999 of December 13 on the protection of personal data, and the regulations issued for its development, by signing this document you are informed and expressly consent that the personal data provided voluntarily to Aventura Bike S.C., such as name, surname, ID card/residence permit/NIF, date of birth, nationality, gender, postal and/or email address, phone number, contact person, and bank details, as well as any additional data collected for this purpose, will form part of our files as appropriate.
             </div>
 
             <div class="mt-4 flex items-center justify-center gap-3">
                 <input type="checkbox" name="acepta_condiciones" required
-                       class="h-5 w-5 text-green-500 border-gray-300 rounded focus:ring-2 focus:ring-green-400">
+                    class="h-5 w-5 text-green-500 border-gray-300 rounded focus:ring-2 focus:ring-green-400">
                 <label class="text-gray-700 text-sm leading-tight">
                     Acepto las condiciones / I accept the terms
                 </label>
             </div>
         </div>
+
 
         <!-- Botones -->
         <div class="flex justify-between mt-6">
