@@ -110,9 +110,6 @@
                     <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
                         Cerrar sesión
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('usuarios_alquiler.index')">
-                        Usuarios Alquiler
-                    </x-responsive-nav-link>
                 </form>
             </div>
         </div>
