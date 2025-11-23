@@ -33,8 +33,26 @@ use App\Http\Controllers\ClienteController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+
+    // Si el usuario NO está logueado → welcome
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+
+    // Si está logueado → redirección según rol
+    $user = auth()->user();
+
+    // ADMIN
+    if ($user->role === 'admin') {
+        return redirect('/presupuestos');
+    }
+
+    // USUARIO o PREMIUM
+    if ($user->role === 'user' || $user->role === 'premium') {
+        return redirect('/miperfil');
+    }
 });
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
