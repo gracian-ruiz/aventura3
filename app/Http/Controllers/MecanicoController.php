@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class MecanicoController extends Controller
 {
-    public function index(Request $request)
+public function index(Request $request)
     {
         $userId = auth()->user()->id;
         $search = $request->input('search');
@@ -25,7 +25,6 @@ class MecanicoController extends Controller
 
         // 🔹 Base de la consulta con relaciones
         $query = Appointment::with('bike.user', 'componentes')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
             ->where(function ($query) use ($userId) {
                 if ($userId == 1 || $userId == 14) {
                     // Muestra solo los que tienen mecánicos asignados
@@ -49,7 +48,8 @@ class MecanicoController extends Controller
                 break;
 
             case 'premium':
-                $query->where('prioridad', 'premium');
+                $query->where('prioridad', 'premium')
+                    ->where('estado', 'en proceso');
                 break;
 
             case 'incidencia':
@@ -58,8 +58,15 @@ class MecanicoController extends Controller
                     ->whereIn('estado', ['en proceso', 'pendiente']);
                 break;
 
-            default:
-                // “Todos”: pendiente o en proceso (ya está aplicado arriba)
+            default: // 🔸 "Todos"
+                $query->whereIn('estado', ['pendiente', 'en proceso'])
+                    ->orderByRaw("
+                        CASE
+                            WHEN estado = 'en proceso' THEN 1
+                            WHEN estado = 'pendiente' THEN 2
+                            ELSE 3
+                        END
+                    ");
                 break;
         }
 
@@ -70,28 +77,22 @@ class MecanicoController extends Controller
                     $q2->where('nombre', 'like', "%{$search}%")
                         ->orWhere('marca', 'like', "%{$search}%")
                         ->orWhereHas('user', function ($qq) use ($search) {
-                            $qq->where('nombre', 'like', "%{$search}%");
+                            $qq->where('name', 'like', "%{$search}%");
                         });
                 })
-                    ->orWhere('idprograma', 'like', "%{$search}%");
+                ->orWhere('idprograma', 'like', "%{$search}%");
             });
         }
 
-        // 🔹 Orden personalizado (similar al original)
-        $query->orderByRaw('
-        CASE 
-            -- EN PROCESO
-            WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total < 30 THEN 1
-            WHEN estado = "en proceso" AND prioridad = "urgente" AND horas_total >= 30 THEN 2
-            WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total < 30 THEN 3
-            WHEN estado = "en proceso" AND prioridad = "normal" AND horas_total >= 30 THEN 4
-            -- PENDIENTE
-            WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total < 30 THEN 5
-            WHEN estado = "pendiente" AND prioridad = "urgente" AND horas_total >= 30 THEN 6
-            WHEN estado = "pendiente" AND prioridad = "normal" AND horas_total < 30 THEN 7
-            ELSE 8
-        END
-    ')->orderBy('horas_total', 'asc');
+        // 🔹 Orden por prioridad y fecha (igual que appointments.index)
+        $query->orderByRaw("
+            CASE
+                WHEN prioridad = 'premium' THEN 0
+                WHEN prioridad = 'urgente' THEN 1
+                WHEN prioridad = 'normal' THEN 2
+                ELSE 3
+            END
+        ")->orderBy('fecha_asignada', 'asc');
 
         // 🔹 Paginar
         $appointments = $query->paginate(8)->appends([
@@ -111,7 +112,6 @@ class MecanicoController extends Controller
 
         return view('mecanico.index', compact('appointments', 'search', 'filtro'));
     }
-
     public function confirmCompletion(Appointment $appointment)
     {
         // Obtener los componentes de la cita

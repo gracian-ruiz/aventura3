@@ -70,7 +70,13 @@
                         </td>
                         <td class="py-2 px-4">
                             <span class="px-2 py-1 rounded-full text-xs font-bold 
-                                {{ $appointment->prioridad == 'urgente' ? 'bg-red-500 text-white' : ($appointment->prioridad == 'premium' ? 'bg-yellow-600 text-white' : 'bg-blue-500 text-white') }}">
+                                @if ($appointment->prioridad == 'urgente')
+                                    bg-red-500 text-white
+                                @elseif ($appointment->prioridad == 'premium')
+                                    bg-black text-white border border-gray-700 shadow-sm
+                                @else
+                                    bg-blue-500 text-white
+                                @endif">
                                 {{ ucfirst($appointment->prioridad) }}
                             </span>
                         </td>
