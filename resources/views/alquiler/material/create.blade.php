@@ -27,8 +27,24 @@
         <div class="mb-4">
             <label for="tipo" class="block text-gray-700 font-semibold mb-2">Tipo</label>
             <select name="tipo" id="tipo" class="w-full border px-4 py-2 rounded-md">
-                @foreach(['mtb','electrica','carretera','paseo','niños','casco','material','bidones'] as $tipo)
-                    <option value="{{ $tipo }}" @selected(old('tipo') == $tipo)>{{ ucfirst($tipo) }}</option>
+                @php
+                    $tipos = [
+                        'mtb26' => 'MTB 26',
+                        'mtb29' => 'MTB 29',
+                        'mtb29doble' => 'MTB 29 Doble',
+                        'electricapaseo' => 'Eléctrica Paseo',
+                        'electricadoble' => 'Eléctrica Doble',
+                        'electricarigida' => 'Eléctrica Rígida',
+                        'carretera' => 'Carretera',
+                        'paseo' => 'Paseo',
+                        'niños' => 'Niños',
+                        'casco' => 'Casco',
+                        'material' => 'Material',
+                        'bidones' => 'Bidones',
+                    ];
+                @endphp
+                @foreach($tipos as $tipo => $label)
+                    <option value="{{ $tipo }}" @selected(old('tipo') == $tipo)>{{ $label }}</option>
                 @endforeach
             </select>
         </div>

@@ -77,24 +77,58 @@
   
       <!-- Mtb -->
       <fieldset class="p-2 rounded bg-red-100 text-sm max-w-[180px]">
-        <legend class="font-semibold mb-1 text-red-700 text-sm">Mtb</legend>
-        <label><input type="checkbox" name="tipo_talla[]" value="mtb-XS" class="mr-1">XS</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="mtb-S" class="mr-1">S</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="mtb-M" class="mr-1">M</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="mtb-L" class="mr-1">L</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="mtb-XL" class="mr-1">XL</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="mtb-XXL" class="mr-1">XXL</label>
+        <legend class="font-semibold mb-1 text-red-700 text-sm">Mtb 26</legend>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb26-XS" class="mr-1">XS</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb26-S" class="mr-1">S</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb26-M" class="mr-1">M</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb26-L" class="mr-1">L</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb26-XL" class="mr-1">XL</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb26-XXL" class="mr-1">XXL</label>
       </fieldset>
+
+            <!-- Mtb -->
+      <fieldset class="p-2 rounded bg-red-100 text-sm max-w-[180px]">
+        <legend class="font-semibold mb-1 text-red-700 text-sm">Mtb 29</legend>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29-XS" class="mr-1">XS</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29-S" class="mr-1">S</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29-M" class="mr-1">M</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29-L" class="mr-1">L</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29-XL" class="mr-1">XL</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29-XXL" class="mr-1">XXL</label>
+      </fieldset>
+
+                  <!-- Mtb -->
+      <fieldset class="p-2 rounded bg-red-100 text-sm max-w-[180px]">
+        <legend class="font-semibold mb-1 text-red-700 text-sm">Mtb 29 Doble</legend>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29doble-XS" class="mr-1">XS</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29doble-S" class="mr-1">S</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29doble-M" class="mr-1">M</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29doble-L" class="mr-1">L</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29doble-XL" class="mr-1">XL</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="mtb29doble-XXL" class="mr-1">XXL</label>
+      </fieldset>
+  
   
       <!-- Eléctrica -->
       <fieldset class="p-2 rounded bg-green-100 text-sm max-w-[180px]">
-        <legend class="font-semibold mb-1 text-green-700 text-sm">Eléctrica</legend>
-        <label><input type="checkbox" name="tipo_talla[]" value="electrica-xs" class="mr-1">XS</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="electrica-s" class="mr-1">S</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="electrica-m" class="mr-1">M</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="electrica-l" class="mr-1">L</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="electrica-xl" class="mr-1">XL</label><br>
-        <label><input type="checkbox" name="tipo_talla[]" value="electrica-xxl" class="mr-1">XXL</label>
+        <legend class="font-semibold mb-1 text-green-700 text-sm">Eléctrica Rigida</legend>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricarigida-xs" class="mr-1">XS</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricarigida-s" class="mr-1">S</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricarigida-m" class="mr-1">M</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricarigida-l" class="mr-1">L</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricarigida-xl" class="mr-1">XL</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricarigida-xxl" class="mr-1">XXL</label>
+      </fieldset>
+
+            <!-- Eléctrica -->
+      <fieldset class="p-2 rounded bg-green-100 text-sm max-w-[180px]">
+        <legend class="font-semibold mb-1 text-green-700 text-sm">Eléctrica Doble</legend>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricadoble-xs" class="mr-1">XS</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricadoble-s" class="mr-1">S</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricadoble-m" class="mr-1">M</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricadoble-l" class="mr-1">L</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricadoble-xl" class="mr-1">XL</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricadoble-xxl" class="mr-1">XXL</label>
       </fieldset>
   
       <!-- Carretera -->
@@ -186,8 +220,14 @@ document.addEventListener('DOMContentLoaded', function () {
         params.append('fecha_fin', fechaFin);
         combinaciones.forEach(comb => params.append('tipo_talla[]', comb));
         
-        fetch(`/public/alquileres/materiales-disponibles?${params.toString()}`)
-        //fetch(`/alquileres/materiales-disponibles?${params.toString()}`)
+        // Detectar entorno automáticamente
+        let baseUrl = '';
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            baseUrl = '';
+        } else {
+            baseUrl = '/public';
+        }
+        fetch(`${baseUrl}/alquileres/materiales-disponibles?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -207,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <input type="hidden" name="materiales[${mat.id}][id]" value="${mat.id}">
                                             <input type="checkbox" id="material_${mat.id}" name="materiales[${mat.id}][selected]" value="on" class="h-5 w-5 text-green-600" style="margin-right: 5px;">
                                             <label for="material_${mat.id}" class="text-green-700 text-lg font-semibold">
-                                                ${mat.nombre} ${mat.descripcion} ${mat.tipo} (${mat.talla})
+                                                ${mat.nombre} ${mat.descripcion} ${tipoBonito(mat.tipo)} (${mat.talla})
                                             </label>
                                         </div>
 
@@ -242,5 +282,28 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 });
+
+// Mapeo de tipos a nombres bonitos
+function tipoBonito(tipo) {
+    const tipos = {
+        'mtb26': 'MTB 26',
+        'mtb29': 'MTB 29',
+        'mtb29doble': 'MTB 29 Doble',
+        'electricapaseo': 'Eléctrica Paseo',
+        'electricadoble': 'Eléctrica Doble',
+        'electricarigida': 'Eléctrica Rígida',
+        'carretera': 'Carretera',
+        'paseo': 'Paseo',
+        'niños': 'Niños',
+        'ninos': 'Niños', // por si acaso
+        'casco': 'Casco',
+        'material': 'Material',
+        'bidones': 'Bidones',
+        'reparacion': 'Reparación',
+        'bombin': 'Bombín',
+        'kit_reparacion': 'Kit Reparación',
+    };
+    return tipos[tipo] || tipo;
+}
 </script>
 @endsection

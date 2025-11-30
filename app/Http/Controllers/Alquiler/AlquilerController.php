@@ -11,6 +11,7 @@ use App\Models\UsuarioAlquiler;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class AlquilerController extends Controller
 {

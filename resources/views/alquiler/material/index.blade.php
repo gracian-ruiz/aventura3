@@ -48,10 +48,28 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
+                @php
+                    $tipos = [
+                        'mtb26' => 'MTB 26',
+                        'mtb29' => 'MTB 29',
+                        'mtb29doble' => 'MTB 29 Doble',
+                        'electricapaseo' => 'Eléctrica Paseo',
+                        'electricadoble' => 'Eléctrica Doble',
+                        'electricarigida' => 'Eléctrica Rígida',
+                        'carretera' => 'Carretera',
+                        'paseo' => 'Paseo',
+                        'niños' => 'Niños',
+                        'casco' => 'Casco',
+                        'material' => 'Material',
+                        'bidones' => 'Bidones',
+                    ];
+                @endphp
                 @foreach ($materials as $material)
                     <tr class="hover:bg-gray-100">
                         <td class="py-2 px-4">{{ $material->id }}</td>
-                        <td class="py-2 px-4 capitalize">{{ $material->tipo }}</td>
+                        <td class="py-2 px-4 capitalize">
+                            {{ $tipos[$material->tipo] ?? ucfirst($material->tipo) }}
+                        </td>
                         <td class="py-2 px-4">{{ $material->nombre }}</td>
                         <td class="py-2 px-4">{{ $material->talla ?? '-' }}</td>
                         <td class="py-2 px-4 capitalize">{{ $material->estado }}</td>
