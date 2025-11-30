@@ -17,7 +17,7 @@
 <ul>
     @foreach($bicicletas as $bici)
         <li>
-            {{ $bici['cantidad'] }} bicicleta(s) tipo <strong>{{ $bici['tipo_bonito'] ?? $bici['tipo'] }}</strong>,
+            {{ $bici['cantidad'] }} bicicleta(s) tipo bicicleta <strong>{{ $bici['tipo_bonito'] }}</strong>,
             talla <strong>{{ $bici['talla'] }}</strong>,
             del {{ \Carbon\Carbon::parse($bici['fecha_inicio'])->format('d/m/Y') }}
             al {{ \Carbon\Carbon::parse($bici['fecha_fin'])->format('d/m/Y') }}
