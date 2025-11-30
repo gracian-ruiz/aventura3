@@ -15,7 +15,7 @@
 
 <h3>Resumen de tu solicitud:</h3>
 <ul>
-    @foreach($bicicletas as $bici)
+    @foreach($bicicletasProcesadas as $bici)
         @php
             \Log::info('🟢 VISTA - Bicicleta en foreach', [
                 'bici' => $bici,

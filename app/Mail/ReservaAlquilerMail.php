@@ -16,6 +16,7 @@ class ReservaAlquilerMail extends Mailable
     public $alquiler;
     public $usuario;
     public $bicicletas;
+    public $bicicletasProcesadas;
     public $observaciones;
     
     public function __construct($alquiler, $usuario, $bicicletas, $observaciones)
@@ -92,14 +93,16 @@ class ReservaAlquilerMail extends Mailable
             'tipo_bicicletas' => gettype($bicicletas),
             'count' => count($bicicletas)
         ]);
+        
+        // Asignar a propiedad pública para evitar problemas con SerializesModels
+        $this->bicicletasProcesadas = $bicicletas;
+        
+        Log::info('🔵 Asignado a propiedad pública', [
+            'bicicletasProcesadas' => $this->bicicletasProcesadas
+        ]);
+        
         return $this->subject('Confirmación de reserva de bicicletas')
                     ->bcc(['aventurabikepk@gmail.com']) 
-                    ->view('emails.reserva2')
-                    ->with([
-                        'alquiler' => $this->alquiler,
-                        'usuario' => $this->usuario,
-                        'bicicletas' => $bicicletas,
-                        'observaciones' => $this->observaciones,
-                    ]);
+                    ->view('emails.reserva2');
     }
 }
