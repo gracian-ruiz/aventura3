@@ -152,6 +152,16 @@
         <label><input type="checkbox" name="tipo_talla[]" value="paseo-xl" class="mr-1">XL</label><br>
         <label><input type="checkbox" name="tipo_talla[]" value="paseo-xxl" class="mr-1">XXL</label>
       </fieldset>
+    
+      <fieldset class="p-2 rounded bg-yellow-100 text-sm max-w-[180px]">
+        <legend class="font-semibold mb-1 text-yellow-700 text-sm">Electrica Paseo</legend>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricapaseo-xs" class="mr-1">XS</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricapaseo-s" class="mr-1">S</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricapaseo-m" class="mr-1">M</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricapaseo-l" class="mr-1">L</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricapaseo-xl" class="mr-1">XL</label><br>
+        <label><input type="checkbox" name="tipo_talla[]" value="electricapaseo-xxl" class="mr-1">XXL</label>
+      </fieldset>
   
       <!-- Niños -->
       <fieldset class="p-2 rounded bg-purple-100 text-sm max-w-[180px]">
