@@ -132,12 +132,16 @@
                             Tipo / Type
                         </label>
                         <select name="bicicletas[0][tipo]" required class="w-full border rounded-md">
-                            <option value="">Selecciona / Select</option>
-                            <option value="Mtb">Montaña / Mountain</option>
-                            <option value="Carretera">Carretera / Road</option>
-                            <option value="Electrica">Eléctrica / Electric</option>
-                            <option value="Paseo">Paseo / City</option>
-                            <option value="Niños">Niños / Kids</option>
+                            <option value="">{{ __('messages.select_type') }}</option>
+                            <option value="mtb26">MTB 26</option>
+                            <option value="mtb29">MTB 29</option>
+                            <option value="mtb29doble">MTB 29 Doble</option>
+                            <option value="electricapaseo">Eléctrica Paseo</option>
+                            <option value="electricadoble">Eléctrica Doble</option>
+                            <option value="electricarigida">Eléctrica Rígida</option>
+                            <option value="carretera">Carretera / Road</option>
+                            <option value="paseo">Paseo / City</option>
+                            <option value="ninos">Niños / Kids</option>
                         </select>
                     </div>
 
