@@ -63,7 +63,7 @@ class ReservaAlquilerMail extends Mailable
             $tipo_normalizado = $normalizar($bici['tipo']);
             $bici['tipo_bonito'] = $tipos[$tipo_normalizado] ?? $bici['tipo'];
             return $bici;
-        });
+        })->toArray();
         return $this->subject('Confirmación de reserva de bicicletas')
                     ->bcc(['aventurabikepk@gmail.com']) 
                     ->view('emails.reserva2')
