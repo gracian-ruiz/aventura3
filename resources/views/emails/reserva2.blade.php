@@ -16,14 +16,6 @@
 <h3>Resumen de tu solicitud:</h3>
 <ul>
     @foreach($bicicletasProcesadas as $bici)
-        @php
-            \Log::info('🟢 VISTA - Bicicleta en foreach', [
-                'bici' => $bici,
-                'keys' => array_keys($bici),
-                'tiene_tipo_bonito' => isset($bici['tipo_bonito']),
-                'tipo_bonito_value' => $bici['tipo_bonito'] ?? 'NO EXISTE'
-            ]);
-        @endphp
         <li>
             {{ $bici['cantidad'] }} bicicleta(s) tipo <strong>{{ $bici['tipo_bonito'] ?? $bici['tipo'] ?? 'N/A' }}</strong>,
             talla <strong>{{ $bici['talla'] }}</strong>,
