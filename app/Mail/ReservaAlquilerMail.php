@@ -7,6 +7,7 @@ use App\Models\UsuarioAlquiler;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class ReservaAlquilerMail extends Mailable
 {
@@ -27,6 +28,11 @@ class ReservaAlquilerMail extends Mailable
     
     public function build()
     {
+        // Log para depuración de tipos recibidos
+        Log::info('Tipos de bicicleta recibidos en el mail de reserva', [
+            'tipos' => collect($this->bicicletas)->pluck('tipo')->all()
+        ]);
+
         // Mapeo de tipos a nombres bonitos
         $tipos = [
             'mtb26' => 'MTB 26',
@@ -46,9 +52,16 @@ class ReservaAlquilerMail extends Mailable
             'bombin' => 'Bombín',
             'kit_reparacion' => 'Kit Reparación',
         ];
-        // Convertir el tipo de cada bicicleta a nombre bonito
-        $bicicletas = collect($this->bicicletas)->map(function($bici) use ($tipos) {
-            $bici['tipo_bonito'] = $tipos[$bici['tipo']] ?? $bici['tipo'];
+        // Función para normalizar el tipo
+        $normalizar = function($tipo) {
+            $tipo = mb_strtolower($tipo, 'UTF-8');
+            $tipo = str_replace(['á','é','í','ó','ú','ñ',' '], ['a','e','i','o','u','n',''], $tipo);
+            return preg_replace('/[^a-z0-9_]/', '', $tipo);
+        };
+        // Convertir el tipo de cada bicicleta a nombre bonito, normalizando
+        $bicicletas = collect($this->bicicletas)->map(function($bici) use ($tipos, $normalizar) {
+            $tipo_normalizado = $normalizar($bici['tipo']);
+            $bici['tipo_bonito'] = $tipos[$tipo_normalizado] ?? $bici['tipo'];
             return $bici;
         });
         return $this->subject('Confirmación de reserva de bicicletas')
