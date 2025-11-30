@@ -1,6 +1,3 @@
-@extends('layouts.mail')
-
-@section('content')
 <h3>Datos del cliente:</h3>
 <ul>
     <li><strong>Nombre:</strong> {{ $usuario->nombre }}</li>
@@ -17,7 +14,6 @@
 </ul>
 
 <h3>Resumen de tu solicitud:</h3>
-<pre>{{ print_r($bicicletas, true) }}</pre>
 <ul>
     @foreach($bicicletas as $bici)
         <li>
@@ -28,4 +24,4 @@
         </li>
     @endforeach
 </ul>
-@endsection
+
