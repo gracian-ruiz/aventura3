@@ -1,4 +1,4 @@
-<img src="http://127.0.0.1:8000/images/logo_taller_1.png"
+<img src="/images/logo_taller_1.png"
      alt="Logo Taller"
      class="h-8 w-auto md:h-10 lg:h-12 logo">
      <style>
