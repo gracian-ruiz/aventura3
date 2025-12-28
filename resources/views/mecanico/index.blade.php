@@ -105,6 +105,11 @@
                                    Reparación
                                 </a>
                             @endif
+                            
+                            <a href="{{ route('mecanico.show', $appointment->id) }}" 
+                               class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-center">
+                                Ver
+                            </a>
                         </td>
                         <td class="py-2 px-4">
                             @foreach ($appointment->usuarios_asignados as $usuario)
