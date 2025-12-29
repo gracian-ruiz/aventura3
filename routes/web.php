@@ -337,6 +337,10 @@ Route::middleware(['auth', 'user'])->group(function () {
     ->name('cliente.cita');
     Route::post('/mibicicleta/guardar-cita', [ClienteController::class, 'guardarCita'])
     ->name('cliente.guardarCita');
+    Route::get('/presupuesto/{appointment}', [ClienteController::class, 'verPresupuesto'])->name('cliente.presupuesto');
+    Route::get('/presupuesto/{appointment}/pdf', [ClienteController::class, 'descargarPresupuestoPDF'])->name('cliente.descargarPresupuestoPDF');
+    Route::post('/presupuesto/{appointment}/aprobar', [ClienteController::class, 'aprobarPresupuesto'])->name('cliente.aprobarPresupuesto');
+    Route::post('/presupuesto/{appointment}/denegar', [ClienteController::class, 'denegarPresupuesto'])->name('cliente.denegarPresupuesto');
 
 });
 

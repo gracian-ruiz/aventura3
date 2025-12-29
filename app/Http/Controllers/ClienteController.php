@@ -7,6 +7,7 @@ use App\Models\Bike;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClienteController extends Controller
 {
@@ -17,10 +18,11 @@ class ClienteController extends Controller
     {
         $user = Auth::user();
 
-        // 🔹 Cargar bicicletas con su cita más reciente (ordenada por fecha o creación)
+        // 🔹 Cargar TODAS las bicicletas del usuario, con sus citas en estado "presupuesto" si existen
         $bikes = Bike::where('user_id', $user->id)
             ->with(['appointments' => function ($q) {
-                $q->orderByDesc('calendario')->take(1); // solo la última cita por bicicleta
+                $q->where('estado', 'presupuesto')
+                  ->orderBy('calendario');
             }])
             ->get();
             
@@ -170,6 +172,106 @@ class ClienteController extends Controller
             'fecha_fija' => true,
         ]);
 
-        return redirect()->route('cliente.perfil')->with('success', '✅ Cita creada correctamente.');
+        $fechaElegida = \Carbon\Carbon::parse($request->fecha)->format('d/m/Y');
+        return redirect()->route('cliente.perfil')->with('success', '✅ Cita creada correctamente para el día ' . $fechaElegida . '.');
+    }
+
+    public function verPresupuesto($appointment_id)
+    {
+        $appointment = Appointment::findOrFail($appointment_id);
+
+        // Seguridad: el cliente solo puede ver sus propias bicis
+        if ($appointment->bike->user_id !== Auth::id()) {
+            abort(403, 'No tienes permiso para ver este presupuesto.');
+        }
+
+        // Obtener los componentes del presupuesto
+        $data = DB::table('appointment_component')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $appointment->id)
+            ->select(
+                'appointment_component.id',
+                'appointment_component.texto',
+                'appointment_component.total_precio',
+                'appointment_component.descuento',
+                'appointment_component.horas_trabajo',
+                'components.nombre as componente_nombre'
+            )
+            ->get();
+
+        return view('cliente.presupuesto', compact('appointment', 'data'));
+    }
+
+    public function aprobarPresupuesto($appointment_id)
+    {
+        $appointment = Appointment::findOrFail($appointment_id);
+
+        // Seguridad: el cliente solo puede aprobar sus propias bicis
+        if ($appointment->bike->user_id !== Auth::id()) {
+            abort(403, 'No tienes permiso para aprobar este presupuesto.');
+        }
+
+        // Cambiar estado a "pendiente" para que entre en la cola del taller
+        $appointment->update([
+            'estado' => 'pendiente',
+        ]);
+
+        return redirect()->route('cliente.perfil')->with('success', '✅ Presupuesto aprobado. Tu bicicleta entrará en reparación próximamente.');
+    }
+
+    public function denegarPresupuesto(Request $request, $appointment_id)
+    {
+        $appointment = Appointment::findOrFail($appointment_id);
+
+        // Seguridad: el cliente solo puede denegar sus propias bicis
+        if ($appointment->bike->user_id !== Auth::id()) {
+            abort(403, 'No tienes permiso para denegar este presupuesto.');
+        }
+
+        // Eliminar la cita si se deniega el presupuesto
+        $appointment->delete();
+
+        return redirect()->route('cliente.perfil')->with('success', 'Presupuesto denegado. La cita ha sido cancelada.');
+    }
+
+    public function descargarPresupuestoPDF($appointment_id)
+    {
+        $appointment = Appointment::findOrFail($appointment_id);
+
+        // Seguridad: el cliente solo puede descargar sus propias bicis
+        if ($appointment->bike->user_id !== Auth::id()) {
+            abort(403, 'No tienes permiso para descargar este presupuesto.');
+        }
+
+        // Obtener los datos igual que en el presupuesto del taller
+        $presupuesto = DB::table('appointments')
+            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
+            ->join('users', 'bikes.user_id', '=', 'users.id')
+            ->where('appointments.id', $appointment_id)
+            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'bikes.marca as marca', 'users.name as usuario_nombre')
+            ->first();
+
+        $items = DB::table('appointment_component')
+            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+            ->where('appointment_component.appointment_id', $appointment_id)
+            ->select('appointment_component.*', 'components.nombre as componente_nombre')
+            ->get();
+
+        if (!$presupuesto) {
+            abort(404, 'Presupuesto no encontrado');
+        }
+
+        // Función para limpiar nombres de archivo
+        $limpiarNombre = fn($texto) => preg_replace('/[^A-Za-z0-9_\-]/', '_', $texto);
+
+        $usuarioLimpio = $limpiarNombre($presupuesto->usuario_nombre);
+        $bicicletaLimpia = $limpiarNombre($presupuesto->bicicleta_nombre);
+        $fecha = date('Y-m-d', strtotime($presupuesto->created_at));
+
+        $nombreArchivo = "Presupuesto_{$usuarioLimpio}_{$bicicletaLimpia}_{$fecha}.pdf";
+
+        $pdf = Pdf::loadView('pdf.presupuesto', compact('presupuesto', 'items'));
+
+        return $pdf->download($nombreArchivo);
     }
 }

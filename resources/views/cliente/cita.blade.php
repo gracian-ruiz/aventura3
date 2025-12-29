@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mt-5">
-    <h2 class="text-center mb-4">📅 Pedir Cita para {{ $bike->marca }} - {{ $bike->nombre }}</h2>
+    <h2 class="text-center mb-4">Pedir Cita para {{ $bike->marca }} - {{ $bike->nombre }}</h2>
 
     {{-- ✅ Mensaje de éxito al crear la cita --}}
     @if(session('success'))
@@ -11,6 +11,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
+    <div class="alert alert-info text-center mb-4">
+        Recuerda: debes llevar la bicicleta al taller el día que selecciones. Una vez esté en el taller, se revisará y se hará un presupuesto sobre la reparación.
+    </div>
 
     <form method="POST" action="{{ route('cliente.guardarCita') }}">
         @csrf
@@ -36,7 +40,7 @@
                               id="descripcion_problema"
                               class="form-control"
                               rows="3"
-                              placeholder="Describe brevemente el problema..."></textarea>
+                              placeholder="Describe brevemente el problema..." required></textarea>
                 </div>
 
                 <div class="text-center">

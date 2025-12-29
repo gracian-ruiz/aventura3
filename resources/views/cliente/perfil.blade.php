@@ -20,10 +20,6 @@
     @else
         <div class="row justify-content-center">
             @foreach($bikes as $bike)
-                @php
-                    $ultimaCita = $bike->appointments->first();
-                @endphp
-
                 <div class="col-sm-10 col-md-8 col-lg-6 mb-4 d-flex justify-content-center">
                     <div class="card h-100 shadow border-0" style="width: 28rem; max-width: 100%;">
                         <div class="card-body text-center">
@@ -32,65 +28,37 @@
                             <p class="card-text mb-1"><strong>Kilómetros:</strong> {{ $bike->kilometros ?? 'N/D' }}</p>
                             <p class="card-text mb-3"><strong>Color:</strong> {{ $bike->color ?? 'N/D' }}</p>
 
-                            {{-- 🔹 Mostrar estado actual de la cita si existe --}}
-                            @if($ultimaCita)
-                                {{-- 💰 Estado: Presupuesto --}}
-                                @if($ultimaCita->estado === 'presupuesto')
-                                    <div class="alert alert-primary py-2 mt-3 mb-0">
-                                        Pendiente de revisión o presupuesto en tienda
-                                        @if(!empty($ultimaCita->calendario))
-                                            el <strong>{{ \Carbon\Carbon::parse($ultimaCita->calendario)->locale('es')->translatedFormat('l d \d\e F \d\e Y') }}</strong>.
+                            {{-- 📋 Mostrar todas las citas en presupuesto si existen --}}
+                            @if($bike->appointments->isNotEmpty())
+                                @foreach($bike->appointments as $cita)
+                                    <div class="alert alert-primary py-2 mt-2 mb-0">
+                                         Pendiente de revisión o presupuesto en tienda
+                                        @if(!empty($cita->calendario))
+                                            el <strong>{{ \Carbon\Carbon::parse($cita->calendario)->locale('es')->translatedFormat('l d \d\e F \d\e Y') }}</strong>
                                         @else
-                                            <strong>(sin fecha asignada)</strong>.
+                                            <strong>(sin fecha asignada)</strong>
                                         @endif
-                                    </div>
-
-                                {{-- ⏳ Estado: Pendiente --}}
-                                @elseif($ultimaCita->estado === 'pendiente')
-                                    <div class="alert alert-warning py-2 mt-3 mb-0">
-                                        ⏳ Pendiente de recepción de la bicicleta en tienda
-                                        @if(!empty($ultimaCita->calendario))
-                                            el <strong>{{ \Carbon\Carbon::parse($ultimaCita->calendario)->locale('es')->translatedFormat('l d \d\e F \d\e Y') }}</strong>.
-                                        @else
-                                            <strong>(sin fecha asignada)</strong>.
+                                        
+                                        @if($cita->descripcion_cliente)
+                                            <div class="mt-2 text-start small">
+                                                <strong>Problema:</strong> {{ Str::limit($cita->descripcion_cliente, 80) }}
+                                            </div>
                                         @endif
+                                        
+                                        <div class="mt-2">
+                                            <a href="{{ route('cliente.presupuesto', $cita->id) }}" class="btn btn-info btn-sm">
+                                                <i class="bi bi-file-earmark-text"></i> Ver Presupuesto
+                                            </a>
+                                        </div>
                                     </div>
-
-                                {{-- 🔧 Estado: En proceso --}}
-                                @elseif($ultimaCita->estado === 'en proceso')
-                                    <div class="alert alert-info py-2 mt-3 mb-0">
-                                        🔧 Reparación en curso
-                                        @if(!empty($ultimaCita->calendario))
-                                            — <strong>{{ \Carbon\Carbon::parse($ultimaCita->calendario)->locale('es')->translatedFormat('l d \d\e F \d\e Y') }}</strong>.
-                                        @endif
-                                    </div>
-
-                                {{-- ✅ Estado: Completada --}}
-                                @elseif($ultimaCita->estado === 'completada')
-                                    <div class="alert alert-success py-2 mt-3 mb-0">
-                                        ✅ Reparación completada
-                                        @if(!empty($ultimaCita->calendario))
-                                            el <strong>{{ \Carbon\Carbon::parse($ultimaCita->calendario)->locale('es')->translatedFormat('d/m/Y') }}</strong>.
-                                        @endif
-                                    </div>
-
-                                {{-- ℹ️ Otros estados --}}
-                                @else
-                                    <div class="alert alert-secondary py-2 mt-3 mb-0">
-                                        ℹ️ Estado actual: {{ ucfirst($ultimaCita->estado) }}
-                                    </div>
-                                @endif
+                                @endforeach
                             @else
-                                <div class="text-muted small mt-3">No hay citas registradas para esta bicicleta.</div>
+                                <div class="text-muted small mt-3">No hay presupuestos pendientes para esta bicicleta.</div>
                             @endif
                         </div>
 
                         <div class="card-footer bg-white border-0 text-center">
                             <div class="btn-group-responsive">
-                                <a href="{{ route('bikes.edit', $bike->id) }}" class="btn btn-warning btn-sm">
-                                    <i class="bi bi-pencil-square"></i> Editar
-                                </a>
-
                                 <a href="{{ route('cliente.cita', $bike->id) }}" class="btn btn-success btn-sm">
                                     <i class="bi bi-calendar-check"></i> Pedir cita
                                 </a>
