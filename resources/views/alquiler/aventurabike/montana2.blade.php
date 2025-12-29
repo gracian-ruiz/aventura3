@@ -367,7 +367,6 @@
                             </thead>
                             <tbody>
                                 <tr><td>OLYMPIA BLAKE</td><td>S</td></tr>
-                                <tr><td>GIANT FATHOM PRO</td><td>M</td></tr>
                                 <tr><td>OLIMPIA MASTER 630</td><td>M</td></tr>
                             </tbody>
                         </table>
