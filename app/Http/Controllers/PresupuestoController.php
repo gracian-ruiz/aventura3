@@ -19,6 +19,8 @@ class PresupuestoController extends Controller
 public function index(Request $request)
 {
     $search = $request->input('search');
+    $filtroOrigen = $request->input('origen'); // 'web' o 'tienda'
+    $filtroPrioridad = $request->input('prioridad'); // 'premium', 'urgente', 'normal'
 
     $presupuestos = DB::table('appointments')
         ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
@@ -39,18 +41,34 @@ public function index(Request $request)
                     ->orWhere('appointments.idprograma', 'like', "%{$search}%");
             });
         })
+        // 🔹 Filtro por origen (web/tienda)
+        ->when($filtroOrigen === 'web', function ($query) {
+            $query->where('appointments.web', 1);
+        })
+        ->when($filtroOrigen === 'tienda', function ($query) {
+            $query->where('appointments.web', 0);
+        })
+        // 🔹 Filtro por prioridad
+        ->when($filtroPrioridad, function ($query, $filtroPrioridad) {
+            $query->where('appointments.prioridad', $filtroPrioridad);
+        })
         ->orderByRaw('
             CASE 
-                WHEN appointments.prioridad = "premium" THEN 0
-                WHEN appointments.prioridad = "urgente" THEN 1
-                ELSE 2
+                WHEN appointments.prioridad = "premium" AND appointments.web = 1 THEN 0
+                WHEN appointments.prioridad = "premium" THEN 1
+                WHEN appointments.prioridad = "urgente" THEN 2
+                ELSE 3
             END
         ')
         ->orderBy('appointments.created_at', 'asc')
         ->paginate(10)
-        ->appends(['search' => $search]);
+        ->appends([
+            'search' => $search,
+            'origen' => $filtroOrigen,
+            'prioridad' => $filtroPrioridad
+        ]);
 
-    return view('presupuestos.index', compact('presupuestos', 'search'));
+    return view('presupuestos.index', compact('presupuestos', 'search', 'filtroOrigen', 'filtroPrioridad'));
 }
 
 

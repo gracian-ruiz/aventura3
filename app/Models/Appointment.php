@@ -40,7 +40,8 @@ class Appointment extends Model
         'calendario',
         'tiempo_reparacion',
         'fecha_fija',
-        'descripcion_cliente' 
+        'descripcion_cliente',
+        'web' 
     ];
 
 

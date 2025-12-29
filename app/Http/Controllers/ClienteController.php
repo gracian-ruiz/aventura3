@@ -170,6 +170,7 @@ class ClienteController extends Controller
             'estimacion_reparacion' => 0,
             'calendario' => $request->fecha,
             'fecha_fija' => true,
+            'web' => true, // 🌐 Marca que viene desde la web (cliente)
         ]);
 
         $fechaElegida = \Carbon\Carbon::parse($request->fecha)->format('d/m/Y');

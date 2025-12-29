@@ -18,6 +18,80 @@
         </div>
     </form>
 
+    <!-- 🔹 Botones de Filtro -->
+    <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+        <div class="flex flex-wrap gap-3 items-center">
+            <span class="font-semibold text-gray-700 mr-2">Filtros:</span>
+            
+            <!-- Filtro: Todos -->
+            <a href="{{ route('presupuestos.index', ['search' => request('search')]) }}" 
+               class="px-4 py-2 rounded-md font-medium transition-all
+                      {{ !request('origen') && !request('prioridad') ? 'bg-gray-800 text-white shadow-md' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100' }}">
+                <i class="bi bi-list-ul"></i> Todos
+            </a>
+
+            <!-- Filtro: Web -->
+            <a href="{{ route('presupuestos.index', ['search' => request('search'), 'origen' => 'web', 'prioridad' => request('prioridad')]) }}" 
+               class="px-4 py-2 rounded-md font-medium transition-all
+                      {{ request('origen') === 'web' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-blue-600 border border-blue-300 hover:bg-blue-50' }}">
+                <i class="bi bi-globe2"></i> Web
+            </a>
+
+            <!-- Filtro: Tienda -->
+            <a href="{{ route('presupuestos.index', ['search' => request('search'), 'origen' => 'tienda', 'prioridad' => request('prioridad')]) }}" 
+               class="px-4 py-2 rounded-md font-medium transition-all
+                      {{ request('origen') === 'tienda' ? 'bg-gray-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50' }}">
+                <i class="bi bi-shop"></i> Tienda
+            </a>
+
+            <span class="text-gray-400 mx-2">|</span>
+
+            <!-- Filtro: Premium -->
+            <a href="{{ route('presupuestos.index', ['search' => request('search'), 'origen' => request('origen'), 'prioridad' => 'premium']) }}" 
+               class="px-4 py-2 rounded-md font-medium transition-all
+                      {{ request('prioridad') === 'premium' ? 'bg-amber-400 text-black shadow-md border border-amber-600' : 'bg-white text-amber-600 border border-amber-300 hover:bg-amber-50' }}">
+                <i class="bi bi-star-fill"></i> Premium
+            </a>
+
+            <!-- Filtro: Urgente -->
+            <a href="{{ route('presupuestos.index', ['search' => request('search'), 'origen' => request('origen'), 'prioridad' => 'urgente']) }}" 
+               class="px-4 py-2 rounded-md font-medium transition-all
+                      {{ request('prioridad') === 'urgente' ? 'bg-red-600 text-white shadow-md' : 'bg-white text-red-600 border border-red-300 hover:bg-red-50' }}">
+                <i class="bi bi-exclamation-triangle-fill"></i> Urgente
+            </a>
+
+            <!-- Filtro: Normal -->
+            <a href="{{ route('presupuestos.index', ['search' => request('search'), 'origen' => request('origen'), 'prioridad' => 'normal']) }}" 
+               class="px-4 py-2 rounded-md font-medium transition-all
+                      {{ request('prioridad') === 'normal' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-blue-600 border border-blue-300 hover:bg-blue-50' }}">
+                <i class="bi bi-clock"></i> Normal
+            </a>
+
+            @if(request('origen') || request('prioridad'))
+                <a href="{{ route('presupuestos.index', ['search' => request('search')]) }}" 
+                   class="ml-auto px-3 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 border border-red-300 text-sm font-medium">
+                    <i class="bi bi-x-circle"></i> Limpiar filtros
+                </a>
+            @endif
+        </div>
+
+        @if(request('origen') || request('prioridad'))
+            <div class="mt-3 text-sm text-gray-600">
+                <strong>Filtros activos:</strong>
+                @if(request('origen'))
+                    <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2">
+                        {{ request('origen') === 'web' ? '🌐 Web' : '🏪 Tienda' }}
+                    </span>
+                @endif
+                @if(request('prioridad'))
+                    <span class="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded ml-2">
+                        {{ ucfirst(request('prioridad')) }}
+                    </span>
+                @endif
+            </div>
+        @endif
+    </div>
+
     <!-- Mensajes de éxito -->
     @if (session('success'))
         <div class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
@@ -35,6 +109,7 @@
                     <th class="py-2 px-4 text-left">Bicicleta</th>
                     <th class="py-2 px-4 text-left">Fecha</th>
                     <th class="py-2 px-4 text-left">Prioridad</th>
+                    <th class="py-2 px-4 text-center">Origen</th>
                     <th class="py-2 px-4 text-center">Aprobar / Denegar</th>
                     <th class="py-2 px-4 text-center">Editar / Ver Presupuesto</th>
                     <th class="py-2 px-4 text-center">Eliminar / Enviar Correo</th>
@@ -72,12 +147,38 @@
                                     bg-blue-500 text-white
                                 @endif">
                                 {{ ucfirst($presupuesto->prioridad) }}
+                                @if ($presupuesto->web && $presupuesto->prioridad == 'premium')
+                                    <i class="bi bi-bell-fill text-orange-600" title="Premium desde Web"></i>
+                                @endif
                             </span>
+                        </td>
+
+                        <!-- 🌐 Columna de Origen -->
+                        <td class="py-2 px-4 text-center">
+                            @if ($presupuesto->web)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300">
+                                    <i class="bi bi-globe2 mr-1"></i> Web
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                                    <i class="bi bi-shop mr-1"></i> Tienda
+                                </span>
+                            @endif
                         </td>
 
                         <style>
                             .premium {
                                 background: rgb(242, 255, 99);
+                            }
+                            .bi-bell-fill {
+                                animation: ring 2s ease-in-out infinite;
+                                display: inline-block;
+                                margin-left: 4px;
+                            }
+                            @keyframes ring {
+                                0%, 100% { transform: rotate(0deg); }
+                                10%, 30% { transform: rotate(-10deg); }
+                                20%, 40% { transform: rotate(10deg); }
                             }
                         </style>
 
