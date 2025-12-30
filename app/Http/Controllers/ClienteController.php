@@ -18,11 +18,12 @@ class ClienteController extends Controller
     {
         $user = Auth::user();
 
-        // 🔹 Cargar TODAS las bicicletas del usuario, con sus citas en estado "presupuesto" si existen
+        // 🔹 Cargar bicicletas del usuario con SOLO la última cita (por ID más reciente)
         $bikes = Bike::where('user_id', $user->id)
             ->with(['appointments' => function ($q) {
-                $q->where('estado', 'presupuesto')
-                  ->orderBy('calendario');
+                $q->whereIn('estado', ['presupuesto', 'pendiente', 'en proceso', 'completada'])
+                  ->orderByDesc('id') // Ordenar por ID descendente
+                  ->limit(1); // Solo la última cita
             }])
             ->get();
             

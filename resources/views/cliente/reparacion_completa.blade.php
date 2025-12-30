@@ -2,21 +2,62 @@
 
 @section('content')
 <div class="container mt-4">
-    <h1 class="text-center mb-4">🧾 Detalle de Reparación #{{ $appointment->id }}</h1>
+    <h1 class="text-center mb-4">
+        @if($appointment->estado === 'en proceso')
+            🔧 Reparación en Curso #{{ $appointment->id }}
+        @elseif($appointment->estado === 'pendiente')
+            ⏳ Reparación Pendiente #{{ $appointment->id }}
+        @else
+            🧾 Detalle de Reparación #{{ $appointment->id }}
+        @endif
+    </h1>
+
+    {{-- Banner de estado --}}
+    @if($appointment->estado === 'en proceso')
+        <div class="alert alert-primary text-center mb-4">
+            <i class="bi bi-tools fs-4"></i>
+            <h5 class="mt-2 mb-0">Tu bicicleta está siendo reparada en este momento</h5>
+            <small>A continuación puedes ver el progreso de la reparación</small>
+        </div>
+    @elseif($appointment->estado === 'pendiente')
+        <div class="alert alert-warning text-center mb-4">
+            <i class="bi bi-hourglass-split fs-4"></i>
+            <h5 class="mt-2 mb-0">Tu presupuesto ha sido aprobado</h5>
+            <small>La reparación comenzará próximamente</small>
+        </div>
+    @endif
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h5 class="card-title">{{ $appointment->bike->marca }} - {{ $appointment->bike->nombre }}</h5>
-            <p><strong>Fecha Asignada:</strong> {{ $appointment->fecha_asignada }}</p>
-            <p><strong>Prioridad:</strong> {{ ucfirst($appointment->prioridad) }}</p>
-            <p><strong>Estado:</strong> {{ ucfirst($appointment->estado) }}</p>
-            <p><strong>Descripción del Problema:</strong> {{ $appointment->descripcion_problema ?? '—' }}</p>
-            <p><strong>Horas Totales:</strong> {{ $appointment->horas_total }} h</p>
-            <p><strong>Precio Total:</strong> {{ number_format($appointment->precio_total, 2) }} €</p>
+            <p><strong>Fecha Asignada:</strong> {{ $appointment->fecha_asignada ? \Carbon\Carbon::parse($appointment->fecha_asignada)->format('d/m/Y') : 'Por asignar' }}</p>
+            <p><strong>Prioridad:</strong> 
+                <span class="badge 
+                    @if($appointment->prioridad === 'premium') bg-dark
+                    @elseif($appointment->prioridad === 'urgente') bg-danger
+                    @else bg-primary
+                    @endif">
+                    {{ ucfirst($appointment->prioridad) }}
+                </span>
+            </p>
+            <p><strong>Estado:</strong> 
+                <span class="badge 
+                    @if($appointment->estado === 'en proceso') bg-primary
+                    @elseif($appointment->estado === 'pendiente') bg-warning text-dark
+                    @else bg-success
+                    @endif">
+                    {{ ucfirst($appointment->estado) }}
+                </span>
+            </p>
+            @if($appointment->descripcion_problema || $appointment->descripcion_cliente)
+                <p><strong>Descripción del Problema:</strong> {{ $appointment->descripcion_problema ?? $appointment->descripcion_cliente ?? '—' }}</p>
+            @endif
+            <p><strong>Tiempo Estimado:</strong> {{ $appointment->horas_total }} min</p>
+            <p><strong>Precio Total:</strong> <span class="text-success fs-5">{{ number_format($appointment->precio_total, 2) }} €</span></p>
         </div>
     </div>
 
-    <h4 class="mb-3">🧩 Componentes Usados</h4>
+    <h4 class="mb-3">🧩 Trabajos a Realizar</h4>
 
     <div class="table-responsive">
         <table class="table table-bordered text-center align-middle shadow-sm">
@@ -58,8 +99,8 @@
     </div>
 
     <div class="text-center mt-4">
-        <a href="{{ route('cliente.historial', $appointment->bike_id) }}" class="btn btn-secondary">
-            ← Volver al Historial
+        <a href="{{ route('cliente.perfil') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Perfil
         </a>
     </div>
 </div>
