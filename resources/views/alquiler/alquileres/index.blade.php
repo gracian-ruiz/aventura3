@@ -35,6 +35,7 @@
                     <th class="py-2 px-4 text-left">Fecha inicio</th>
                     <th class="py-2 px-4 text-left">Fecha fin</th>
                     <th class="py-2 px-4 text-left">Estado</th>
+                    <th class="py-2 px-4 text-left">Web</th>
                     <th class="py-2 px-4 text-left">Total (€)</th>
                     <th class="py-2 px-4 text-left">Acciones</th>
                     <th class="py-2 px-4 text-left">Ver</th>
@@ -58,6 +59,13 @@
                 <td class="py-2 px-4">{{ $alquiler->fecha_inicio }}</td>
                 <td class="py-2 px-4">{{ $alquiler->fecha_fin }}</td>
                 <td class="py-2 px-4 capitalize">{{ $alquiler->estado }}</td>
+                <td class="py-2 px-4">
+                    @if($alquiler->web === 1)
+                        <span class="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">Web</span>
+                    @else
+                        <span class="px-2 py-1 bg-gray-500 text-white text-xs font-bold rounded-full">Presencial</span>
+                    @endif
+                </td>
                 <td class="py-2 px-4">{{ number_format($alquiler->total_precio - $alquiler->reserva_precio, 2) }} €</td>
             
                 <td class="py-2 px-4">
@@ -78,7 +86,7 @@
             
                 @empty
                     <tr>
-                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="10" class="py-4 px-4 text-center text-gray-500">
                             No hay alquileres registrados.
                         </td>
                     </tr>

@@ -6,22 +6,22 @@
 
     <!-- Estado del alquiler -->
     <div class="mb-4">
-        <h5>
+        <h3>
             <strong>🔄 Estado del Alquiler:</strong>
             @switch($alquiler->estado)
                 @case('reservado')
-                    <span class="badge bg-warning text-dark">Reserva</span>
+                    <span class="badge bg-warning text-dark fs-5">Reserva</span>
                     @break
                 @case('activo')
-                    <span class="badge bg-primary">Activo</span>
+                    <span class="badge bg-primary fs-5">Activo</span>
                     @break
                 @case('finalizado')
-                    <span class="badge bg-success">Finalizado</span>
+                    <span class="badge bg-success fs-5">Finalizado</span>
                     @break
                 @default
-                    <span class="badge bg-secondary">Desconocido</span>
+                    <span class="badge bg-secondary fs-5">Desconocido</span>
             @endswitch
-        </h5>
+        </h3>
     </div>
 
     <!-- Información general -->
@@ -111,10 +111,13 @@
                         </td>
                         <td class="text-center">
                             @if($material->pivot->estado !== 'finalizado')
-                                <form action="{{ route('alquileres.material.devolver', $material->pivot->id) }}" method="POST" onsubmit="return confirm('¿Marcar este material como devuelto?')">
+                                <form id="devolverForm-{{ $material->pivot->id }}" action="{{ route('alquileres.material.devolver', $material->pivot->id) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="btn btn-success btn-sm rounded-pill">
+                                    <button type="button" 
+                                            class="btn btn-success btn-sm rounded-pill"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#devolverModal-{{ $material->pivot->id }}">
                                         <i class="bi bi-arrow-return-left me-1"></i> Devolver
                                     </button>
                                 </form>
@@ -130,6 +133,36 @@
             </table>
         </div>
     @endif
+
+    <!-- Modales para devolución de cada material -->
+    @foreach($alquiler->materiales as $material)
+        <div class="modal fade" id="devolverModal-{{ $material->pivot->id }}" tabindex="-1" aria-labelledby="devolverModalLabel-{{ $material->pivot->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title fs-4" id="devolverModalLabel-{{ $material->pivot->id }}">
+                            <i class="bi bi-arrow-return-left me-2"></i>¿Devolver Material?
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="fs-5 mb-3">¿Estás seguro de marcar este material como devuelto?</p>
+                        <div class="alert alert-info mb-0">
+                            <strong class="fs-5">{{ $material->nombre }} - Talla {{ $material->talla }}</strong>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary fs-5" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </button>
+                        <button type="button" class="btn btn-success fs-5" onclick="document.getElementById('devolverForm-{{ $material->pivot->id }}').submit()">
+                            <i class="bi bi-check-circle-fill me-1"></i>Sí, Devolver
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     <!-- 📸 Imágenes del DNI -->
     <h2 class="mt-5 mb-3">🪪 Imágenes del DNI del Cliente</h2>
@@ -173,17 +206,69 @@
 
     <!-- Botón de cambio de estado -->
     @if($alquiler->estado !== 'finalizado')
-        <form action="{{ route('alquileres.finalizar', $alquiler->id) }}" method="POST" class="mt-4"
-              onsubmit="return confirm('{{ $alquiler->estado === 'reserva' ? '¿Confirmar alquiler y activar materiales?' : '¿Finalizar el alquiler y todos los materiales?' }}')">
+        <form id="estadoForm" action="{{ route('alquileres.finalizar', $alquiler->id) }}" method="POST" class="mt-4">
             @csrf
             @method('PATCH')
             <input type="hidden" name="nuevo" value="{{ $alquiler->estado === 'reservado' ? 'activo' : 'finalizado' }}">
-            <button type="submit" class="btn {{ $alquiler->estado === 'reservado' ? 'btn-success' : 'btn-danger' }}">
+            <button type="button" 
+                    class="btn {{ $alquiler->estado === 'reservado' ? 'btn-success' : 'btn-danger' }}"
+                    data-bs-toggle="modal" 
+                    data-bs-target="#{{ $alquiler->estado === 'reservado' ? 'alquilarModal' : 'finalizarModal' }}">
                 <i class="bi {{ $alquiler->estado === 'reservado' ? 'bi-check-circle-fill' : 'bi-archive-fill' }}"></i>
                 {{ $alquiler->estado === 'reservado' ? 'Alquilar' : 'Finalizar Alquiler' }}
             </button>
         </form>
     @endif
+
+    <!-- Modal para confirmar ALQUILAR -->
+    <div class="modal fade" id="alquilarModal" tabindex="-1" aria-labelledby="alquilarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fs-4" id="alquilarModalLabel">
+                        <i class="bi bi-check-circle-fill me-2"></i>¿Confirmar Alquiler?
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fs-5 mb-0">¿Estás seguro de activar este alquiler? Se marcarán todos los materiales como <strong>activos</strong>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary fs-5" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success fs-5" onclick="document.getElementById('estadoForm').submit()">
+                        <i class="bi bi-check-circle-fill me-1"></i>Sí, Alquilar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para confirmar FINALIZAR -->
+    <div class="modal fade" id="finalizarModal" tabindex="-1" aria-labelledby="finalizarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fs-4" id="finalizarModalLabel">
+                        <i class="bi bi-archive-fill me-2"></i>¿Finalizar Alquiler?
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fs-5 mb-0">¿Estás seguro de finalizar este alquiler? Se marcarán todos los materiales como <strong>finalizados</strong>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary fs-5" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger fs-5" onclick="document.getElementById('estadoForm').submit()">
+                        <i class="bi bi-archive-fill me-1"></i>Sí, Finalizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Botón de volver -->
     <div class="mt-4">
