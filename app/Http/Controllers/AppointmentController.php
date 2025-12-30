@@ -41,7 +41,14 @@ class AppointmentController extends Controller
             case 'premium':
                 // 💎 Mostrar premium solo en pendiente o en proceso
                 $query->where('prioridad', 'premium')
-                      ->whereIn('estado', ['pendiente', 'en proceso']);
+                      ->whereIn('estado', ['pendiente', 'en proceso'])
+                      ->orderByRaw("
+                          CASE
+                              WHEN estado = 'en proceso' THEN 1
+                              WHEN estado = 'pendiente' THEN 2
+                              ELSE 3
+                          END
+                      ");
                 break;
 
             case 'incidencia':
