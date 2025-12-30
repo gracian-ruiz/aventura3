@@ -92,6 +92,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/usuarios/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/usuarios/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    
+    // 🚴 Ver bicicletas de un usuario específico
+    Route::get('/usuarios/{user}/bicicletas', [UserController::class, 'userBikes'])->name('users.bikes');
+    Route::post('/usuarios/{user}/bicicletas', [UserController::class, 'storeBike'])->name('users.bikes.store');
 });
 
 Route::get('/usuarios-datatable', function () {

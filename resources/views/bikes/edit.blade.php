@@ -1,17 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $fromUserBikes = request('from') === 'user_bikes';
+    $backUrl = $fromUserBikes ? route('users.bikes', $bike->user_id) : route('bikes.index');
+    $breadcrumbName = $fromUserBikes ? 'Bicicletas de Usuario' : 'Bicicletas';
+@endphp
+
 <x-breadcrumbs :items="[
     ['name' => 'Inicio', 'url' => route('dashboard')],
-    ['name' => 'Bicicletas', 'url' => route('bikes.index')],
+    ['name' => $breadcrumbName, 'url' => $backUrl],
     ['name' => 'Editar Bicicleta']
 ]" />
 <div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 mt-8">
-    <h1 class="text-2xl font-bold text-center mb-4">Editar Bicicleta</h1>
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">Editar Bicicleta</h1>
+        <a href="{{ $backUrl }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
 
     <form action="{{ route('bikes.update', $bike->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
         @csrf
         @method('PUT')
+
+        <!-- 🔹 Campo oculto para controlar la redirección -->
+        @if(request('from') === 'user_bikes')
+            <input type="hidden" name="redirect_to" value="user.bikes">
+        @endif
 
         <div class="mb-4">
             <label for="user_id" class="block text-gray-700">Usuario</label>

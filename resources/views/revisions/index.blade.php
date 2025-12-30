@@ -26,8 +26,17 @@
     @endif
 
     @if (isset($bike))
-        <div class="flex justify-end mb-4">
-            <a href="{{ route('bikes.revisions.create', $bike->id) }}" 
+        <div class="flex justify-end gap-2 mb-4">
+            <!-- Botón Volver (visible si se accede desde user_bikes) -->
+            @if (request('from') === 'user_bikes' && $bike->user_id)
+                <a href="{{ route('users.bikes', $bike->user_id) }}" 
+                   class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+                    ← Volver a Bicicletas
+                </a>
+            @endif
+            
+            <!-- Botón Nueva Revisión -->
+            <a href="{{ route('bikes.revisions.create', ['bike' => $bike->id, 'from' => request('from')]) }}" 
                class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ Nueva Revisión</a>
         </div>
     @endif
@@ -55,10 +64,13 @@
                         <td class="py-2 px-4">{{ $revision->descripcion }}</td>
                         <td class="py-2 px-4">{{ $revision->proxima_revision ?? 'N/A' }}</td>
                         <td class="py-2 px-4 text-center">
-                            <a href="{{ route('bikes.revisions.edit', [$revision->bike->id, $revision->id]) }}" 
+                            <a href="{{ route('bikes.revisions.edit', ['bike' => $revision->bike->id, 'revision' => $revision->id, 'from' => request('from')]) }}" 
                                class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Editar</a>
                             <form action="{{ route('bikes.revisions.destroy', [$revision->bike->id, $revision->id]) }}" method="POST" class="inline-block">
                                 @csrf @method('DELETE')
+                                @if (request('from'))
+                                    <input type="hidden" name="from" value="{{ request('from') }}">
+                                @endif
                                 <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600" onclick="return confirm('¿Seguro que quieres eliminar esta revisión?')">
                                     Eliminar
                                 </button>

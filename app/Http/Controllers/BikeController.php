@@ -80,7 +80,7 @@ class BikeController extends Controller
             'marca' => 'required|string|max:255',
             'anio_modelo' => 'required|integer|min:1900|max:' . date('Y'),
             'kilometros' => 'nullable|integer|min:0',
-            'color' => 'nullable|string|max:100', // Validación para color
+            'color' => 'nullable|string|max:100',
         ]);
     
         $bike->update([
@@ -89,9 +89,16 @@ class BikeController extends Controller
             'marca' => $request->marca,
             'anio_modelo' => $request->anio_modelo,
             'kilometros' => $request->kilometros ?? $bike->kilometros,
-            'color' => $request->color, // Se añade aquí también
+            'color' => $request->color,
         ]);
     
+        // 🔹 Redirigir según el parámetro 'redirect_to'
+        $redirectTo = $request->input('redirect_to', 'bikes.index');
+        
+        if ($redirectTo === 'user.bikes') {
+            return redirect()->route('users.bikes', $bike->user_id)->with('success', '🚴‍♂️ Bicicleta actualizada correctamente.');
+        }
+        
         return redirect()->route('bikes.index')->with('success', '🚴‍♂️ Bicicleta actualizada correctamente.');
     }
     
@@ -99,9 +106,18 @@ class BikeController extends Controller
     /**
      * Eliminar bicicleta.
      */
-    public function destroy(Bike $bike)
+    public function destroy(Request $request, Bike $bike)
     {
+        $userId = $bike->user_id;
         $bike->delete();
+        
+        // 🔹 Redirigir según el parámetro 'redirect_to'
+        $redirectTo = $request->input('redirect_to', 'bikes.index');
+        
+        if ($redirectTo === 'user.bikes') {
+            return redirect()->route('users.bikes', $userId)->with('success', '🗑️ Bicicleta eliminada.');
+        }
+        
         return redirect()->route('bikes.index')->with('success', '🗑️ Bicicleta eliminada.');
     }
 }

@@ -57,15 +57,15 @@
                         <td class="py-2 px-4">{{ $user->email }}</td>
                         <td class="py-2 px-4">{{ $user->telefono }}</td>
                         <td class="py-2 px-4">
-                            @if($user->bikes->isEmpty())
-                                <span class="text-gray-500 italic">Sin bicicletas</span>
-                            @else
-                                <ul class="list-disc list-inside">
-                                    @foreach($user->bikes as $bike)
-                                        <li>{{ $bike->marca }} {{ $bike->nombre }}</li>
-                                    @endforeach
-                                </ul>
-                            @endif
+                            <a href="{{ route('users.bikes', $user->id) }}" 
+                               class="inline-flex items-center px-3 py-2 {{ $user->bikes->isEmpty() ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600' }} text-white rounded-md transition">
+                                <i class="bi bi-bicycle mr-2"></i>
+                                @if($user->bikes->isEmpty())
+                                    Añadir Bicicleta
+                                @else
+                                    Ver Bicicletas ({{ $user->bikes->count() }})
+                                @endif
+                            </a>
                         </td>
                         
                         <td>
