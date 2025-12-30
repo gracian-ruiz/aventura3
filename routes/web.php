@@ -302,10 +302,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 
+// 🔒 SEGURIDAD: Rate limiting en confirmación de presupuestos (máximo 3 intentos por minuto)
 Route::get('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'confirmarPresupuesto'])
+    ->middleware('throttle:3,1') // Máximo 3 intentos por minuto
     ->name('presupuesto.confirmar');
 
 Route::post('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'procesarConfirmacion'])
+    ->middleware('throttle:3,1') // Máximo 3 intentos por minuto
     ->name('presupuesto.procesar');
 
 

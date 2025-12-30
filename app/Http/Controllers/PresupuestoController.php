@@ -125,7 +125,8 @@ public function index(Request $request)
             return redirect()->back()->withErrors(['error' => 'Bicicleta no encontrada.']);
         }
 
-        $tokenPresupuesto = md5(Carbon::now()->timestamp . $bike->user_id);
+        // 🔒 SEGURIDAD: Token criptográficamente seguro (64 caracteres aleatorios)
+        $tokenPresupuesto = \Illuminate\Support\Str::random(64);
 
         $presupuesto = Appointment::create([
             'bike_id' => $bikeId,
