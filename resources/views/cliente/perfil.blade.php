@@ -66,17 +66,37 @@
                                         }
                                     @endphp
                                     
-                                    <div class="alert {{ $alertClass }} py-2 mt-2 mb-0">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="bi {{ $iconClass }} me-2"></i>
-                                            <strong>{{ $mensaje }}</strong>
-                                        </div>
-                                        
-                                        @if(!empty($cita->calendario))
-                                            <div class="small">
-                                                📅 Fecha: <strong>{{ \Carbon\Carbon::parse($cita->calendario)->locale('es')->translatedFormat('l d \d\e F \d\e Y') }}</strong>
-                                            </div>
-                                        @endif
+                                    <div class="alert {{ $alertClass }} py-2 mt-2 mb-0">                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi {{ $iconClass }} me-2"></i>
+                            <strong>{{ $mensaje }}</strong>
+                        </div>
+                        
+                        {{-- Mostrar fecha estimada de reparación --}}
+                        @if($cita->estado === 'en proceso' || $cita->estado === 'pendiente')
+                            @if(!empty($cita->fecha_asignada))
+                                <div class="small">
+                                    📅 Fecha estimada de finalización: <strong>{{ \Carbon\Carbon::parse($cita->fecha_asignada)->locale('es')->translatedFormat('l d \d\e F \d\e Y') }}</strong>
+                                </div>
+                            @elseif(!empty($cita->calendario))
+                                <div class="small">
+                                    📅 Fecha estimada de finalización: <strong>{{ \Carbon\Carbon::parse($cita->calendario)->locale('es')->translatedFormat('l d \d\e F \d\e Y') }}</strong>
+                                </div>
+                            @else
+                                <div class="small text-muted">
+                                    📅 Fecha estimada: Pendiente de asignación por el taller
+                                </div>
+                            @endif
+                        @elseif($cita->estado === 'presupuesto')
+                            @if(!empty($cita->calendario))
+                                <div class="small">
+                                    📅 Fecha de cita solicitada: <strong>{{ \Carbon\Carbon::parse($cita->calendario)->locale('es')->translatedFormat('l d \d\e F \d\e Y') }}</strong>
+                                </div>
+                            @else
+                                <div class="small text-muted">
+                                    📅 Fecha: Pendiente de confirmación
+                                </div>
+                            @endif
+                        @endif
                                         
                                         @if($cita->descripcion_cliente)
                                             <div class="mt-2 text-start small">

@@ -26,6 +26,16 @@ class ClienteController extends Controller
                   ->limit(1); // Solo la última cita
             }])
             ->get();
+        
+        // 🔄 Para cada cita sin fecha_asignada, usar el calendario como fecha_asignada
+        foreach ($bikes as $bike) {
+            foreach ($bike->appointments as $appointment) {
+                // Si no tiene fecha_asignada pero tiene calendario, usar calendario
+                if (empty($appointment->fecha_asignada) && !empty($appointment->calendario)) {
+                    $appointment->fecha_asignada = $appointment->calendario;
+                }
+            }
+        }
             
         return view('cliente.perfil', compact('user', 'bikes'));
     }
