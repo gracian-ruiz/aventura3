@@ -98,6 +98,9 @@ class AventuraBikeController extends Controller
             'bicicletas.*.cantidad' => 'required|integer|min:1',
             'acepta_condiciones' => 'accepted',
             'observaciones' => 'nullable|string|max:1000',
+            // 📸 Validación de imágenes del DNI
+            'imagenes_dni' => 'required|array|min:1',
+            'imagenes_dni.*' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
         ], [
             // 🧾 Mensajes personalizados
             'bicicletas.required' => 'Debes añadir al menos una bicicleta para la reserva.',
@@ -109,6 +112,13 @@ class AventuraBikeController extends Controller
             'bicicletas.*.cantidad.required' => 'Indica cuántas bicicletas deseas alquilar.',
             'bicicletas.*.cantidad.min' => 'Debe alquilar al menos una bicicleta.',
             'acepta_condiciones.accepted' => 'Debes aceptar las condiciones generales del alquiler para continuar.',
+            // 📸 Mensajes para imágenes del DNI
+            'imagenes_dni.required' => 'Debes subir al menos una imagen del DNI.',
+            'imagenes_dni.min' => 'Debes subir al menos una imagen del DNI.',
+            'imagenes_dni.*.required' => 'La imagen del DNI es obligatoria.',
+            'imagenes_dni.*.image' => 'El archivo debe ser una imagen válida.',
+            'imagenes_dni.*.mimes' => 'Las imágenes del DNI deben ser en formato: JPEG, JPG, PNG o WEBP.',
+            'imagenes_dni.*.max' => 'Cada imagen del DNI no puede superar los 5MB.',
         ]);
 
         // 🕵️‍♂️ Honeypot anti-spam
