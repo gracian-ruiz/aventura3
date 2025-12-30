@@ -39,7 +39,8 @@ class AppointmentController extends Controller
                 break;
 
             case 'premium':
-                $query->where('prioridad', 'premium')->where('estado', 'en proceso');
+                // 💎 Mostrar TODOS los premium sin filtrar por estado
+                $query->where('prioridad', 'premium');
                 break;
 
             case 'incidencia':
