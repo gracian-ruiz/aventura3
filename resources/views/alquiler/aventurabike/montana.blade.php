@@ -279,7 +279,7 @@
                                 <tr><th>{{ __('messages.model') }}</th><th>{{ __('messages.size') }}</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>Mondraker Pensacola</td><td>M</td></tr>
+                                <tr><td>Scott spark rc</td><td>M</td></tr>
                                 <tr><td>Mondraker Factor LSR</td><td>M, L</td></tr>
                                 <tr><td>Diamond Back Titanio</td><td>S</td></tr>
                             </tbody>
@@ -301,7 +301,6 @@
                             </thead>
                             <tbody>
                                 <tr><td>Giant Propel</td><td>S</td></tr>
-                                <tr><td>Scott Addict 20</td><td>L</td></tr>
                                 <tr><td>BH Prisma Carbono</td><td>M</td></tr>
                                 <tr><td>Pinarello Dogma</td><td>XS</td></tr>
                                 <tr><td>Wilier</td><td>M</td></tr>
