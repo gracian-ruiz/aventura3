@@ -1,6 +1,7 @@
 @extends('layouts.app3')
 
 @section('content')
+
 <div class="w-full max-w-none mx-0 px-2 sm:px-4 lg:px-8 mt-0 bg-white shadow-md rounded-lg p-4">
 
     <!-- Mensajes -->
@@ -27,7 +28,7 @@
     @endif
 
     <!-- Formulario -->
-    <form action="{{ route('addbicismontaña') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('addbicismontaña') }}" method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
         @csrf
 
         <!-- Datos personales -->
@@ -105,6 +106,15 @@
         <div id="bicicletas-container">
             <div class="bicicleta-item border p-4 mb-4 rounded-md bg-blue-100">
 
+                <!-- Header con número y botón eliminar -->
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-semibold text-gray-700 bicicleta-numero">🚲 Bicicleta / Bicycle #1</span>
+                    <button type="button" onclick="eliminarBicicleta(this)" 
+                            class="btn-eliminar hidden bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">
+                        ❌ Eliminar / Remove
+                    </button>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
                     <div style="display:none;">
@@ -115,7 +125,7 @@
                         <label class="block text-gray-700 mb-1">
                             Talla / Size
                         </label>
-                        <select name="bicicletas[0][talla]" required class="w-full border rounded-md">
+                        <select name="bicicletas[0][talla]" class="w-full border rounded-md">
                             <option value="">Selecciona / Select</option>
                             <option value="XSS">Niño / Child</option>
                             <option value="XS">XS (145–160 cm)</option>
@@ -131,7 +141,7 @@
                         <label class="block text-gray-700 mb-1">
                             Tipo / Type
                         </label>
-                        <select name="bicicletas[0][tipo]" required class="w-full border rounded-md">
+                        <select name="bicicletas[0][tipo]" class="w-full border rounded-md">
                             <option value="">{{ __('messages.select_type') }}</option>
                             <option value="mtb26">MTB 26</option>
                             <option value="mtb29">MTB 29</option>
@@ -149,7 +159,7 @@
                         <label class="block text-gray-700 mb-1">
                             Cantidad / Quantity
                         </label>
-                        <select name="bicicletas[0][cantidad]" required class="w-full border rounded-md">
+                        <select name="bicicletas[0][cantidad]" class="w-full border rounded-md">
                             <option value="">Selecciona / Select</option>
                             @for($i=1;$i<=6;$i++)
                                 <option value="{{ $i }}">{{ $i }}</option>
@@ -163,13 +173,13 @@
                         <label class="block text-gray-700 mb-1">
                             Fecha inicio / Start date
                         </label>
-                        <input type="date" name="bicicletas[0][fecha_inicio]" required class="w-full border-gray-300 rounded-md shadow-sm">
+                        <input type="date" name="bicicletas[0][fecha_inicio]" class="w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">
                             Fecha fin / End date
                         </label>
-                        <input type="date" name="bicicletas[0][fecha_fin]" required class="w-full border-gray-300 rounded-md shadow-sm">
+                        <input type="date" name="bicicletas[0][fecha_fin]" class="w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                 </div>
 
@@ -411,9 +421,12 @@
 
 <script>
     let index = 1;
+
     function agregarBicicleta() {
         const container = document.getElementById('bicicletas-container');
         const nueva = container.firstElementChild.cloneNode(true);
+        
+        // Limpiar valores y actualizar nombres
         nueva.querySelectorAll('select, input').forEach(el => {
             const name = el.getAttribute('name');
             if (name) {
@@ -422,8 +435,122 @@
                 el.value = '';
             }
         });
+        
+        // Actualizar número de bicicleta
+        const numeroSpan = nueva.querySelector('.bicicleta-numero');
+        if (numeroSpan) {
+            numeroSpan.textContent = `🚲 Bicicleta / Bicycle #${index + 1}`;
+        }
+        
+        // Mostrar botón eliminar en las nuevas bicicletas
+        const btnEliminar = nueva.querySelector('.btn-eliminar');
+        if (btnEliminar) {
+            btnEliminar.classList.remove('hidden');
+        }
+        
         container.appendChild(nueva);
         index++;
+    }
+
+    function eliminarBicicleta(btn) {
+        const container = document.getElementById('bicicletas-container');
+        const items = container.querySelectorAll('.bicicleta-item');
+        
+        if (items.length <= 1) {
+            alert('No puedes eliminar la única bicicleta.\nYou cannot remove the only bicycle.');
+            return;
+        }
+        
+        if (confirm('¿Eliminar esta bicicleta?\nRemove this bicycle?')) {
+            const item = btn.closest('.bicicleta-item');
+            item.remove();
+            renumerarBicicletas();
+        }
+    }
+
+    function renumerarBicicletas() {
+        const container = document.getElementById('bicicletas-container');
+        const items = container.querySelectorAll('.bicicleta-item');
+        
+        items.forEach((item, i) => {
+            // Actualizar número visible
+            const numeroSpan = item.querySelector('.bicicleta-numero');
+            if (numeroSpan) {
+                numeroSpan.textContent = `🚲 Bicicleta / Bicycle #${i + 1}`;
+            }
+            
+            // Actualizar índices en nombres de campos
+            item.querySelectorAll('select, input').forEach(el => {
+                const name = el.getAttribute('name');
+                if (name) {
+                    el.setAttribute('name', name.replace(/\[\d+\]/, `[${i}]`));
+                }
+            });
+            
+            // Ocultar botón eliminar solo en la primera bicicleta
+            const btnEliminar = item.querySelector('.btn-eliminar');
+            if (btnEliminar) {
+                if (i === 0) {
+                    btnEliminar.classList.add('hidden');
+                } else {
+                    btnEliminar.classList.remove('hidden');
+                }
+            }
+        });
+        
+        index = items.length;
+    }
+
+    function validarFormulario() {
+        const container = document.getElementById('bicicletas-container');
+        const items = container.querySelectorAll('.bicicleta-item');
+        let valido = true;
+        let errores = [];
+
+        items.forEach((item, i) => {
+            const numBici = i + 1;
+            const talla = item.querySelector('select[name*="[talla]"]');
+            const tipo = item.querySelector('select[name*="[tipo]"]');
+            const cantidad = item.querySelector('select[name*="[cantidad]"]');
+            const fechaInicio = item.querySelector('input[name*="[fecha_inicio]"]');
+            const fechaFin = item.querySelector('input[name*="[fecha_fin]"]');
+
+            if (!talla || !talla.value) {
+                errores.push({ bici: numBici, msg: 'Selecciona la talla / Select the size' });
+                valido = false;
+            }
+            if (!tipo || !tipo.value) {
+                errores.push({ bici: numBici, msg: 'Selecciona el tipo / Select the type' });
+                valido = false;
+            }
+            if (!cantidad || !cantidad.value) {
+                errores.push({ bici: numBici, msg: 'Selecciona la cantidad / Select the quantity' });
+                valido = false;
+            }
+            if (!fechaInicio || !fechaInicio.value) {
+                errores.push({ bici: numBici, msg: 'Selecciona fecha de inicio / Select start date' });
+                valido = false;
+            }
+            if (!fechaFin || !fechaFin.value) {
+                errores.push({ bici: numBici, msg: 'Selecciona fecha fin / Select end date' });
+                valido = false;
+            }
+            if (fechaInicio && fechaFin && fechaInicio.value && fechaFin.value) {
+                if (new Date(fechaFin.value) < new Date(fechaInicio.value)) {
+                    errores.push({ bici: numBici, msg: 'La fecha fin debe ser posterior a la de inicio / End date must be after start date' });
+                    valido = false;
+                }
+            }
+        });
+
+        if (!valido) {
+            // Obtener las bicicletas con errores (sin duplicados)
+            const bicisConErrores = [...new Set(errores.map(e => e.bici))];
+            const listaBicis = bicisConErrores.map(n => `Bicicleta #${n} / Bicycle #${n}`).join('\n');
+            alert(`⚠️ Completa todos los campos de:\n${listaBicis}\n\nPlease fill in all fields for the bicycles listed above.`);
+        }
+
+        return valido;
     }
 </script>
 <script>

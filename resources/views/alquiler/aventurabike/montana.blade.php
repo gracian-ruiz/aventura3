@@ -145,7 +145,15 @@
         <h2 class="text-lg font-bold mt-6 mb-2">{{ __('messages.bicycles_to_rent') }}</h2>
 
         <div id="bicicletas-container">
-            <div class="bicicleta-item border p-4 mb-4 rounded-md bg-blue-100">
+            <div class="bicicleta-item border p-4 mb-4 rounded-md bg-blue-100 relative" data-index="0">
+                <!-- Header con título y botón eliminar (solo visible si no es la primera) -->
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-semibold text-gray-700">🚲 {{ app()->getLocale() === 'en' ? 'Bicycle' : 'Bicicleta' }} #<span class="bici-numero">1</span></span>
+                    <button type="button" onclick="eliminarBicicleta(this)" class="btn-eliminar hidden bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">
+                        ✕ {{ app()->getLocale() === 'en' ? 'Delete' : 'Eliminar' }}
+                    </button>
+                </div>
+                
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <!-- Honeypot -->
                     <div style="display: none;">
@@ -153,7 +161,7 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.size') }}</label>
-                        <select name="bicicletas[0][talla]" required class="w-full border rounded-md">
+                        <select name="bicicletas[0][talla]" required class="w-full border rounded-md bici-field">
                             <option value="">{{ __('messages.select_size') }}</option>
                             <option value="XSS">Niño / Child</option>
                             <option value="XS">XS (145–160 cm)</option>
@@ -166,7 +174,7 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.type') }}</label>
-                        <select name="bicicletas[0][tipo]" required class="w-full border rounded-md">
+                        <select name="bicicletas[0][tipo]" required class="w-full border rounded-md bici-field">
                             <option value="">{{ __('messages.select_type') }}</option>
                             <option value="mtb26">MTB 26</option>
                             <option value="mtb29">MTB 29</option>
@@ -181,7 +189,7 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.quantity') }}</label>
-                        <select name="bicicletas[0][cantidad]" required class="w-full border rounded-md">
+                        <select name="bicicletas[0][cantidad]" required class="w-full border rounded-md bici-field">
                             <option value="">{{ __('messages.select_quantity') }}</option>
                             @for($i = 1; $i <= 6; $i++)
                                 <option value="{{ $i }}">{{ $i }}</option>
@@ -193,11 +201,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.start_date') }}</label>
-                        <input type="date" name="bicicletas[0][fecha_inicio]" required class="w-full border-gray-300 rounded-md shadow-sm">
+                        <input type="date" name="bicicletas[0][fecha_inicio]" required class="w-full border-gray-300 rounded-md shadow-sm bici-field">
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">{{ __('messages.end_date') }}</label>
-                        <input type="date" name="bicicletas[0][fecha_fin]" required class="w-full border-gray-300 rounded-md shadow-sm">
+                        <input type="date" name="bicicletas[0][fecha_fin]" required class="w-full border-gray-300 rounded-md shadow-sm bici-field">
                     </div>
                 </div>
             </div>
@@ -233,7 +241,7 @@
             <a href="{{ route('usuarios_alquiler.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
                 {{ __('messages.cancel') }}
             </a>
-            <button type="submit" class="px-6 py-2 bg-green-400 hover:bg-green-500 text-black rounded-md font-semibold">
+            <button type="submit" onclick="return validarFormulario()" class="px-6 py-2 bg-green-400 hover:bg-green-500 text-black rounded-md font-semibold">
                 {{ __('messages.submit_booking') }}
             </button>
         </div>
@@ -388,10 +396,59 @@
 
 <script>
     let index = 1;
+    const lang = '{{ app()->getLocale() }}';
+    
+    // 📝 Mensajes en español e inglés
+    const mensajes = {
+        es: {
+            cantDeleteLast: 'No puedes eliminar la única bicicleta. Debe haber al menos una.',
+            confirmDelete: '¿Estás seguro de que quieres eliminar esta bicicleta?',
+            incompleteBikes: 'Hay bicicletas sin completar',
+            pleaseComplete: 'Por favor, completa todos los campos o elimina las bicicletas que no necesites.',
+            bicycle: 'Bicicleta',
+            size: 'Talla',
+            type: 'Tipo',
+            quantity: 'Cantidad',
+            startDate: 'Fecha inicio',
+            endDate: 'Fecha fin'
+        },
+        en: {
+            cantDeleteLast: 'You cannot delete the only bicycle. There must be at least one.',
+            confirmDelete: 'Are you sure you want to delete this bicycle?',
+            incompleteBikes: 'There are incomplete bicycles',
+            pleaseComplete: 'Please complete all fields or delete the bicycles you don\'t need.',
+            bicycle: 'Bicycle',
+            size: 'Size',
+            type: 'Type',
+            quantity: 'Quantity',
+            startDate: 'Start date',
+            endDate: 'End date'
+        }
+    };
+    
+    // Obtener mensaje según idioma actual
+    function t(key) {
+        return mensajes[lang]?.[key] || mensajes['es'][key];
+    }
+    
+    // 🚲 Agregar nueva bicicleta
     function agregarBicicleta() {
         const container = document.getElementById('bicicletas-container');
-        const nueva = container.firstElementChild.cloneNode(true);
-        nueva.querySelectorAll('select, input').forEach(el => {
+        const primera = container.firstElementChild;
+        const nueva = primera.cloneNode(true);
+        
+        // Actualizar el índice de la bicicleta
+        nueva.setAttribute('data-index', index);
+        
+        // Actualizar el número visible
+        nueva.querySelector('.bici-numero').textContent = index + 1;
+        
+        // Mostrar el botón de eliminar en la nueva bicicleta
+        const btnEliminar = nueva.querySelector('.btn-eliminar');
+        btnEliminar.classList.remove('hidden');
+        
+        // Limpiar y actualizar los campos
+        nueva.querySelectorAll('select, input[type="date"]').forEach(el => {
             const name = el.getAttribute('name');
             if (name) {
                 const nuevoNombre = name.replace(/\d+/, index);
@@ -399,8 +456,106 @@
                 el.value = '';
             }
         });
+        
+        // Cambiar color de fondo para diferenciar
+        nueva.classList.remove('bg-blue-100');
+        nueva.classList.add('bg-green-100');
+        
         container.appendChild(nueva);
         index++;
+        
+        // Scroll suave hacia la nueva bicicleta
+        nueva.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // 🗑️ Eliminar bicicleta
+    function eliminarBicicleta(btn) {
+        const bicicleta = btn.closest('.bicicleta-item');
+        const container = document.getElementById('bicicletas-container');
+        
+        // No permitir eliminar si es la única
+        if (container.children.length <= 1) {
+            alert(t('cantDeleteLast'));
+            return;
+        }
+        
+        // Confirmar eliminación
+        if (confirm(t('confirmDelete'))) {
+            bicicleta.remove();
+            renumerarBicicletas();
+        }
+    }
+    
+    // 🔢 Renumerar las bicicletas después de eliminar
+    function renumerarBicicletas() {
+        const container = document.getElementById('bicicletas-container');
+        const bicicletas = container.querySelectorAll('.bicicleta-item');
+        
+        bicicletas.forEach((bici, i) => {
+            // Actualizar el número visible
+            bici.querySelector('.bici-numero').textContent = i + 1;
+            bici.setAttribute('data-index', i);
+            
+            // Actualizar los nombres de los campos
+            bici.querySelectorAll('select, input[type="date"]').forEach(el => {
+                const name = el.getAttribute('name');
+                if (name) {
+                    const nuevoNombre = name.replace(/\[\d+\]/, '[' + i + ']');
+                    el.setAttribute('name', nuevoNombre);
+                }
+            });
+            
+            // Ocultar el botón eliminar en la primera
+            const btnEliminar = bici.querySelector('.btn-eliminar');
+            if (i === 0) {
+                btnEliminar.classList.add('hidden');
+            }
+        });
+        
+        index = bicicletas.length;
+    }
+    
+    // ✅ Validar formulario antes de enviar
+    function validarFormulario() {
+        const container = document.getElementById('bicicletas-container');
+        const bicicletas = container.querySelectorAll('.bicicleta-item');
+        let hayErrores = false;
+        let mensajeError = '';
+        
+        bicicletas.forEach((bici, i) => {
+            const numero = i + 1;
+            const talla = bici.querySelector('select[name*="[talla]"]');
+            const tipo = bici.querySelector('select[name*="[tipo]"]');
+            const cantidad = bici.querySelector('select[name*="[cantidad]"]');
+            const fechaInicio = bici.querySelector('input[name*="[fecha_inicio]"]');
+            const fechaFin = bici.querySelector('input[name*="[fecha_fin]"]');
+            
+            let camposFaltantes = [];
+            
+            if (!talla.value) camposFaltantes.push(t('size'));
+            if (!tipo.value) camposFaltantes.push(t('type'));
+            if (!cantidad.value) camposFaltantes.push(t('quantity'));
+            if (!fechaInicio.value) camposFaltantes.push(t('startDate'));
+            if (!fechaFin.value) camposFaltantes.push(t('endDate'));
+            
+            if (camposFaltantes.length > 0) {
+                hayErrores = true;
+                mensajeError += `\n🚲 ${t('bicycle')} #${numero}: ${camposFaltantes.join(', ')}`;
+                
+                // Resaltar la bicicleta con errores
+                bici.classList.add('border-red-500', 'border-2');
+                setTimeout(() => {
+                    bici.classList.remove('border-red-500', 'border-2');
+                }, 5000);
+            }
+        });
+        
+        if (hayErrores) {
+            alert(`⚠️ ${t('incompleteBikes')}:\n${mensajeError}\n\n${t('pleaseComplete')}`);
+            return false;
+        }
+        
+        return true;
     }
 </script>
 @endsection
