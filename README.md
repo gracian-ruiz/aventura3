@@ -1,67 +1,471 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚴 Aventura Bike - Sistema de Gestión de Taller y Alquiler de Bicicletas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema integral desarrollado en **Laravel 10** para la gestión completa de un taller de reparación y servicio de alquiler de bicicletas.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Descripción General
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Aventura Bike** es una aplicación web completa que permite gestionar:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Taller de Reparación de Bicicletas** - Gestión de citas, presupuestos, reparaciones y seguimiento de componentes
+2. **Servicio de Alquiler** - Reservas online y gestión de materiales de alquiler
+3. **Gestión de Clientes** - Base de datos de usuarios y sus bicicletas
+4. **Comunicaciones** - Notificaciones por WhatsApp y correo electrónico
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠️ Tecnologías Utilizadas
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Backend
+- **PHP 8.1+**
+- **Laravel 10** - Framework principal
+- **Laravel Sanctum** - Autenticación API
+- **Laravel Breeze** - Scaffolding de autenticación
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Frontend
+- **Blade Templates** - Motor de plantillas
+- **Tailwind CSS 3** - Framework CSS
+- **Alpine.js** - Interactividad JavaScript
+- **Vite** - Bundler de assets
 
-## Laravel Sponsors
+### Integraciones
+- **Twilio SDK** - Envío de mensajes WhatsApp
+- **DomPDF (barryvdh/laravel-dompdf)** - Generación de PDFs
+- **Yajra DataTables** - Tablas dinámicas
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Base de Datos
+- **MySQL/MariaDB** compatible
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 🏗️ Estructura del Proyecto
 
-## Contributing
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── Alquiler/           # Controladores del módulo de alquiler
+│   │   │   ├── AlquilerController.php
+│   │   │   ├── AventuraBikeController.php
+│   │   │   ├── MaterialController.php
+│   │   │   └── UsuarioAlquilerController.php
+│   │   ├── AppointmentController.php    # Gestión de citas
+│   │   ├── BikeController.php           # Gestión de bicicletas
+│   │   ├── ComponentController.php      # Componentes/piezas
+│   │   ├── EnviarCorreosController.php  # Envío de correos
+│   │   ├── MecanicoController.php       # Vista del mecánico
+│   │   ├── PresupuestoController.php    # Presupuestos
+│   │   ├── RecordatorioController.php   # Recordatorios automáticos
+│   │   ├── RevisionController.php       # Revisiones de bicicletas
+│   │   ├── UserController.php           # Gestión de usuarios
+│   │   └── WhatsappController.php       # Integración WhatsApp
+│   └── Middleware/
+├── Mail/
+│   ├── CitaCompletadaMail.php          # Email de cita completada
+│   ├── PresupuestoMail.php             # Email con presupuesto
+│   ├── RecordatorioRevisionMail.php    # Recordatorio de revisión
+│   └── ReservaAlquilerMail.php         # Confirmación de reserva
+└── Models/
+    ├── Alquiler.php
+    ├── AlquilerMaterial.php
+    ├── Appointment.php
+    ├── AppointmentComponent.php
+    ├── AvisoEnviado.php
+    ├── Bike.php
+    ├── Component.php
+    ├── Material.php
+    ├── Presupuesto.php
+    ├── PresupuestoItem.php
+    ├── Revision.php
+    ├── User.php
+    ├── UsuarioAlquiler.php
+    └── UsuarioAlquilerFoto.php
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 📦 Módulos del Sistema
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 1. 👥 Gestión de Usuarios
 
-## Security Vulnerabilities
+**Funcionalidades:**
+- Registro y autenticación de usuarios
+- Roles de usuario: `admin`, `user`, `premium`, `taller`
+- Gestión de perfiles con nombre, email y teléfono
+- Listado y búsqueda de usuarios con DataTables
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Rutas principales:**
+- `/usuarios` - Listado de usuarios
+- `/usuarios/create` - Crear nuevo usuario
+- `/usuarios/{id}/edit` - Editar usuario
+- `/usuarios/{id}/bicicletas` - Ver bicicletas de un usuario
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# aventura3
+### 2. 🚲 Gestión de Bicicletas
+
+**Funcionalidades:**
+- Registro de bicicletas asociadas a usuarios
+- Información: nombre, marca, año, kilómetros, color
+- Historial de revisiones por bicicleta
+- Asociación con citas de taller
+
+**Campos:**
+| Campo | Descripción |
+|-------|-------------|
+| nombre | Nombre/modelo de la bicicleta |
+| marca | Fabricante |
+| anio_modelo | Año del modelo |
+| kilometros | Kilómetros recorridos |
+| color | Color de la bicicleta |
+
+**Rutas:**
+- `/bikes` - Listado de bicicletas
+- `/bikes/create` - Nueva bicicleta
+- `/bikes/{bike}/revisions` - Revisiones de una bicicleta
+
+---
+
+### 3. 🔧 Componentes y Revisiones
+
+**Componentes:**
+Catálogo de piezas/servicios del taller con:
+- Nombre del componente
+- Fecha de preaviso para recordatorios
+- Precio y horas de taller estimadas
+- Descripción detallada
+
+**Revisiones:**
+Sistema de seguimiento de mantenimiento:
+- Fecha de revisión realizada
+- Próxima revisión programada
+- Asociación con componente específico
+- Historial completo por bicicleta
+
+**Recordatorios automáticos:**
+- El sistema envía recordatorios vía WhatsApp/Email cuando se acerca una revisión
+- Configurable días de preaviso por componente
+- Registro de avisos enviados para evitar duplicados
+
+---
+
+### 4. 📅 Citas de Taller (Appointments)
+
+**Estados de una cita:**
+| Estado | Descripción |
+|--------|-------------|
+| `vacia` | Cita creada sin componentes asignados |
+| `presupuesto` | Presupuesto creado, pendiente de aprobación |
+| `pendiente` | Trabajo pendiente de iniciar |
+| `en proceso` | Reparación en curso |
+| `completada` | Trabajo finalizado |
+| `denegado` | Presupuesto rechazado por el cliente |
+
+**Prioridades:**
+- 🔴 `premium` - Máxima prioridad (clientes premium + web)
+- 🟠 `urgente` - Alta prioridad
+- 🟢 `normal` - Prioridad estándar
+
+**Funcionalidades:**
+- Creación de citas con descripción del problema
+- Asignación de mecánicos (múltiples)
+- Seguimiento de componentes a reparar
+- Gestión de tiempos y precios
+- Calendario visual de citas
+- Filtros por estado, prioridad y origen (web/tienda)
+- Búsqueda por cliente, bicicleta o ID de programa
+
+**Vistas:**
+- `/citas` - Panel principal de citas
+- `/citas/historico` - Historial de citas completadas
+- `/calendario-citas` - Vista calendario
+- `/calendario-asignado` - Citas asignadas a mecánicos
+- `/mecanico` - Vista específica para mecánicos
+
+---
+
+### 5. 💰 Presupuestos
+
+**Funcionalidades:**
+- Generación de presupuestos detallados
+- Listado de componentes con precios y horas
+- Descuentos aplicables
+- Generación de PDF profesional
+- Envío por WhatsApp con enlace de confirmación
+- Envío por correo electrónico con PDF adjunto
+- Sistema de tokens para confirmación segura
+
+**Flujo:**
+1. Crear cita → Añadir componentes → Generar presupuesto
+2. Enviar al cliente (WhatsApp/Email)
+3. Cliente confirma/deniega vía enlace seguro
+4. Si aprueba → pasa a cola de trabajo
+
+**Rutas:**
+- `/presupuestos` - Listado de presupuestos
+- `/presupuestos/create/{user}` - Nuevo presupuesto para cliente
+- `/presupuestos/{id}/factura` - Ver factura/presupuesto
+- `/presupuestos/{id}/pdf` - Descargar PDF
+
+---
+
+### 6. 🔔 Sistema de Notificaciones
+
+**WhatsApp (Twilio):**
+- Envío de presupuestos con PDF adjunto
+- Recordatorios de revisiones próximas
+- Notificación de bicicleta lista para recoger
+- Confirmación de reservas de alquiler
+
+**Email:**
+- Presupuestos con PDF adjunto
+- Notificación de cita completada
+- Recordatorios de revisiones
+- Confirmación de reservas de alquiler
+
+**Registro:**
+Todos los avisos enviados se guardan en `avisos_enviados` para:
+- Evitar envíos duplicados
+- Auditoría de comunicaciones
+- Estadísticas de notificaciones
+
+---
+
+### 7. 🚴‍♂️ Sistema de Alquiler
+
+**Módulo completo de alquiler de bicicletas y material:**
+
+#### Usuarios de Alquiler
+Clientes específicos para el servicio de alquiler:
+- Nombre, email, teléfono, DNI, dirección
+- Historial de alquileres
+- Almacenamiento seguro de fotos de DNI
+
+#### Materiales Disponibles
+Inventario de material para alquilar:
+- **Tipos**: MTB 26, MTB 29, MTB 29 Doble, Eléctrica Paseo, Eléctrica Doble, Eléctrica Rígida, Carretera, Paseo, Niños, Cascos, Accesorios
+- **Gestión de stock**: Stock total y disponible
+- **Tallas disponibles**: XS, S, M, L, XL, XXL
+- **Precio por día** y **precio de reserva/fianza**
+- Estados: disponible, reservado, en uso, mantenimiento
+
+#### Alquileres
+| Campo | Descripción |
+|-------|-------------|
+| fecha_inicio | Inicio del alquiler |
+| fecha_fin | Fin del alquiler |
+| total_precio | Precio total calculado |
+| reserva_precio | Fianza/depósito |
+| descuento | Descuento aplicado |
+| estado | Activo, Reservado, Finalizado |
+| observaciones | Notas adicionales |
+| web | Indica si viene de reserva online |
+| incidencia | Detalle de problemas |
+| fallo | Marca de fallo detectado |
+
+#### Reservas Online (Web Pública)
+Sistema público de reservas:
+- Verificación de disponibilidad en tiempo real
+- Selección de tipo de bicicleta y talla
+- Múltiples bicicletas por reserva
+- Subida obligatoria de foto del DNI
+- Aceptación de condiciones de alquiler
+- Envío automático de confirmación por email
+- Protección honeypot anti-spam
+
+**Rutas:**
+- `/usuarios_alquiler` - Gestión de clientes de alquiler
+- `/alquileres` - Alquileres activos y reservados
+- `/alquileres/finalizado` - Historial de alquileres
+- `/material` - Gestión de inventario
+- `/calendario/alquiler` - Vista calendario de alquileres
+
+---
+
+### 8. 📊 Calendario y Planificación
+
+**Vistas de calendario:**
+- **Calendario de citas** - Visualización de citas programadas
+- **Calendario de alquileres** - Reservas y alquileres activos
+- **Calendario asignado** - Citas por mecánico
+
+---
+
+## 🔐 Sistema de Roles y Permisos
+
+| Rol | Acceso |
+|-----|--------|
+| `admin` | Acceso completo a todas las funcionalidades |
+| `taller` | Acceso a panel de mecánico y gestión de citas asignadas |
+| `premium` | Cliente premium con prioridad |
+| `user` | Cliente estándar |
+
+**Redirección según rol:**
+- Admin → `/presupuestos`
+- User/Premium → `/miperfil`
+
+---
+
+## 🌐 Internacionalización
+
+- Soporte para **Español** e **Inglés**
+- Cambio de idioma mediante `/lang/{lang}`
+- Almacenamiento de preferencia en sesión
+
+---
+
+## 📧 Plantillas de Email
+
+- `emails/presupuesto.blade.php` - Email de presupuesto
+- `emails/cita_completada.blade.php` - Bicicleta lista
+- `emails/reserva2.blade.php` - Confirmación de reserva
+
+---
+
+## 📄 Generación de PDFs
+
+- **Presupuestos** - PDF con detalle de trabajos y precios
+- Almacenamiento en `storage/app/public/presupuestos/`
+- Nombre de archivo: `presupuesto_{id}.pdf`
+
+---
+
+## ⚙️ Instalación
+
+### Requisitos
+- PHP >= 8.1
+- Composer
+- Node.js >= 16
+- MySQL/MariaDB
+
+### Pasos
+
+```bash
+# Clonar repositorio
+git clone [url-repositorio]
+cd aventura3
+
+# Instalar dependencias PHP
+composer install
+
+# Instalar dependencias JavaScript
+npm install
+
+# Copiar archivo de configuración
+cp .env.example .env
+
+# Generar clave de aplicación
+php artisan key:generate
+
+# Configurar base de datos en .env
+# DB_DATABASE=aventura
+# DB_USERNAME=root
+# DB_PASSWORD=
+
+# Ejecutar migraciones
+php artisan migrate
+
+# Crear enlace simbólico para storage
+php artisan storage:link
+
+# Compilar assets
+npm run build
+
+# Iniciar servidor de desarrollo
+php artisan serve
+```
+
+### Configuración de Twilio (WhatsApp)
+```env
+TWILIO_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+```
+
+### Configuración de Email
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=your_email
+MAIL_PASSWORD=your_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@aventurabike.com
+MAIL_FROM_NAME="Aventura Bike"
+```
+
+---
+
+## 📁 Almacenamiento de Archivos
+
+```
+storage/app/
+├── private/
+│   └── dnis/                    # Fotos de DNI (privado)
+├── public/
+│   └── presupuestos/           # PDFs de presupuestos
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Ejecutar tests
+php artisan test
+
+# Tests específicos
+php artisan test --filter=NombreTest
+```
+
+---
+
+## 📊 Diagrama de Relaciones (Modelos)
+
+```
+User
+├── Bikes[] ─────────────┬── Revisions[]
+│                        │       └── Component
+│                        │
+│                        └── Appointments[]
+│                                └── Components[] (pivot: appointment_component)
+│
+└── Presupuestos[]
+        └── PresupuestoItems[]
+                └── Component
+
+UsuarioAlquiler
+└── Alquileres[]
+        ├── Materiales[] (pivot: alquiler_material)
+        └── UsuarioAlquilerFotos[]
+```
+
+---
+
+## 🚀 Características Principales
+
+- ✅ Gestión completa de taller de bicicletas
+- ✅ Sistema de presupuestos con aprobación online
+- ✅ Notificaciones WhatsApp y Email
+- ✅ Recordatorios automáticos de revisiones
+- ✅ Sistema de alquiler con reservas web
+- ✅ Verificación de disponibilidad en tiempo real
+- ✅ Panel específico para mecánicos
+- ✅ Calendarios visuales
+- ✅ Generación de PDFs profesionales
+- ✅ Multi-idioma (ES/EN)
+- ✅ Sistema de roles y permisos
+- ✅ Diseño responsive con Tailwind CSS
+
+---
+
+## 📝 Licencia
+
+Este proyecto es software propietario de **Aventura Bike**.
+
+---
+
+## 👨‍💻 Desarrollo
+
+Desarrollado con ❤️ para la gestión eficiente de talleres de bicicletas.

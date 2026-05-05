@@ -118,50 +118,58 @@ class AlquilerController extends Controller
         // ---------------------------------------------
 
         // Crear el alquiler
-        $alquiler = Alquiler::create([
-            'usuario_id' => $request->input('usuario_id'),
-            'fecha_inicio' => $request->input('fecha_inicio'),
-            'fecha_fin' => $request->input('fecha_fin'),
-            'total_precio' => $totalPrecio,
-            'reserva_precio' => $reservaTotal,
-            'descuento' => $descuentoTotal,
-            'observaciones' => $request->input('observaciones'),
-            'estado' => $request->input('estado'),
-        ]);
+        DB::beginTransaction();
+        try {
+            $alquiler = Alquiler::create([
+                'usuario_id'    => $request->input('usuario_id'),
+                'fecha_inicio'  => $request->input('fecha_inicio'),
+                'fecha_fin'     => $request->input('fecha_fin'),
+                'total_precio'  => $totalPrecio,
+                'reserva_precio'=> $reservaTotal,
+                'descuento'     => $descuentoTotal,
+                'observaciones' => $request->input('observaciones'),
+                'estado'        => $request->input('estado'),
+            ]);
 
-        // Asociar materiales seleccionados al alquiler
-        foreach ($materialesSeleccionados as $material) {
-            $alquiler->materiales()->attach(
-                $material['id'],
-                [
-                    'fecha_inicio' => $request->input('fecha_inicio'),
-                    'fecha_fin' => $request->input('fecha_fin'),
-                    'precio_unitario' => $material['precio_unitario'],
-                    'descuento' => $material['descuento'],
-                    'reserva_precio' => $material['reserva_precio'],
-                    'subtotal' => ($material['precio_unitario'] - $material['descuento']),
-                ]
-            );
-        }
-
-        // Guardar las imágenes después de crear el alquiler
-        if ($request->hasFile('imagenes_dni')) {
-            foreach ($request->file('imagenes_dni') as $index => $file) {
-                $nombreArchivo = time() . "_dni_" . $index . '.' . $file->getClientOriginalExtension();
-                $ruta = $file->storeAs('app/private/dnis', $nombreArchivo);
-
-                DB::table('usuario_alquiler_fotos')->insert([
-                    'alquiler_id' => $alquiler->id,
-                    'ruta' => $ruta,
-                    'tipo' => 'dni',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            // Asociar materiales seleccionados al alquiler
+            foreach ($materialesSeleccionados as $material) {
+                $alquiler->materiales()->attach(
+                    $material['id'],
+                    [
+                        'fecha_inicio'    => $request->input('fecha_inicio'),
+                        'fecha_fin'       => $request->input('fecha_fin'),
+                        'precio_unitario' => $material['precio_unitario'],
+                        'descuento'       => $material['descuento'],
+                        'reserva_precio'  => $material['reserva_precio'],
+                        'subtotal'        => ($material['precio_unitario'] - $material['descuento']),
+                    ]
+                );
             }
+
+            // Guardar las imágenes después de crear el alquiler
+            if ($request->hasFile('imagenes_dni')) {
+                foreach ($request->file('imagenes_dni') as $index => $file) {
+                    $nombreArchivo = time() . "_dni_" . $index . '.' . $file->getClientOriginalExtension();
+                    $ruta = $file->storeAs('app/private/dnis', $nombreArchivo);
+
+                    DB::table('usuario_alquiler_fotos')->insert([
+                        'alquiler_id' => $alquiler->id,
+                        'ruta'        => $ruta,
+                        'tipo'        => 'dni',
+                        'created_at'  => now(),
+                        'updated_at'  => now(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('alquileres.index')->with('success', 'Alquiler creado exitosamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('[AlquilerController] Error en store', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Error al crear el alquiler. Inténtalo de nuevo.');
         }
-
-
-        return redirect()->route('alquileres.index')->with('success', 'Alquiler creado exitosamente.');
     }
 
 
@@ -256,54 +264,65 @@ class AlquilerController extends Controller
     public function update(Request $request, Alquiler $alquiler)
     {
         $request->validate([
-            'estado' => 'required|in:reservado,activo',
-            'total_precio' => 'nullable|numeric|min:0',
-            'descuento' => 'nullable|numeric|min:0|max:100',
+            'estado'        => 'required|in:reservado,activo',
+            'total_precio'  => 'nullable|numeric|min:0',
+            'descuento'     => 'nullable|numeric|min:0|max:100',
             'observaciones' => 'nullable|string|max:1000',
-            'incidencia' => 'nullable|string|max:1000',
-            'fallo' => 'nullable|boolean',
+            'incidencia'    => 'nullable|string|max:1000',
+            'fallo'         => 'nullable|boolean',
         ]);
 
-        $alquiler->update([
-            'estado' => $request->estado,
-            'total_precio' => $request->total_precio,
-            'descuento' => $request->descuento,
-            'observaciones' => $request->observaciones,
-            'incidencia' => $request->incidencia,
-            'fallo' => $request->fallo,
-        ]);
+        try {
+            $alquiler->update([
+                'estado'        => $request->estado,
+                'total_precio'  => $request->total_precio,
+                'descuento'     => $request->descuento,
+                'observaciones' => $request->observaciones,
+                'incidencia'    => $request->incidencia,
+                'fallo'         => $request->fallo,
+            ]);
 
-        // Guardar las imágenes después de crear el alquiler
-        if ($request->hasFile('imagenes_dni')) {
-            foreach ($request->file('imagenes_dni') as $index => $file) {
-                $nombreArchivo = time() . "_dni_" . $index . '.' . $file->getClientOriginalExtension();
-                $ruta = $file->storeAs('app/private/dnis', $nombreArchivo);
+            if ($request->hasFile('imagenes_dni')) {
+                foreach ($request->file('imagenes_dni') as $index => $file) {
+                    $nombreArchivo = time() . "_dni_" . $index . '.' . $file->getClientOriginalExtension();
+                    $ruta = $file->storeAs('app/private/dnis', $nombreArchivo);
 
-                DB::table('usuario_alquiler_fotos')->insert([
-                    'alquiler_id' => $alquiler->id,
-                    'ruta' => $ruta,
-                    'tipo' => 'dni',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                    DB::table('usuario_alquiler_fotos')->insert([
+                        'alquiler_id' => $alquiler->id,
+                        'ruta'        => $ruta,
+                        'tipo'        => 'dni',
+                        'created_at'  => now(),
+                        'updated_at'  => now(),
+                    ]);
+                }
             }
-        }
 
-        return redirect()->route('alquileres.index')->with('success', 'Alquiler actualizado correctamente.');
+            return redirect()->route('alquileres.index')->with('success', 'Alquiler actualizado correctamente.');
+        } catch (\Exception $e) {
+            Log::error('[AlquilerController] Error en update', [
+                'alquiler_id' => $alquiler->id,
+                'error'       => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al actualizar el alquiler.');
+        }
     }
 
 
     public function destroy($id)
     {
-        $alquiler = Alquiler::findOrFail($id);
+        try {
+            $alquiler = Alquiler::findOrFail($id);
+            DB::table('alquiler_material')->where('alquiler_id', $alquiler->id)->delete();
+            $alquiler->delete();
 
-        // Eliminar materiales asociados al alquiler
-        DB::table('alquiler_material')->where('alquiler_id', $alquiler->id)->delete();
-
-        // Luego eliminamos el alquiler
-        $alquiler->delete();
-
-        return redirect()->route('alquileres.index')->with('success', 'Alquiler y materiales eliminados correctamente.');
+            return redirect()->route('alquileres.index')->with('success', 'Alquiler y materiales eliminados correctamente.');
+        } catch (\Exception $e) {
+            Log::error('[AlquilerController] Error en destroy', [
+                'alquiler_id' => $id,
+                'error'       => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al eliminar el alquiler.');
+        }
     }
 
 

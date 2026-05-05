@@ -148,48 +148,43 @@ class AppointmentController extends Controller
 
     public function confirmCompletion(Appointment $appointment)
     {
-        // Obtener los componentes de la cita
-        $data = DB::table('appointment_component')
-            ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
-            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
-            ->where('appointment_component.appointment_id', $appointment->id)
-            ->select(
-                'appointment_component.id as ac_id',
-                'appointment_component.checked',
-                'appointment_component.texto',
-                'appointment_component.total_precio',
-                'appointment_component.horas_trabajo',
-                'components.nombre as componente_nombre',
-                'appointments.estado as appointment_estado'
-            )
-            ->get();
+        try {
+            $data = DB::table('appointment_component')
+                ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
+                ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+                ->where('appointment_component.appointment_id', $appointment->id)
+                ->select(
+                    'appointment_component.id as ac_id',
+                    'appointment_component.checked',
+                    'appointment_component.texto',
+                    'appointment_component.total_precio',
+                    'appointment_component.horas_trabajo',
+                    'components.nombre as componente_nombre',
+                    'appointments.estado as appointment_estado'
+                )
+                ->get();
 
-        // Verificar si hay componentes sin marcar como completados
-        $faltanComponentes = $data->contains(function ($item) {
-            return !$item->checked;
-        });
+            $faltanComponentes = $data->contains(fn ($item) => !$item->checked);
 
-        // Obtener información del usuario y bicicleta
-        $user = $appointment->bike->user;
-        $bike = $appointment->bike;
+            $user = $appointment->bike->user;
+            $bike = $appointment->bike;
 
-        // Generar mensaje de finalización
-        $mensaje = "✅ ¡Hola {$user->name}! Tu bicicleta {$bike->nombre} ya está lista.\n"
-            . "Puedes pasar a recogerla en nuestro horario habitual. ¡Gracias! 🚴";
+            $mensaje = "✅ ¡Hola {$user->name}! Tu bicicleta {$bike->nombre} ya está lista.\n"
+                . "Puedes pasar a recogerla en nuestro horario habitual. ¡Gracias! 🚴";
 
-        // Teléfono y nombre del cliente para la vista
-        $telefono = $user->telefono ?? 'No disponible';
-        $nombre = $user->name;
+            $telefono = $user->telefono ?? 'No disponible';
+            $nombre   = $user->name;
 
-        // Pasar todo a la vista
-        return view('appointments.confirm', compact(
-            'appointment',
-            'data',
-            'faltanComponentes',
-            'mensaje',
-            'telefono',
-            'nombre'
-        ));
+            return view('appointments.confirm', compact(
+                'appointment', 'data', 'faltanComponentes', 'mensaje', 'telefono', 'nombre'
+            ));
+        } catch (\Exception $e) {
+            Log::error('[AppointmentController] Error en confirmCompletion', [
+                'appointment_id' => $appointment->id,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->route('appointments.index')->with('error', 'Error al cargar los datos de la cita.');
+        }
     }
 
     //AQUI TERMINA EL PROCESO DE RAPACION CUANDO LE DAS AL BOTON DE CONFIRMAR FINALIZACION 
@@ -203,39 +198,57 @@ class AppointmentController extends Controller
             'tipo_fecha.*' => 'required|in:fija,opcional',
         ]);
 
-        foreach ($request->revisiones as $componente_id) {
-            $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
-            $componente = Component::find($componente_id);
+        DB::beginTransaction();
+        try {
+            foreach ($request->revisiones as $componente_id) {
+                $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
+                $componente  = Component::find($componente_id);
 
-            if ($request->tipo_fecha[$componente_id] === 'fija') {
-                $dias_a_sumar = $componente ? $componente->fecha_revision : 30;
-                $fecha_proxima = now()->addDays($dias_a_sumar);
-            } else {
-                $fecha_proxima = $request->proxima_revision[$componente_id]
-                    ? Carbon::parse($request->proxima_revision[$componente_id])
-                    : now()->addDays(30);
+                if ($request->tipo_fecha[$componente_id] === 'fija') {
+                    $dias_a_sumar = $componente ? $componente->fecha_revision : 30;
+                    $fecha_proxima = now()->addDays($dias_a_sumar);
+                } else {
+                    $fecha_proxima = $request->proxima_revision[$componente_id]
+                        ? Carbon::parse($request->proxima_revision[$componente_id])
+                        : now()->addDays(30);
+                }
+
+                $appointment->bike->revisions()->create([
+                    'componente_id'    => $componente_id,
+                    'fecha_revision'   => now(),
+                    'descripcion'      => $descripcion,
+                    'proxima_revision' => $fecha_proxima,
+                ]);
             }
 
-            $appointment->bike->revisions()->create([
-                'componente_id' => $componente_id,
-                'fecha_revision' => now(),
-                'descripcion' => $descripcion,
-                'proxima_revision' => $fecha_proxima,
+            $appointment->update([
+                'estado'            => 'completada',
+                'usuario_taller_id' => auth()->id(),
+                'calendario'        => null,
             ]);
+
+            DB::commit();
+
+            // Enviar correo fuera de la transacción para no revertir si falla el mail
+            try {
+                $correoController = new ControllersEnviarCorreosController();
+                $correoController->enviarCompletado($appointment->id);
+            } catch (\Exception $mailEx) {
+                Log::warning('[AppointmentController] Cita completada pero fallo al enviar correo', [
+                    'appointment_id' => $appointment->id,
+                    'error' => $mailEx->getMessage(),
+                ]);
+            }
+
+            return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('[AppointmentController] Error al completar cita', [
+                'appointment_id' => $appointment->id,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al completar la cita. Inténtalo de nuevo.');
         }
-
-        $appointment->update([
-            'estado' => 'completada',
-            'usuario_taller_id' => auth()->id(),
-            'calendario' => null,
-        ]);
-
-        // Llamar al controlador de recordatorios para enviar mensaje de WhatsApp
-        //app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
-        $correoController = new ControllersEnviarCorreosController();
-        $correoController->enviarCompletado($appointment->id);
-
-        return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
     }
 
     public function updatedos(Request $request, $id)
@@ -321,6 +334,7 @@ class AppointmentController extends Controller
             return redirect()->route('appointments.index')->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('[AppointmentController] Error en updatedos', ['appointment_id' => $id, 'error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Error al actualizar el presupuesto: ' . $e->getMessage());
         }
     }
@@ -381,19 +395,28 @@ class AppointmentController extends Controller
             return redirect()->back()->with('error', 'Estado no válido.');
         }
 
-        $appointment->update(['estado' => $nuevoEstado]);
+        try {
+            $appointment->update(['estado' => $nuevoEstado]);
 
-        if ($nuevoEstado === 'reparacion') {
-            return redirect()->route('appointments.repair', ['appointment' => $appointment->id])
-                ->with('success', 'Cita en fase de reparación.');
+            if ($nuevoEstado === 'reparacion') {
+                return redirect()->route('appointments.repair', ['appointment' => $appointment->id])
+                    ->with('success', 'Cita en fase de reparación.');
+            }
+
+            if ($nuevoEstado === 'completada') {
+                return redirect()->route('bikes.revisions.create', ['bike' => $appointment->bike_id])
+                    ->with('success', 'Cita completada y revisiones generadas.');
+            }
+
+            return redirect()->route('appointments.index')->with('success', 'Estado de la cita actualizado.');
+        } catch (\Exception $e) {
+            Log::error('[AppointmentController] Error al actualizar estado', [
+                'appointment_id' => $appointment->id,
+                'estado' => $nuevoEstado,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al actualizar el estado de la cita.');
         }
-
-        if ($nuevoEstado === 'completada') {
-            return redirect()->route('bikes.revisions.create', ['bike' => $appointment->bike_id])
-                ->with('success', 'Cita completada y revisiones generadas.');
-        }
-
-        return redirect()->route('appointments.index')->with('success', 'Estado de la cita actualizado.');
     }
 
 
@@ -422,95 +445,96 @@ class AppointmentController extends Controller
 
     public function destroy(Appointment $appointment)
     {
-        if ($appointment->estado === 'completada') {
+        try {
+            $esHistorico = $appointment->estado === 'completada';
             $appointment->delete();
-            return redirect()->route('appointments.historico')->with('success', '✅ Cita eliminada del historial.');
-        }
 
-        $appointment->delete();
-        return redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
+            return $esHistorico
+                ? redirect()->route('appointments.historico')->with('success', '✅ Cita eliminada del historial.')
+                : redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
+        } catch (\Exception $e) {
+            Log::error('[AppointmentController] Error al eliminar cita', [
+                'appointment_id' => $appointment->id,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al eliminar la cita.');
+        }
     }
 
     private function recalcularFechasAsignadas2()
     {
-        $horas_laborales = [
-            'monday'    => 300,  // 5 horas
-            'tuesday'   => 300,
-            'wednesday' => 300,
-            'thursday'  => 300,
-            'friday'    => 300,
-            'saturday'  => 200,  // 3h 20min
-        ];
+        try {
+            $horas_laborales = [
+                'monday'    => 300,
+                'tuesday'   => 300,
+                'wednesday' => 300,
+                'thursday'  => 300,
+                'friday'    => 300,
+                'saturday'  => 200,
+            ];
 
-        // 🔸 No borramos las fechas fijas de los Premium
-        DB::table('appointments')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->where('fecha_fija', false)
-            ->update(['fecha_asignada' => null]);
+            DB::table('appointments')
+                ->whereIn('estado', ['pendiente', 'en proceso'])
+                ->where('fecha_fija', false)
+                ->update(['fecha_asignada' => null]);
 
-        // 🔸 Obtener todas las citas que necesitan asignación
-        $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
-            ->orderByRaw("
-            CASE
-                WHEN fecha_fija = 1 THEN 0        -- 📅 Premium con fecha fija (no se tocarán)
-                WHEN prioridad = 'premium' THEN 1 -- 💎 Premium sin fecha fija
-                WHEN prioridad = 'urgente' THEN 2 -- 🔴 Urgente
-                ELSE 3                            -- 🟡 Normal
-            END
-        ")
-            ->orderBy('created_at', 'asc')
-            ->orderBy('id', 'asc')
-            ->get();
+            $appointments = Appointment::whereIn('estado', ['pendiente', 'en proceso'])
+                ->orderByRaw("
+                    CASE
+                        WHEN fecha_fija = 1 THEN 0
+                        WHEN prioridad = 'premium' THEN 1
+                        WHEN prioridad = 'urgente' THEN 2
+                        ELSE 3
+                    END
+                ")
+                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc')
+                ->get();
 
-        $fecha_actual = Carbon::today();
-        $ahora = Carbon::now();
-        $hora_cierre = $fecha_actual->copy()->setTime(20, 0);
+            $fecha_actual = Carbon::today();
+            $ahora        = Carbon::now();
+            $hora_cierre  = $fecha_actual->copy()->setTime(20, 0);
 
-        // 🔹 Si ya cerró la tienda, pasar al siguiente día laboral
-        if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
-            do {
-                $fecha_actual->addDay();
-                $dia_semana = strtolower($fecha_actual->format('l'));
-            } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
-        }
-
-        $agenda = [];
-
-        foreach ($appointments as $appointment) {
-            // 🔹 Saltar premium con fecha fija
-            if ($appointment->fecha_fija) {
-                continue;
+            if ($ahora->greaterThanOrEqualTo($hora_cierre)) {
+                do {
+                    $fecha_actual->addDay();
+                    $dia_semana = strtolower($fecha_actual->format('l'));
+                } while ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana]));
             }
 
-            $tiempo_estimado = $appointment->horas_total ?: 30; // por si no está definido
+            $agenda = [];
 
-            while (true) {
-                $dia_semana = strtolower($fecha_actual->format('l'));
+            foreach ($appointments as $appointment) {
+                if ($appointment->fecha_fija) continue;
 
-                // Saltar domingos o días no laborales
-                if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
-                    $fecha_actual->addDay();
-                    continue;
-                }
+                $tiempo_estimado = $appointment->horas_total ?: 30;
 
-                // Inicializar el día si no existe aún
-                if (!isset($agenda[$fecha_actual->toDateString()])) {
-                    $agenda[$fecha_actual->toDateString()] = 0;
-                }
+                while (true) {
+                    $dia_semana = strtolower($fecha_actual->format('l'));
 
-                // 🔹 Si cabe la cita en el día
-                if ($agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
-                    DB::table('appointments')
-                        ->where('id', $appointment->id)
-                        ->update(['fecha_asignada' => $fecha_actual->toDateString()]);
+                    if ($dia_semana === 'sunday' || !isset($horas_laborales[$dia_semana])) {
+                        $fecha_actual->addDay();
+                        continue;
+                    }
 
-                    $agenda[$fecha_actual->toDateString()] += $tiempo_estimado;
-                    break;
-                } else {
-                    // Si no cabe, pasar al siguiente día laboral
-                    $fecha_actual->addDay();
+                    if (!isset($agenda[$fecha_actual->toDateString()])) {
+                        $agenda[$fecha_actual->toDateString()] = 0;
+                    }
+
+                    if ($agenda[$fecha_actual->toDateString()] + $tiempo_estimado <= $horas_laborales[$dia_semana]) {
+                        DB::table('appointments')
+                            ->where('id', $appointment->id)
+                            ->update(['fecha_asignada' => $fecha_actual->toDateString()]);
+
+                        $agenda[$fecha_actual->toDateString()] += $tiempo_estimado;
+                        break;
+                    } else {
+                        $fecha_actual->addDay();
+                    }
                 }
             }
+        } catch (\Exception $e) {
+            Log::error('[AppointmentController] Error en recalcularFechasAsignadas2', ['error' => $e->getMessage()]);
         }
     }
 
@@ -521,84 +545,76 @@ class AppointmentController extends Controller
         Log::info('🔄 Iniciando recalcularFechasAsignadas()');
         $startTotal = microtime(true);
 
-        $horas_laborales = [
-            'monday'    => 300,
-            'tuesday'   => 300,
-            'wednesday' => 300,
-            'thursday'  => 300,
-            'friday'    => 300,
-            'saturday'  => 200,
-        ];
-
-        $fecha_inicio = now()->startOfDay();
-        $minutos_dia = 300; // 5h por día base
-        $acumulado = 0;
-        $agenda = [];
-
-        // 🔸 Reset de fechas
-        DB::table('appointments')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->where('fecha_fija', false)
-            ->update(['fecha_asignada' => null]);
-
-        // 🔸 Obtener todas las citas
-        $appointments = DB::table('appointments')
-            ->select('id', 'horas_total', 'fecha_fija', 'prioridad', 'created_at')
-            ->whereIn('estado', ['pendiente', 'en proceso'])
-            ->orderByRaw("
-            CASE
-                WHEN fecha_fija = 1 THEN 0
-                WHEN prioridad = 'premium' THEN 1
-                WHEN prioridad = 'urgente' THEN 2
-                ELSE 3
-            END
-        ")
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        $updates = [];
-
-        foreach ($appointments as $a) {
-            if ($a->fecha_fija) continue;
-
-            $tiempo = $a->horas_total ?: 30;
-
-            // Calcula en qué día cae según los minutos acumulados
-            $dia_offset = floor($acumulado / $minutos_dia);
-
-            // Ajustar si cae en domingo o día sin horas laborales
-            $fecha = $fecha_inicio->copy()->addDays($dia_offset);
-            while (true) {
-                $dia_semana = strtolower($fecha->format('l'));
-                if (isset($horas_laborales[$dia_semana])) break;
-                $fecha->addDay(); // salta domingos
-            }
-
-            $updates[] = [
-                'id' => $a->id,
-                'fecha_asignada' => $fecha->toDateString(),
+        try {
+            $horas_laborales = [
+                'monday'    => 300,
+                'tuesday'   => 300,
+                'wednesday' => 300,
+                'thursday'  => 300,
+                'friday'    => 300,
+                'saturday'  => 200,
             ];
 
-            $agenda[$fecha->toDateString()] = ($agenda[$fecha->toDateString()] ?? 0) + $tiempo;
-            $acumulado += $tiempo;
-        }
+            $fecha_inicio = now()->startOfDay();
+            $minutos_dia  = 300;
+            $acumulado    = 0;
+            $agenda       = [];
 
-        // 🔸 Actualización masiva
-        if ($updates) {
-            $query = "UPDATE appointments SET fecha_asignada = CASE id ";
-            $ids = [];
+            DB::table('appointments')
+                ->whereIn('estado', ['pendiente', 'en proceso'])
+                ->where('fecha_fija', false)
+                ->update(['fecha_asignada' => null]);
 
-            foreach ($updates as $u) {
-                $query .= "WHEN {$u['id']} THEN '{$u['fecha_asignada']}' ";
-                $ids[] = $u['id'];
+            $appointments = DB::table('appointments')
+                ->select('id', 'horas_total', 'fecha_fija', 'prioridad', 'created_at')
+                ->whereIn('estado', ['pendiente', 'en proceso'])
+                ->orderByRaw("
+                    CASE
+                        WHEN fecha_fija = 1 THEN 0
+                        WHEN prioridad = 'premium' THEN 1
+                        WHEN prioridad = 'urgente' THEN 2
+                        ELSE 3
+                    END
+                ")
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $updates = [];
+
+            foreach ($appointments as $a) {
+                if ($a->fecha_fija) continue;
+
+                $tiempo     = $a->horas_total ?: 30;
+                $dia_offset = floor($acumulado / $minutos_dia);
+                $fecha      = $fecha_inicio->copy()->addDays($dia_offset);
+
+                while (true) {
+                    $dia_semana = strtolower($fecha->format('l'));
+                    if (isset($horas_laborales[$dia_semana])) break;
+                    $fecha->addDay();
+                }
+
+                $updates[] = ['id' => $a->id, 'fecha_asignada' => $fecha->toDateString()];
+                $agenda[$fecha->toDateString()] = ($agenda[$fecha->toDateString()] ?? 0) + $tiempo;
+                $acumulado += $tiempo;
             }
 
-            $query .= "END WHERE id IN (" . implode(',', $ids) . ")";
-            DB::statement($query);
-        }
+            if ($updates) {
+                $sql = "UPDATE appointments SET fecha_asignada = CASE id ";
+                $ids = [];
+                foreach ($updates as $u) {
+                    $sql .= "WHEN {$u['id']} THEN '{$u['fecha_asignada']}' ";
+                    $ids[] = $u['id'];
+                }
+                $sql .= "END WHERE id IN (" . implode(',', $ids) . ")";
+                DB::statement($sql);
+            }
 
-        $timeTotal = round(microtime(true) - $startTotal, 2);
-        Log::info("✅ recalcularFechasAsignadas() completado en {$timeTotal}s con " . count($updates) . " citas");
+            $timeTotal = round(microtime(true) - $startTotal, 2);
+            Log::info("✅ recalcularFechasAsignadas() completado en {$timeTotal}s con " . count($updates) . " citas");
+        } catch (\Exception $e) {
+            Log::error('[AppointmentController] Error en recalcularFechasAsignadas', ['error' => $e->getMessage()]);
+        }
     }
 
 
@@ -676,7 +692,6 @@ class AppointmentController extends Controller
 
     public function updateReparacion(Request $request, Appointment $appointment)
     {
-        // Validar los datos recibidos
         $request->validate([
             'componentes' => 'array',
             'componentes.*.id' => 'exists:components,id',
@@ -686,113 +701,107 @@ class AppointmentController extends Controller
             'idprograma' => 'nullable|string|max:200',
         ]);
 
-        $usuarioTallerId = auth()->id(); // ID del usuario autenticado
-        $tiempoTotalRestado = 0;
+        try {
+            $usuarioTallerId   = auth()->id();
+            $tiempoTotalRestado = 0;
 
-        // Actualizar estado de los componentes seleccionados
-        foreach ($request->componentes as $component) {
-            $checked = isset($component['checked']) ? true : false;
+            foreach ($request->componentes as $component) {
+                $checked = isset($component['checked']) ? true : false;
 
-            // Obtener datos del pivote
-            $pivot = DB::table('appointment_component')
-                ->where('appointment_id', $appointment->id)
-                ->where('componente_id', $component['id'])
-                ->first();
-
-            if ($pivot) {
-                // ⚡️ Si antes no estaba marcado y ahora sí -> restamos horas_trabajo
-                if ($checked && !$pivot->checked) {
-                    $tiempoTotalRestado += (int) $pivot->horas_trabajo;
-                }
-
-                DB::table('appointment_component')
+                $pivot = DB::table('appointment_component')
                     ->where('appointment_id', $appointment->id)
                     ->where('componente_id', $component['id'])
-                    ->update([
-                        'checked' => $checked,
-                        'usuario_taller_id' => $checked ? $usuarioTallerId : null
-                    ]);
-            }
-        }
+                    ->first();
 
-        // Restar tiempo al appointment si corresponde
-        if ($tiempoTotalRestado > 0) {
-            $appointment->tiempo_reparacion = max(0, $appointment->tiempo_reparacion - $tiempoTotalRestado);
-            $appointment->save();
-        }
+                if ($pivot) {
+                    if ($checked && !$pivot->checked) {
+                        $tiempoTotalRestado += (int) $pivot->horas_trabajo;
+                    }
 
-        // Actualizar los kilómetros si se proporcionaron
-        if ($request->filled('kilometros')) {
-            $appointment->bike->kilometros = $request->input('kilometros');
-            $appointment->bike->save();
-        }
-
-        // Actualizar la descripción del problema si se proporciona
-        if ($request->has('descripcion_problema')) {
-            $descripcion = $request->input('descripcion_problema');
-
-            if (strtolower(trim($descripcion)) === 'nada') {
-                $appointment->descripcion_problema = null;
-            } else {
-                $appointment->descripcion_problema = $descripcion;
+                    DB::table('appointment_component')
+                        ->where('appointment_id', $appointment->id)
+                        ->where('componente_id', $component['id'])
+                        ->update([
+                            'checked' => $checked,
+                            'usuario_taller_id' => $checked ? $usuarioTallerId : null,
+                        ]);
+                }
             }
 
-            $appointment->save();
-        }
+            if ($tiempoTotalRestado > 0) {
+                $appointment->tiempo_reparacion = max(0, $appointment->tiempo_reparacion - $tiempoTotalRestado);
+                $appointment->save();
+            }
 
-        return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
+            if ($request->filled('kilometros')) {
+                $appointment->bike->kilometros = $request->input('kilometros');
+                $appointment->bike->save();
+            }
+
+            if ($request->has('descripcion_problema')) {
+                $descripcion = $request->input('descripcion_problema');
+                $appointment->descripcion_problema = (strtolower(trim($descripcion)) === 'nada') ? null : $descripcion;
+                $appointment->save();
+            }
+
+            return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
+        } catch (\Exception $e) {
+            Log::error('[AppointmentController] Error en updateReparacion', [
+                'appointment_id' => $appointment->id,
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al actualizar la reparación. Inténtalo de nuevo.');
+        }
     }
-
     public function calendariocitas()
     {
-        // 📅 Fecha actual
-        $hoy = now()->toDateString();
+        try {
+            $hoy = now()->toDateString();
 
-        // 🔁 Mover TODAS las citas con fecha pasada (no completadas) al día de hoy
-        DB::table('appointments')
-            ->whereNotNull('calendario')
-            ->where('estado', '!=', 'completada') // solo las activas
-            ->where('calendario', '<', $hoy)      // todas las fechas anteriores a hoy
-            ->update(['calendario' => $hoy]);
+            DB::table('appointments')
+                ->whereNotNull('calendario')
+                ->where('estado', '!=', 'completada')
+                ->where('calendario', '<', $hoy)
+                ->update(['calendario' => $hoy]);
 
-        // 🔍 Obtener solo citas activas (sin completadas)
-        $resultados = DB::table('appointments')
-            ->join('bikes', 'bikes.id', '=', 'appointments.bike_id')
-            ->join('users', 'users.id', '=', 'bikes.user_id')
-            ->select(
-                'appointments.id as presupuesto_id',
-                'bikes.nombre as bike_nombre',
-                'bikes.marca as bike_marca',
-                'users.name as usuario',
-                'appointments.calendario',
-                'appointments.estado'
-            )
-            ->whereNotNull('appointments.calendario')
-            ->where('appointments.estado', '!=', 'completada') // 🔹 no mostrar completadas
-            ->get();
+            $resultados = DB::table('appointments')
+                ->join('bikes', 'bikes.id', '=', 'appointments.bike_id')
+                ->join('users', 'users.id', '=', 'bikes.user_id')
+                ->select(
+                    'appointments.id as presupuesto_id',
+                    'bikes.nombre as bike_nombre',
+                    'bikes.marca as bike_marca',
+                    'users.name as usuario',
+                    'appointments.calendario',
+                    'appointments.estado'
+                )
+                ->whereNotNull('appointments.calendario')
+                ->where('appointments.estado', '!=', 'completada')
+                ->get();
 
-        // 🎨 Preparar los eventos para el calendario
-        $eventos = $resultados->map(function ($item) {
-            $color = match ($item->estado) {
-                'pendiente'   => '#facc15', // amarillo
-                'en proceso'  => '#60a5fa', // azul
-                default       => '#a1a1aa', // gris
-            };
+            $eventos = $resultados->map(function ($item) {
+                $color = match ($item->estado) {
+                    'pendiente'  => '#facc15',
+                    'en proceso' => '#60a5fa',
+                    default      => '#a1a1aa',
+                };
 
-            // 🧾 Mostrar cliente y bicicleta (marca + nombre)
-            $titulo = "<b>{$item->usuario}</b><br>{$item->bike_marca} - {$item->bike_nombre}";
+                $titulo = "<b>{$item->usuario}</b><br>{$item->bike_marca} - {$item->bike_nombre}";
 
-            return [
-                'title' => $titulo,
-                'start' => $item->calendario,
-                'url'   => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
-                'color' => $color,
-            ];
-        });
+                return [
+                    'title' => $titulo,
+                    'start' => $item->calendario,
+                    'url'   => url('/presupuestos/' . $item->presupuesto_id . '/factura'),
+                    'color' => $color,
+                ];
+            });
 
-        return view('appointments.calendario', ['eventos' => $eventos]);
+            return view('appointments.calendario', ['eventos' => $eventos]);
+        } catch (\Exception $e) {
+            Log::error('[AppointmentController] Error en calendariocitas', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Error al cargar el calendario.');
+        }
     }
-
 
 
 

@@ -73,10 +73,11 @@ class RouteTest extends TestCase
         $componente = Component::factory()->create();
 
         $response = $this->actingAs($user)->post("/bikes/{$bike->id}/revisions", [
-            'componente_id' => $componente->id,
-            'fecha_revision' => now()->format('Y-m-d'),
-            'descripcion' => 'Cambio de frenos',
+            'componente_id'    => $componente->id,
+            'fecha_revision'   => now()->format('Y-m-d'),
+            'descripcion'      => 'Cambio de frenos',
             'proxima_revision' => now()->addMonth()->format('Y-m-d'),
+            'tipo_fecha'       => 'opcional',
         ]);
 
         $response->assertRedirect("/bikes/{$bike->id}/revisions");
@@ -111,8 +112,12 @@ public function un_usuario_puede_crear_un_componente_nuevo()
 
     // 🚀 Simulamos el POST para crear el componente
     $response = $this->actingAs($user)->post(route('components.store'), [
-        'nombre' => 'Horquilla',
+        'nombre'         => 'Horquilla',
+        'descripcion'    => 'Horquilla delantera',
         'fecha_preaviso' => 1,
+        'fecha_revision' => 30,
+        'hora_taller'    => 2,
+        'precio'         => 15.00,
     ]);
 
     // 📌 Verificamos que redirige correctamente

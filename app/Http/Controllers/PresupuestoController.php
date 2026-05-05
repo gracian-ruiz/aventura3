@@ -128,57 +128,65 @@ public function index(Request $request)
         // 🔒 SEGURIDAD: Token criptográficamente seguro (64 caracteres aleatorios)
         $tokenPresupuesto = \Illuminate\Support\Str::random(64);
 
-        $presupuesto = Appointment::create([
-            'bike_id' => $bikeId,
-            'horas_total' => 0,
-            'precio_total' => 0,
-            'user_id' => $bike->user_id,
-            'token_presupuesto' => $tokenPresupuesto,
-            'mensaje_enviado' => false,
-            'prioridad' => $request->prioridad,
-            'estimacion_reparacion' => '',
-            'estado' => count($componentes) > 0 ? 'presupuesto' : 'vacía',
-            'descuento' => 0, // se actualiza más abajo
-            'asignacion_taller' => $request->asignacion_taller ?? [],
-            'idprograma' => $request->idprograma,
-            'calendario' => $request->calendario
-        ]);
+        try {
+            $presupuesto = Appointment::create([
+                'bike_id' => $bikeId,
+                'horas_total' => 0,
+                'precio_total' => 0,
+                'user_id' => $bike->user_id,
+                'token_presupuesto' => $tokenPresupuesto,
+                'mensaje_enviado' => false,
+                'prioridad' => $request->prioridad,
+                'estimacion_reparacion' => '',
+                'estado' => count($componentes) > 0 ? 'presupuesto' : 'vacía',
+                'descuento' => 0,
+                'asignacion_taller' => $request->asignacion_taller ?? [],
+                'idprograma' => $request->idprograma,
+                'calendario' => $request->calendario,
+            ]);
 
-        $totalHoras = 0;
-        $totalPrecio = 0;
-        $totalDescuento = 0;
+            $totalHoras = 0;
+            $totalPrecio = 0;
+            $totalDescuento = 0;
 
-        if (count($componentes) > 0) {
-            foreach ($componentes as $index => $componenteId) {
-                $horas = (int) $horasTrabajo[$index];
-                $precio = (float) $precios[$index];
-                $texto = $textos[$index] ?? '';
-                $descuento = isset($descuentos[$index]) ? (int) $descuentos[$index] : 0;
+            if (count($componentes) > 0) {
+                foreach ($componentes as $index => $componenteId) {
+                    $horas = (int) $horasTrabajo[$index];
+                    $precio = (float) $precios[$index];
+                    $texto = $textos[$index] ?? '';
+                    $descuento = isset($descuentos[$index]) ? (int) $descuentos[$index] : 0;
 
-                AppointmentComponent::create([
-                    'appointment_id' => $presupuesto->id,
-                    'componente_id' => $componenteId,
-                    'horas_trabajo' => $horas,
-                    'total_precio' => $precio,
-                    'texto' => $texto,
-                    'descuento' => $descuento,
+                    AppointmentComponent::create([
+                        'appointment_id' => $presupuesto->id,
+                        'componente_id' => $componenteId,
+                        'horas_trabajo' => $horas,
+                        'total_precio' => $precio,
+                        'texto' => $texto,
+                        'descuento' => $descuento,
+                    ]);
+
+                    $totalHoras += $horas;
+                    $totalPrecio += max($precio - $descuento, 0);
+                    $totalDescuento += $descuento;
+                }
+
+                $presupuesto->update([
+                    'horas_total' => $totalHoras,
+                    'tiempo_reparacion' => $totalHoras,
+                    'precio_total' => round($totalPrecio, 2),
+                    'descuento' => $totalDescuento,
                 ]);
-
-                $totalHoras += $horas;
-                $totalPrecio += max($precio - $descuento, 0);
-                $totalDescuento += $descuento;
             }
 
-            $presupuesto->update([
-                'horas_total' => $totalHoras,
-                'tiempo_reparacion' => $totalHoras,
-                'precio_total' => round($totalPrecio, 2),
-                'descuento' => $totalDescuento,
+            return redirect()->route('presupuestos.factura', ['id' => $presupuesto->id])
+                ->with('success', 'Presupuesto guardado correctamente.');
+        } catch (\Exception $e) {
+            Log::error('[PresupuestoController] Error al crear presupuesto', [
+                'bike_id' => $bikeId,
+                'error' => $e->getMessage(),
             ]);
+            return redirect()->back()->with('error', 'Error al guardar el presupuesto. Inténtalo de nuevo.');
         }
-
-        return redirect()->route('presupuestos.factura', ['id' => $presupuesto->id])
-            ->with('success', 'Presupuesto guardado correctamente.');
     }
 
 
@@ -232,40 +240,44 @@ public function index(Request $request)
 
     public function descargarPDF($presupuestoId)
     {
-        $presupuesto = DB::table('appointments')
-            ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
-            ->join('users', 'bikes.user_id', '=', 'users.id')
-            ->where('appointments.id', $presupuestoId)
-            ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'bikes.marca as marca', 'users.name as usuario_nombre')
-            ->first();
+        try {
+            $presupuesto = DB::table('appointments')
+                ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
+                ->join('users', 'bikes.user_id', '=', 'users.id')
+                ->where('appointments.id', $presupuestoId)
+                ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'bikes.marca as marca', 'users.name as usuario_nombre')
+                ->first();
 
-        $items = DB::table('appointment_component')
-            ->join('components', 'appointment_component.componente_id', '=', 'components.id')
-            ->where('appointment_component.appointment_id', $presupuestoId)
-            ->select('appointment_component.*', 'components.nombre as componente_nombre')
-            ->get();
+            if (!$presupuesto) {
+                abort(404, 'Presupuesto no encontrado');
+            }
 
-        if (!$presupuesto) {
-            abort(404, 'Presupuesto no encontrado');
+            $items = DB::table('appointment_component')
+                ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+                ->where('appointment_component.appointment_id', $presupuestoId)
+                ->select('appointment_component.*', 'components.nombre as componente_nombre')
+                ->get();
+
+            $limpiarNombre  = fn($texto) => preg_replace('/[^A-Za-z0-9_\-]/', '_', $texto);
+            $usuarioLimpio  = $limpiarNombre($presupuesto->usuario_nombre);
+            $bicicletaLimpia = $limpiarNombre($presupuesto->bicicleta_nombre);
+            $fecha          = date('Y-m-d', strtotime($presupuesto->created_at));
+            $nombreArchivo  = "Presupuesto_{$usuarioLimpio}_{$bicicletaLimpia}_{$fecha}.pdf";
+
+            $pdf = Pdf::loadView('pdf.presupuesto', compact('presupuesto', 'items'));
+
+            DB::table('appointments')
+                ->where('id', $presupuestoId)
+                ->update(['presupuesto_enviado' => true]);
+
+            return $pdf->download($nombreArchivo);
+        } catch (\Exception $e) {
+            Log::error('[PresupuestoController] Error en descargarPDF', [
+                'presupuesto_id' => $presupuestoId,
+                'error'          => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al generar el PDF.');
         }
-
-        // Función para limpiar nombres de archivo
-        $limpiarNombre = fn($texto) => preg_replace('/[^A-Za-z0-9_\-]/', '_', $texto);
-
-        $usuarioLimpio = $limpiarNombre($presupuesto->usuario_nombre);
-        $bicicletaLimpia = $limpiarNombre($presupuesto->bicicleta_nombre);
-        $fecha = date('Y-m-d', strtotime($presupuesto->created_at));
-
-        $nombreArchivo = "Presupuesto_{$usuarioLimpio}_{$bicicletaLimpia}_{$fecha}.pdf";
-
-        $pdf = Pdf::loadView('pdf.presupuesto', compact('presupuesto', 'items'));
-
-        DB::table('appointments')
-            ->where('id', $presupuestoId)
-            ->update(['presupuesto_enviado' => true]);
-
-
-        return $pdf->download($nombreArchivo);
     }
 
     public function edit($id)
@@ -408,6 +420,10 @@ public function index(Request $request)
             return redirect()->route('presupuestos.index')->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('[PresupuestoController] Error en update', [
+                'presupuesto_id' => $id,
+                'error'          => $e->getMessage(),
+            ]);
             return redirect()->back()->with('error', 'Error al actualizar el presupuesto: ' . $e->getMessage());
         }
     }
@@ -460,15 +476,22 @@ public function index(Request $request)
                 ];
             }
         } elseif ($request->estado === 'denegado') {
-            // Si el estado es 'denegado', actualizar el estado de la cita
-            DB::table('appointments')->where('id', $id)->update([
-                'estado' => 'denegado',
-                'updated_at' => now(),
-            ]);
+            try {
+                DB::table('appointments')->where('id', $id)->update([
+                    'estado'     => 'denegado',
+                    'updated_at' => now(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('[PresupuestoController] Error en cita (denegado)', [
+                    'presupuesto_id' => $id,
+                    'error'          => $e->getMessage(),
+                ]);
+                return ['tipo' => 'error', 'mensaje' => 'Error al denegar el presupuesto.'];
+            }
 
             return [
-                'tipo' => 'success',
-                'mensaje' => 'Presupuesto denegado.'
+                'tipo'    => 'success',
+                'mensaje' => 'Presupuesto denegado.',
             ];
         }
     }
@@ -578,10 +601,11 @@ public function index(Request $request)
             return redirect()->route('presupuestos.index')
                 ->with('success', 'Cita y componentes asociados eliminados correctamente.');
         } catch (\Exception $e) {
-            // Si algo falla, revertir la transacción
             DB::rollback();
-
-            // Manejar el error y redirigir
+            Log::error('[PresupuestoController] Error en destroy', [
+                'presupuesto_id' => $id,
+                'error'          => $e->getMessage(),
+            ]);
             return redirect()->route('presupuestos.index')
                 ->with('error', 'Ocurrió un error al eliminar la cita: ' . $e->getMessage());
         }

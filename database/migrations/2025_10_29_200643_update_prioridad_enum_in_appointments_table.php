@@ -8,13 +8,15 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void
     {
-        // 🔸 Cambiar el ENUM agregando 'premium'
-        DB::statement("ALTER TABLE appointments MODIFY prioridad ENUM('normal', 'urgente', 'premium') DEFAULT 'normal'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE appointments MODIFY prioridad ENUM('normal', 'urgente', 'premium') DEFAULT 'normal'");
+        }
     }
 
     public function down(): void
     {
-        // 🔸 Revertir al ENUM original
-        DB::statement("ALTER TABLE appointments MODIFY prioridad ENUM('normal', 'urgente') DEFAULT 'normal'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE appointments MODIFY prioridad ENUM('normal', 'urgente') DEFAULT 'normal'");
+        }
     }
 };

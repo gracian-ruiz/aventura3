@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MecanicoController extends Controller
 {
@@ -169,36 +170,45 @@ public function index(Request $request)
             'tipo_fecha.*' => 'required|in:fija,opcional',
         ]);
 
-        foreach ($request->revisiones as $componente_id) {
-            $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
-            $componente = Component::find($componente_id);
+        DB::beginTransaction();
+        try {
+            foreach ($request->revisiones as $componente_id) {
+                $descripcion = $request->descripcion_revisiones[$componente_id] ?? 'Sin descripción';
+                $componente  = Component::find($componente_id);
 
-            if ($request->tipo_fecha[$componente_id] === 'fija') {
-                $dias_a_sumar = $componente ? $componente->fecha_revision : 30;
-                $fecha_proxima = now()->addDays($dias_a_sumar);
-            } else {
-                $fecha_proxima = $request->proxima_revision[$componente_id]
-                    ? Carbon::parse($request->proxima_revision[$componente_id])
-                    : now()->addDays(30);
+                if ($request->tipo_fecha[$componente_id] === 'fija') {
+                    $dias_a_sumar = $componente ? $componente->fecha_revision : 30;
+                    $fecha_proxima = now()->addDays($dias_a_sumar);
+                } else {
+                    $fecha_proxima = $request->proxima_revision[$componente_id]
+                        ? Carbon::parse($request->proxima_revision[$componente_id])
+                        : now()->addDays(30);
+                }
+
+                $appointment->bike->revisions()->create([
+                    'componente_id'    => $componente_id,
+                    'fecha_revision'   => now(),
+                    'descripcion'      => $descripcion,
+                    'proxima_revision' => $fecha_proxima,
+                ]);
             }
 
-            $appointment->bike->revisions()->create([
-                'componente_id' => $componente_id,
-                'fecha_revision' => now(),
-                'descripcion' => $descripcion,
-                'proxima_revision' => $fecha_proxima,
+            $appointment->update([
+                'estado'            => 'completada',
+                'usuario_taller_id' => auth()->id(),
             ]);
+
+            DB::commit();
+
+            return redirect()->route('mecanico.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('[MecanicoController] Error en complete', [
+                'appointment_id' => $appointment->id,
+                'error'          => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al completar la cita. Inténtalo de nuevo.');
         }
-
-        $appointment->update([
-            'estado' => 'completada',
-            'usuario_taller_id' => auth()->id(),
-        ]);
-
-        // Llamar al controlador de recordatorios para enviar mensaje de WhatsApp
-        //app(RecordatorioController::class)->enviarMensajeFinalizacionCita($appointment);
-
-        return redirect()->route('mecanico.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
     }
 
     public function updatedos(Request $request, $id)
@@ -282,6 +292,10 @@ public function index(Request $request)
             return redirect()->route('mecanico.index')->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('[MecanicoController] Error en updatedos', [
+                'appointment_id' => $id,
+                'error'          => $e->getMessage(),
+            ]);
             return redirect()->back()->with('error', 'Error al actualizar el presupuesto: ' . $e->getMessage());
         }
     }
@@ -383,13 +397,20 @@ public function index(Request $request)
 
     public function destroy(Appointment $appointment)
     {
-        if ($appointment->estado === 'completada') {
+        try {
+            $wasCompleted = $appointment->estado === 'completada';
             $appointment->delete();
-            return redirect()->route('appointments.historico')->with('success', '✅ Cita eliminada del historial.');
-        }
 
-        $appointment->delete();
-        return redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
+            return $wasCompleted
+                ? redirect()->route('appointments.historico')->with('success', '✅ Cita eliminada del historial.')
+                : redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
+        } catch (\Exception $e) {
+            Log::error('[MecanicoController] Error en destroy', [
+                'appointment_id' => $appointment->id,
+                'error'          => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Error al eliminar la cita.');
+        }
     }
 
 private function recalcularFechasAsignadas()
