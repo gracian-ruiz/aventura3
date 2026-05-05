@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Bike;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\UserRequest;
 
 class UserController extends Controller
@@ -68,20 +69,30 @@ class UserController extends Controller
 
     public function update(UserRequest $request, User $user)
     {
-
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'telefono' => $request->telefono,
-            'role' => $request->role,
-        ]);
+        try {
+            $user->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'telefono' => $request->telefono,
+                'role' => $request->role,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar usuario', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al actualizar el usuario.'])->withInput();
+        }
 
         return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
     public function destroy(User $user)
     {
-        $user->delete();
+        try {
+            $user->delete();
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar usuario', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al eliminar el usuario.']);
+        }
+
         return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Component;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ComponentController extends Controller
 {
@@ -36,9 +37,13 @@ class ComponentController extends Controller
             'orden' => 'nullable|integer|min:0', // Validar el campo 'orden' (puede ser nulo)
         ]);
     
-        // Crear el componente, incluyendo el campo 'orden'
-        Component::create($validated);
-    
+        try {
+            Component::create($validated);
+        } catch (\Exception $e) {
+            Log::error('Error al crear componente', ['error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al guardar el componente.'])->withInput();
+        }
+
         return redirect()->route('components.index')->with('success', '✅ Componente creado correctamente.');
     }
 
@@ -59,15 +64,25 @@ class ComponentController extends Controller
             'orden' => 'nullable|integer|min:0', // Validar el campo 'orden' (puede ser nulo)
         ]);
     
-        // Actualizar el componente, incluyendo el campo 'orden'
-        $component->update($validated);
-    
+        try {
+            $component->update($validated);
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar componente', ['component_id' => $component->id, 'error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al actualizar el componente.'])->withInput();
+        }
+
         return redirect()->route('components.index')->with('success', '✅ Componente actualizado correctamente.');
     }
 
     public function destroy(Component $component)
     {
-        $component->delete();
+        try {
+            $component->delete();
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar componente', ['component_id' => $component->id, 'error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al eliminar el componente.']);
+        }
+
         return redirect()->route('components.index')->with('success', '🗑️ Componente eliminado.');
     }
 }

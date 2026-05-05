@@ -6,6 +6,7 @@ use App\Models\Bike;
 use App\Models\Revision;
 use App\Models\Component;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 
@@ -73,8 +74,13 @@ class RevisionController extends Controller
             }
         }
     
-        $bike->revisions()->create($validated);
-    
+        try {
+            $bike->revisions()->create($validated);
+        } catch (\Exception $e) {
+            Log::error('Error al crear revisión', ['bike_id' => $bike->id, 'error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al guardar la revisión.'])->withInput();
+        }
+
         return redirect()->route('bikes.revisions.index', $bike->id)
             ->with('success', '✅ Revisión añadida correctamente.');
     }
@@ -103,7 +109,12 @@ class RevisionController extends Controller
             'proxima_revision' => 'nullable|date',
         ]);
 
-        $revision->update($request->all());
+        try {
+            $revision->update($request->all());
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar revisión', ['revision_id' => $revision->id, 'error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al actualizar la revisión.'])->withInput();
+        }
 
         return redirect()->route('bikes.revisions.index', $bike->id)
             ->with('success', '✅ Revisión actualizada correctamente.');
@@ -114,7 +125,12 @@ class RevisionController extends Controller
      */
     public function destroy(Bike $bike, Revision $revision)
     {
-        $revision->delete();
+        try {
+            $revision->delete();
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar revisión', ['revision_id' => $revision->id, 'error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Error al eliminar la revisión.']);
+        }
 
         return redirect()->route('bikes.revisions.index', $bike->id)
             ->with('success', '🗑️ Revisión eliminada.');
