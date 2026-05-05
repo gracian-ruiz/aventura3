@@ -193,7 +193,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
 
-    Route::resource('presupuestos', PresupuestoController::class);
+    Route::resource('presupuestos', PresupuestoController::class)->except(['destroy', 'show', 'create']);
 
     Route::get('/presupuestos/create/{user}', [PresupuestoController::class, 'create'])->name('presupuestos.create');
 
