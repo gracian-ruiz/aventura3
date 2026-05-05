@@ -158,8 +158,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/mecanico/{appointment}/confirm', [MecanicoController::class, 'confirmCompletion'])
         ->name('mecanico.confirmCompletion');
     
-    Route::get('/mecanico/{id}/show', [MecanicoController::class, 'show'])->name('mecanico.show');
-
     Route::put('/citas/{appointment}/complete', [AppointmentController::class, 'complete'])
         ->name('appointments.complete');
     Route::get('/citas/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
