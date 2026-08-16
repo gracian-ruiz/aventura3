@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 | WhatsApp Business API — Webhook de Meta
 |--------------------------------------------------------------------------
 | URL de devolución de llamada: {APP_URL}/api/whatsapp/webhook
-| Identificador de verificación: ver WHATSAPP_META_VERIFY_TOKEN en .env
+| Identificador de verificación: ver WHATSAPP_VERIFY_TOKEN en .env
 */
 Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify']);
 Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive']);

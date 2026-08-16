@@ -30,17 +30,11 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-    'twilio' => [
-        'sid' => env('TWILIO_SID'),
-        'token' => env('TWILIO_AUTH_TOKEN'),
-        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
-        'whatsapp_to' => env('TWILIO_WHATSAPP_TO'),
-    ],
-
     'whatsapp' => [
-        'verify_token'     => env('WHATSAPP_META_VERIFY_TOKEN'),
-        'phone_number_id'  => env('WHATSAPP_META_PHONE_NUMBER_ID'),
-        'access_token'     => env('WHATSAPP_META_ACCESS_TOKEN'),
+        'verify_token' => env('WHATSAPP_VERIFY_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
+        'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
     ],
 
 ];

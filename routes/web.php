@@ -17,6 +17,7 @@ use App\Http\Controllers\Alquiler\UsuarioAlquilerController;
 use App\Http\Controllers\EnviarCorreosController;
 use App\Http\Controllers\MecanicoController;
 use App\Http\Controllers\WhatsappController;
+use App\Http\Controllers\WhatsAppTestController;
 use App\Models\Bike;
 use App\Models\Material;
 use App\Http\Controllers\ClienteController;
@@ -295,6 +296,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/calendario-asignado', [AppointmentController::class, 'calendarioAsignado'])
     ->name('calendario-asignado');
 
+    Route::get('/pruebas', [WhatsAppTestController::class, 'index'])->name('pruebas');
+    Route::post('/pruebas/whatsapp', [WhatsAppTestController::class, 'send'])
+        ->name('pruebas.whatsapp.send');
+
 
  
 });
@@ -330,7 +335,6 @@ Route::post('/alquiler/response', [AventuraBikeController::class, 'response'])->
 
 /* Route::get('/alquiler/exito', [AventuraBikeController::class, 'exito'])->name('alquiler.exito');
 Route::get('/alquiler/error', [AventuraBikeController::class, 'error'])->name('alquiler.error'); */
-//Route::get('/pruebas', [AlquilerController::class, 'pruebas'])->name('pruebas');
 
 
 Route::middleware(['auth', 'user'])->group(function () {
