@@ -78,6 +78,7 @@ class PresupuestoControllerTest extends TestCase
                 'componentes'  => [$componente->id],
                 'horas_trabajo'=> [60],
                 'precio'       => [100.00],
+                'precio_material' => [25.50],
                 'descuento'    => [0],
                 'prioridad'    => 'urgente',
             ]);
@@ -85,12 +86,13 @@ class PresupuestoControllerTest extends TestCase
         $response->assertRedirect(route('presupuestos.index'));
         $this->assertDatabaseHas('appointments', [
             'id'          => $this->presupuesto->id,
-            'precio_total'=> 100,
+            'precio_total'=> 125.5,
             'horas_total' => 60,
         ]);
         $this->assertDatabaseHas('appointment_component', [
             'appointment_id' => $this->presupuesto->id,
             'componente_id'  => $componente->id,
+            'precio_material'=> 25.5,
         ]);
     }
 

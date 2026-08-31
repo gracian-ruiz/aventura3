@@ -9,7 +9,8 @@
             <tr>
                 <th>Componente</th>
                 <th>Precio sin IVA</th>
-                <th>Precio con IVA</th>
+                <th>Mano de Obra</th>
+                <th>Material</th>
                 <th>Descuento</th>
                 <th>Total Final</th>
                 <th>Descripción</th>
@@ -25,27 +26,26 @@
             @endphp
             @foreach ($items as $item)
                 @php
-                    // Calcular el precio con IVA y sin IVA
-                    $precioConIVA = $item->total_precio;
-                    $precioSinIVA = $precioConIVA / (1 + $iva / 100);
-                    $ivaImporte = $precioConIVA - $precioSinIVA;
-
-                    // Calcular el descuento sobre el precio con IVA
-                    $descuento = $item->descuento ?? 0; // Descuento en porcentaje
-                    $descuentoMonto = ($precioConIVA * $descuento) / 100;
-                    $precioConDescuento = $precioConIVA - $descuentoMonto;
+                    $manoObra = (float) ($item->total_precio ?? 0);
+                    $material = (float) ($item->precio_material ?? 0);
+                    $descuento = (float) ($item->descuento ?? 0);
+                    $precioBruto = $manoObra + $material;
+                    $precioSinIVA = $precioBruto / (1 + $iva / 100);
+                    $ivaImporte = $precioBruto - $precioSinIVA;
+                    $precioConDescuento = max($precioBruto - $descuento, 0);
 
                     // Acumular valores para totales
                     $totalSinIVA += $precioSinIVA;
                     $totalIVA += $ivaImporte;
-                    $totalDescuento += $descuentoMonto;
+                    $totalDescuento += $descuento;
                     $totalConDescuento += $precioConDescuento;
                 @endphp
                 <tr>
                     <td>{{ str_contains(strtolower($item->componente_nombre), 'material') ? $item->texto : $item->componente_nombre }}</td>
                     <td>{{ number_format($precioSinIVA, 2) }}€</td>
-                    <td class="text-success fw-bold">{{ number_format($precioConIVA, 2) }}€</td>
-                    <td class="text-danger">-{{ number_format($descuento, 2) }}%</td>
+                    <td class="text-success fw-bold">{{ number_format($manoObra, 2) }}€</td>
+                    <td class="text-success fw-bold">{{ number_format($material, 2) }}€</td>
+                    <td class="text-danger">-{{ number_format($descuento, 2) }}€</td>
                     <td class="text-success fw-bold">{{ number_format($precioConDescuento, 2) }}€</td>
                     <td>{{ $item->texto }}</td>
                 </tr>

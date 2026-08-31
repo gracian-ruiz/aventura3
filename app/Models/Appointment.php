@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Schema;
 
 class Appointment extends Model
 {
@@ -57,8 +58,14 @@ class Appointment extends Model
 
     public function componentes(): BelongsToMany
     {
+        $pivotColumns = ['horas_trabajo', 'total_precio', 'texto', 'checked', 'usuario_taller_id'];
+
+        if (Schema::hasColumn('appointment_component', 'precio_material')) {
+            $pivotColumns[] = 'precio_material';
+        }
+
         return $this->belongsToMany(Component::class, 'appointment_component', 'appointment_id', 'componente_id')
-            ->withPivot('horas_trabajo', 'total_precio', 'texto','checked','usuario_taller_id');
+            ->withPivot($pivotColumns);
     }
 
     public function scopeBuscar($query, $search)

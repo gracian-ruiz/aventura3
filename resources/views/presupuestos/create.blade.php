@@ -99,7 +99,8 @@
                     <tr class="bg-gray-200">
                         <th class="border px-2 sm:px-4 py-2">Nombre</th>
                         <th class="border px-2 sm:px-4 py-2">Minutos</th>
-                        <th class="border px-2 sm:px-4 py-2">Precio</th>
+                        <th class="border px-2 sm:px-4 py-2">Precio Mano Obra</th>
+                        <th class="border px-2 sm:px-4 py-2">Precio Material</th>
                         <th class="border px-2 sm:px-4 py-2">Desc.</th>
                         <th class="border px-2 sm:px-4 py-2">Descripción</th>
                         <th class="border px-2 sm:px-4 py-2">Acción</th>
@@ -229,6 +230,9 @@ $(document).ready(function() {
                 </td>
                 <td class="border px-2 sm:px-4 py-2">
                     <input type="number" name="precios[]" value="${precio}" min="0" step="0.01" class="w-20 sm:w-full border rounded px-1 sm:px-2 py-1 text-xs sm:text-sm">
+                </td>
+                <td class="border px-2 sm:px-4 py-2">
+                    <input type="number" name="precio_materiales[]" value="0" min="0" step="0.01" class="w-20 sm:w-full border rounded px-1 sm:px-2 py-1 text-xs sm:text-sm">
                 </td>
                 <td class="border px-2 sm:px-4 py-2">
                     <input type="number" name="descuentos[]" value="0" min="0" step="1" class="w-20 sm:w-full border rounded px-1 sm:px-2 py-1 text-xs sm:text-sm" placeholder="Desc €">

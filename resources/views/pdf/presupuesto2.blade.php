@@ -54,7 +54,8 @@
             <tr>
                 <th>Componente</th>
                 <th>Precio sin IVA</th>
-                <th>precio con IVA</th>
+                <th>Mano de Obra</th>
+                <th>Material</th>
                 <th>Descuento</th>
                 <th>Total Final</th>
                 <th>Descripción</th>
@@ -66,35 +67,34 @@
                 $totalSinIVA = 0;
                 $totalIVA = 0;
                 $totalDescuento = 0;
-                $precioTotal = $presupuesto->precio_total;
-                $descuentoTotal = $presupuesto->descuento ?? 0;
-                $sumaPreciosConIVA = $items->sum('total_precio');
-                $precioproducto=0;
                 $precioproductototal=0;
                 $preciodescuentotototal=0;
             @endphp
             @foreach ($items as $item)
                 @php
-                    $precioConIVA = $item->total_precio;
+                    $manoObra = (float) ($item->total_precio ?? 0);
+                    $material = (float) ($item->precio_material ?? 0);
+                    $descuento = (float) ($item->descuento ?? 0);
+                    $precioConIVA = $manoObra + $material;
 
                     $precioSinIVA = $precioConIVA / (1 + $iva / 100);
                     $ivaImporte = $precioConIVA - $precioSinIVA;
 
                     $totalSinIVA += $precioSinIVA;
                     $totalIVA += $ivaImporte;
-                    $precioproducto = number_format($item->total_precio - ($item->total_precio * $item->descuento / 100), 2);
+                    $precioproducto = max($precioConIVA - $descuento, 0);
                     $precioproductototal += $precioproducto;
-                    $preciodescuentotototal += $item->total_precio - $precioproducto;
+                    $preciodescuentotototal += $descuento;
 
                 @endphp
                 <tr>
                     <td>{{ str_contains(strtolower($item->componente_nombre), 'material') ? $item->texto : $item->componente_nombre }}</td>
                     <td>{{ number_format($precioSinIVA, 2) }}€</td>
-                    <td class="text-success fw-bold">{{ $item->total_precio  }}€</td>
-                    <td class="text-danger">-{{ $item->descuento }}%</td>
+                    <td class="text-success fw-bold">{{ number_format($manoObra, 2) }}€</td>
+                    <td class="text-success fw-bold">{{ number_format($material, 2) }}€</td>
+                    <td class="text-danger">-{{ number_format($descuento, 2) }}€</td>
                     <td class="text-success fw-bold">
-                        {{-- Aplicar el descuento como porcentaje al precio total --}}
-                        {{ $precioproducto }}€
+                        {{ number_format($precioproducto, 2) }}€
                     </td>
                     <td>{{ $item->texto }}</td>
                 </tr>

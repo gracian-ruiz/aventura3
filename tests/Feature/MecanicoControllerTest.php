@@ -115,6 +115,7 @@ class MecanicoControllerTest extends TestCase
                 'componentes'  => [$componente->id],
                 'horas_trabajo'=> [60],
                 'precio'       => [50.00],
+                'precio_material' => [30.00],
                 'prioridad'    => 'urgente',
                 'descuento'    => [0],
             ]);
@@ -128,6 +129,7 @@ class MecanicoControllerTest extends TestCase
             'appointment_id' => $this->appointment->id,
             'componente_id'  => $componente->id,
             'horas_trabajo'  => 60,
+            'precio_material'=> 30,
         ]);
     }
 

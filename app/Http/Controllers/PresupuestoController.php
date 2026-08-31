@@ -11,6 +11,7 @@ use App\Models\Bike;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Appointment;
 use Carbon\Carbon;
 
@@ -101,16 +102,20 @@ public function index(Request $request)
 
     public function store(Request $request)
     {
+        $hasPrecioMaterial = Schema::hasColumn('appointment_component', 'precio_material');
+
         $request->validate([
             'bike_id' => 'required|exists:bikes,id',
             'componentes' => 'nullable|array',
             'horas_trabajo' => 'nullable|array',
             'precios' => 'nullable|array',
+            'precio_materiales' => 'nullable|array',
             'textos' => 'nullable|array',
             'descuentos' => 'nullable|array',
 
             'horas_trabajo.*' => 'nullable|integer|min:0',
             'precios.*' => 'nullable|numeric|min:0',
+            'precio_materiales.*' => 'nullable|numeric|min:0',
             'idprograma*' => 'nullable',
             'descuentos.*' => 'nullable|integer|min:0',
             'asignacion_taller' => 'nullable|array',
@@ -121,6 +126,7 @@ public function index(Request $request)
         $componentes = $request->componentes ?? [];
         $horasTrabajo = $request->horas_trabajo ?? [];
         $precios = $request->precios ?? [];
+        $precioMateriales = $request->precio_materiales ?? [];
         $textos = $request->textos ?? [];
         $descuentos = $request->descuentos ?? [];
 
@@ -128,6 +134,7 @@ public function index(Request $request)
             count($componentes) > 0 &&
             (count($componentes) !== count($horasTrabajo) ||
                 count($componentes) !== count($precios) ||
+                count($componentes) !== count($precioMateriales) ||
                 count($componentes) !== count($textos))
         ) {
             return redirect()->back()->withErrors(['error' => 'Los datos de los componentes no coinciden.']);
@@ -165,21 +172,29 @@ public function index(Request $request)
             if (count($componentes) > 0) {
                 foreach ($componentes as $index => $componenteId) {
                     $horas = (int) $horasTrabajo[$index];
-                    $precio = (float) $precios[$index];
+                    $precioManoObra = (float) $precios[$index];
+                    $precioMaterial = (float) ($precioMateriales[$index] ?? 0);
                     $texto = $textos[$index] ?? '';
                     $descuento = isset($descuentos[$index]) ? (int) $descuentos[$index] : 0;
+                    $precioBruto = $precioManoObra + $precioMaterial;
 
-                    AppointmentComponent::create([
+                    $itemData = [
                         'appointment_id' => $presupuesto->id,
                         'componente_id' => $componenteId,
                         'horas_trabajo' => $horas,
-                        'total_precio' => $precio,
+                        'total_precio' => $precioManoObra,
                         'texto' => $texto,
                         'descuento' => $descuento,
-                    ]);
+                    ];
+
+                    if ($hasPrecioMaterial) {
+                        $itemData['precio_material'] = $precioMaterial;
+                    }
+
+                    AppointmentComponent::create($itemData);
 
                     $totalHoras += $horas;
-                    $totalPrecio += max($precio - $descuento, 0);
+                    $totalPrecio += max($precioBruto - $descuento, 0);
                     $totalDescuento += $descuento;
                 }
 
@@ -297,6 +312,8 @@ public function index(Request $request)
 
     public function edit($id)
     {
+        $hasPrecioMaterial = Schema::hasColumn('appointment_component', 'precio_material');
+
         // Obtener el presupuesto con los datos de la bicicleta y el usuario
         $presupuesto = DB::table('appointments')
             ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
@@ -310,10 +327,10 @@ public function index(Request $request)
         }
 
         // Obtener todos los ítems asociados a este presupuesto
-        $presupuesto_items = DB::table('appointment_component')
+        $presupuestoItemsQuery = DB::table('appointment_component')
             ->join('components', 'appointment_component.componente_id', '=', 'components.id')
             ->where('appointment_component.appointment_id', $id)
-            ->select(
+            ->select([
                 'appointment_component.id',
                 'appointment_component.appointment_id',
                 'appointment_component.componente_id',
@@ -322,8 +339,15 @@ public function index(Request $request)
                 'appointment_component.horas_trabajo', // Ahora obtenemos las horas de trabajo editadas
                 'components.nombre as componente_nombre',
                 'appointment_component.descuento',
-            )
-            ->get();
+            ]);
+
+        if ($hasPrecioMaterial) {
+            $presupuestoItemsQuery->addSelect('appointment_component.precio_material');
+        } else {
+            $presupuestoItemsQuery->selectRaw('0 as precio_material');
+        }
+
+        $presupuesto_items = $presupuestoItemsQuery->get();
 
         $usuariosTaller = DB::table('users')
             ->whereIn('role', ['admin', 'taller'])
@@ -345,11 +369,14 @@ public function index(Request $request)
 
     public function update(Request $request, $id)
     {
+        $hasPrecioMaterial = Schema::hasColumn('appointment_component', 'precio_material');
+
         $request->validate([
             'bike_id' => 'required|exists:bikes,id',
             'componentes' => 'nullable|array',
             'horas_trabajo' => 'nullable|array',
             'precio' => 'nullable|array',
+            'precio_material' => 'nullable|array',
             'textos' => 'nullable|array',
             'descuento' => 'nullable|array',
             'asignacion_taller' => 'nullable|array',
@@ -383,21 +410,27 @@ public function index(Request $request)
 
                 foreach ($request->componentes as $index => $componente_id) {
                     $horas_trabajo = (int) $request->horas_trabajo[$index];
-                    $total_precio = (float) $request->precio[$index];
+                    $precio_mano_obra = (float) $request->precio[$index];
+                    $precio_material = (float) ($request->precio_material[$index] ?? 0);
                     $total_descuento = (float) $request->descuento[$index];
+                    $precio_bruto = $precio_mano_obra + $precio_material;
 
-                    $totalPresupuesto += $total_precio;
+                    $totalPresupuesto += max($precio_bruto - $total_descuento, 0);
                     $totalDescuento += $total_descuento;
                     $totalHoras += $horas_trabajo;
 
                     $datosItem = [
                         'appointment_id' => $id,
                         'horas_trabajo' => $horas_trabajo,
-                        'total_precio' => $total_precio,
+                        'total_precio' => $precio_mano_obra,
                         'descuento' => $total_descuento,
                         'texto' => $request->textos[$index] ?? '',
                         'updated_at' => now(),
                     ];
+
+                    if ($hasPrecioMaterial) {
+                        $datosItem['precio_material'] = $precio_material;
+                    }
 
                     if (isset($componentesActuales[$componente_id])) {
                         DB::table('appointment_component')
@@ -432,6 +465,7 @@ public function index(Request $request)
             }
 
             DB::commit();
+
             return redirect()->route('presupuestos.index', $this->buildIndexContextFromRequest($request))
                 ->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
@@ -531,11 +565,9 @@ public function index(Request $request)
 
 
 
-
     public function confirmarPresupuesto(Request $request, $presupuestoId)
     {
         $token = $request->query('token');
-
         // Obtener presupuesto y verificar token
         $presupuesto = DB::table('appointments')
             ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')

@@ -12,6 +12,7 @@ use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class MecanicoController extends Controller
 {
@@ -250,11 +251,14 @@ public function index(Request $request)
 
     public function updatedos(Request $request, $id)
     {
+        $hasPrecioMaterial = Schema::hasColumn('appointment_component', 'precio_material');
+
         $request->validate([
             'bike_id' => 'required|exists:bikes,id',
             'componentes' => 'required|array',
             'horas_trabajo' => 'required|array',
             'precio' => 'required|array',
+            'precio_material' => 'nullable|array',
             'textos' => 'nullable|array',
             'prioridad' => 'required|in:normal,urgente,premium',
             'descuento' => 'nullable|array', // Validación de descuentos
@@ -282,20 +286,26 @@ public function index(Request $request)
 
             foreach ($request->componentes as $index => $componente_id) {
                 $horas_trabajo = (int) $request->horas_trabajo[$index];
-                $total_precio = (float) $request->precio[$index];
+                $precio_mano_obra = (float) $request->precio[$index];
+                $precio_material = (float) ($request->precio_material[$index] ?? 0);
                 $descuento = isset($request->descuento[$index]) ? (float) $request->descuento[$index] : 0; // Obtener descuento
+                $precio_bruto = $precio_mano_obra + $precio_material;
 
-                $totalPresupuesto += $total_precio;
+                $totalPresupuesto += max($precio_bruto - $descuento, 0);
                 $totalHoras += $horas_trabajo;
 
                 $datosItem = [
                     'appointment_id' => $id,
                     'horas_trabajo' => $horas_trabajo,
-                    'total_precio' => $total_precio,
+                    'total_precio' => $precio_mano_obra,
                     'descuento' => $descuento, // Incluir descuento
                     'texto' => isset($request->textos[$index]) ? $request->textos[$index] : '', // Texto del trabajo
                     'updated_at' => now(),
                 ];
+
+                if ($hasPrecioMaterial) {
+                    $datosItem['precio_material'] = $precio_material;
+                }
 
                 if (isset($componentesActuales[$componente_id])) {
                     DB::table('appointment_component')
@@ -341,6 +351,8 @@ public function index(Request $request)
 
     public function edit(Request $request, $id)
     {
+        $hasPrecioMaterial = Schema::hasColumn('appointment_component', 'precio_material');
+
         // Obtener el presupuesto con los datos de la bicicleta y el usuario
         $presupuesto = DB::table('appointments')
             ->leftJoin('bikes', 'appointments.bike_id', '=', 'bikes.id')
@@ -354,10 +366,10 @@ public function index(Request $request)
         }
 
         // Obtener todos los ítems asociados a este presupuesto
-        $presupuesto_items = DB::table('appointment_component')
+        $presupuestoItemsQuery = DB::table('appointment_component')
             ->join('components', 'appointment_component.componente_id', '=', 'components.id')
             ->where('appointment_component.appointment_id', $id)
-            ->select(
+            ->select([
                 'appointment_component.id',
                 'appointment_component.appointment_id',
                 'appointment_component.componente_id',
@@ -366,8 +378,15 @@ public function index(Request $request)
                 'appointment_component.total_precio', // Ahora obtenemos el precio del presupuesto_item
                 'appointment_component.horas_trabajo', // Ahora obtenemos las horas de trabajo editadas
                 'components.nombre as componente_nombre'
-            )
-            ->get();
+            ]);
+
+        if ($hasPrecioMaterial) {
+            $presupuestoItemsQuery->addSelect('appointment_component.precio_material');
+        } else {
+            $presupuestoItemsQuery->selectRaw('0 as precio_material');
+        }
+
+        $presupuesto_items = $presupuestoItemsQuery->get();
 
 
         $usuariosTaller = DB::table('users')
@@ -544,11 +563,13 @@ private function recalcularFechasAsignadas()
 
     public function show(Request $request, $id)
     {
-        $appointment = DB::table('appointments')
+        $hasPrecioMaterial = Schema::hasColumn('appointment_component', 'precio_material');
+
+        $appointmentQuery = DB::table('appointments')
             ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
             ->leftJoin('appointment_component', 'appointments.id', '=', 'appointment_component.appointment_id')
             ->leftJoin('components', 'appointment_component.componente_id', '=', 'components.id') // Asegúrate de que es `componente_id`
-            ->select(
+            ->select([
                 'appointments.id as appointment_id',
                 'appointment_component.usuario_taller_id',
                 'appointments.presupuesto_id as presupuesto',
@@ -558,10 +579,18 @@ private function recalcularFechasAsignadas()
                 'components.nombre as component_nombre',
                 'appointment_component.horas_trabajo',
                 'appointment_component.total_precio',
+                'appointment_component.descuento',
                 'appointment_component.texto'
-            )
-            ->where('appointments.id', $id)
-            ->get();
+            ])
+            ->where('appointments.id', $id);
+
+        if ($hasPrecioMaterial) {
+            $appointmentQuery->addSelect('appointment_component.precio_material');
+        } else {
+            $appointmentQuery->selectRaw('0 as precio_material');
+        }
+
+        $appointment = $appointmentQuery->get();
 
 
         if ($appointment->isEmpty()) {

@@ -57,7 +57,8 @@
                     <tr class="bg-gray-200">
                         <th class="border px-4 py-2">Nombre</th>
                         <th class="border px-4 py-2">Minutos Taller</th>
-                        <th class="border px-4 py-2">Precio</th>
+                        <th class="border px-4 py-2">Precio Mano Obra</th>
+                        <th class="border px-4 py-2">Precio Material</th>
                         <th class="border px-4 py-2">Descuento</th>
                         <th class="border px-4 py-2">Descripción</th>
                         <th class="border px-4 py-2">Acción</th>
@@ -80,6 +81,11 @@
                         <!-- Precio: más estrecho -->
                         <td class="border px-2 py-2 w-20">
                             <input type="number" name="precio[]" value="{{ old('precio.' . $loop->index, $item->total_precio) }}" min="0" step="0.01"
+                                class="w-full border rounded px-2 py-1 text-sm">
+                        </td>
+
+                        <td class="border px-2 py-2 w-20">
+                            <input type="number" name="precio_material[]" value="{{ old('precio_material.' . $loop->index, $item->precio_material ?? 0) }}" min="0" step="0.01"
                                 class="w-full border rounded px-2 py-1 text-sm">
                         </td>
                     
@@ -174,6 +180,12 @@
                     </td>
                     <td class="border px-4 py-2">
                         <input type="number" name="precio[]" value="${componentPrecio}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                    </td>
+                    <td class="border px-4 py-2">
+                        <input type="number" name="precio_material[]" value="0" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                    </td>
+                    <td class="border px-4 py-2">
+                        <input type="number" name="descuento[]" value="0" min="0" step="0.01" class="w-full border rounded px-2 py-1">
                     </td>
                     <td class="border px-4 py-2">
                         <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">

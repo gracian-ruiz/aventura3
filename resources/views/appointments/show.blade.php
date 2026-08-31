@@ -20,7 +20,10 @@
                     <tr class="bg-gray-200">
                         <th class="border px-4 py-2">Componente</th>
                         <th class="border px-4 py-2">Minutos Taller</th>
-                        <th class="border px-4 py-2">Precio</th>
+                        <th class="border px-4 py-2">Precio Mano Obra</th>
+                        <th class="border px-4 py-2">Precio Material</th>
+                        <th class="border px-4 py-2">Descuento</th>
+                        <th class="border px-4 py-2">Total Línea</th>
                         <th class="border px-4 py-2">Descripción</th>
                         <th class="border px-4 py-2">Mecanico que edito</th>
                     </tr>
@@ -31,6 +34,9 @@
                             <td class="border px-4 py-2">{{ $item->component_nombre }}</td>
                             <td class="border px-4 py-2">{{ $item->horas_trabajo }}</td>
                             <td class="border px-4 py-2">{{ $item->total_precio }}€</td>
+                            <td class="border px-4 py-2">{{ number_format((float) ($item->precio_material ?? 0), 2) }}€</td>
+                            <td class="border px-4 py-2">{{ number_format((float) ($item->descuento ?? 0), 2) }}€</td>
+                            <td class="border px-4 py-2">{{ number_format(max(((float) $item->total_precio + (float) ($item->precio_material ?? 0)) - (float) ($item->descuento ?? 0), 0), 2) }}€</td>
                             <td class="border px-4 py-2">{{ $item->texto }}</td>
                             <td class="border px-4 py-2">{{ $item->usuario_taller_id }}</td>
                         </tr>

@@ -111,6 +111,7 @@ class AppointmentControllerTest extends TestCase
             'componente_id'  => Component::factory()->create()->id,
             'horas_trabajo'  => 30,
             'total_precio'   => 0,
+            'precio_material'=> 0,
             'checked'        => false,
             'created_at'     => now(),
             'updated_at'     => now(),

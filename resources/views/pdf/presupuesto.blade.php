@@ -34,12 +34,13 @@
             font-size: 9px;
         }
         /* Anchos específicos para cada columna */
-        th:nth-child(1), td:nth-child(1) { width: 20%; } /* Componente */
-        th:nth-child(2), td:nth-child(2) { width: 11%; text-align: right; } /* Precio sin IVA */
-        th:nth-child(3), td:nth-child(3) { width: 11%; text-align: right; } /* Precio con IVA */
-        th:nth-child(4), td:nth-child(4) { width: 10%; text-align: center; } /* Descuento */
-        th:nth-child(5), td:nth-child(5) { width: 12%; text-align: right; font-weight: bold; } /* Total Final */
-        th:nth-child(6), td:nth-child(6) { width: 36%; } /* Descripción */
+        th:nth-child(1), td:nth-child(1) { width: 18%; } /* Componente */
+        th:nth-child(2), td:nth-child(2) { width: 10%; text-align: right; } /* Precio sin IVA */
+        th:nth-child(3), td:nth-child(3) { width: 10%; text-align: right; } /* Mano de obra */
+        th:nth-child(4), td:nth-child(4) { width: 10%; text-align: right; } /* Material */
+        th:nth-child(5), td:nth-child(5) { width: 10%; text-align: right; } /* Descuento */
+        th:nth-child(6), td:nth-child(6) { width: 12%; text-align: right; font-weight: bold; } /* Total Final */
+        th:nth-child(7), td:nth-child(7) { width: 30%; } /* Descripción */
         
         .total { 
             font-weight: bold; 
@@ -98,7 +99,8 @@
             <tr>
                 <th>Componente</th>
                 <th>Precio sin IVA</th>
-                <th>Precio con IVA</th>
+                <th>Mano de Obra</th>
+                <th>Material</th>
                 <th>Descuento</th>
                 <th>Total Final</th>
                 <th>Descripción</th>
@@ -115,8 +117,10 @@
 
             @foreach ($items as $item)
                 @php
-                    $precioConIVA = (float) ($item->total_precio ?? 0);
+                    $manoObra = (float) ($item->total_precio ?? 0);
+                    $material = (float) ($item->precio_material ?? 0);
                     $descuento = (float) ($item->descuento ?? 0);
+                    $precioConIVA = $manoObra + $material;
 
                     // Precio sin IVA
                     $precioSinIVA = $precioConIVA / (1 + $iva / 100);
@@ -124,20 +128,21 @@
                     // IVA de la línea
                     $ivaImporte = $precioConIVA - $precioSinIVA;
 
-                    // Precio final con descuento
-                    $precioFinal = $precioConIVA - ($precioConIVA * $descuento / 100);
+                    // Precio final con descuento absoluto
+                    $precioFinal = max($precioConIVA - $descuento, 0);
 
                     // Acumular totales
                     $totalSinIVA += $precioSinIVA;
                     $totalIVA += $ivaImporte;
-                    $totalDescuento += ($precioConIVA - $precioFinal);
+                    $totalDescuento += $descuento;
                     $totalConDescuento += $precioFinal;
                 @endphp
                 <tr>
                     <td>{{ str_contains(strtolower($item->componente_nombre), 'material') ? $item->texto : $item->componente_nombre }}</td>
                     <td style="text-align: right;">{{ number_format($precioSinIVA, 2, ',', '.') }}€</td>
-                    <td style="text-align: right;">{{ number_format($precioConIVA, 2, ',', '.') }}€</td>
-                    <td style="text-align: center;">-{{ number_format($descuento, 2, ',', '.') }}%</td>
+                    <td style="text-align: right;">{{ number_format($manoObra, 2, ',', '.') }}€</td>
+                    <td style="text-align: right;">{{ number_format($material, 2, ',', '.') }}€</td>
+                    <td style="text-align: right;">-{{ number_format($descuento, 2, ',', '.') }}€</td>
                     <td style="text-align: right; font-weight: bold;">{{ number_format($precioFinal, 2, ',', '.') }}€</td>
                     <td style="font-size: 8px;">{{ $item->texto }}</td>
                 </tr>

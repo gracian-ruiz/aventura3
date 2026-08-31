@@ -16,6 +16,7 @@ class AppointmentComponent extends Model
         'componente_id',
         'texto',
         'total_precio',
+        'precio_material',
         'horas_trabajo',
         'checked',
         'usuario_taller_id',
