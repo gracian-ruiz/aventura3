@@ -9,6 +9,11 @@
 
 <!-- 🔹 Contenedor de ancho completo -->
 <div class="w-full px-4 sm:px-6 lg:px-10 mt-8">
+    @php
+        $indexContext = request()->only(['page', 'search', 'filtro']);
+        $returnUrl = url()->full();
+    @endphp
+
     <h1 class="text-2xl font-bold text-center mb-4">Órdenes pendientes para reparar</h1>
 
     <!-- 🔎 Buscador + Filtros -->
@@ -88,6 +93,10 @@
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="estado" value="en proceso">
+                                    <input type="hidden" name="return_page" value="{{ request('page') }}">
+                                    <input type="hidden" name="return_search" value="{{ request('search') }}">
+                                    <input type="hidden" name="return_filtro" value="{{ request('filtro') }}">
+                                    <input type="hidden" name="return_url" value="{{ $returnUrl }}">
                                     <button type="submit" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
                                         Revisar
                                     </button>
@@ -96,17 +105,17 @@
 
                             <!-- Botón Completar (solo si está en proceso) -->
                             @if($appointment->estado == 'en proceso')
-                                <a href="{{ route('mecanico.confirmCompletion', $appointment->id) }}" 
+                                <a href="{{ route('mecanico.confirmCompletion', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
                                    class="block px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 my-1">
                                     Finalizar
                                 </a>
-                                <a href="{{ route('mecanico.reparacion.show', $appointment->id) }}" 
+                                <a href="{{ route('mecanico.reparacion.show', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
                                    class="block px-3 py-1 bg-black text-white rounded-md hover:bg-gray-800 my-1">
                                    Reparación
                                 </a>
                             @endif
                             
-                            <a href="{{ route('mecanico.show', $appointment->id) }}" 
+                            <a href="{{ route('mecanico.show', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
                                class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-center">
                                 Ver
                             </a>
@@ -130,7 +139,7 @@
 
     <!-- Paginación -->
     <div class="mt-6">
-        {{ $appointments->appends(['search' => request('search'), 'filtro' => request('filtro')])->links() }}
+        {{ $appointments->appends(request()->query())->links() }}
     </div>
 </div>
 @endsection

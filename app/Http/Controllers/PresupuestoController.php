@@ -10,12 +10,25 @@ use App\Models\AppointmentComponent;
 use App\Models\Bike;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Appointment;
 use Carbon\Carbon;
 
 
 class PresupuestoController extends Controller
 {
+    private function buildIndexContextFromRequest(Request $request): array
+    {
+        $context = [
+            'page' => $request->input('return_page', $request->query('page')),
+            'search' => $request->input('return_search', $request->query('search')),
+            'origen' => $request->input('return_origen', $request->query('origen')),
+            'prioridad' => $request->input('return_prioridad', $request->query('prioridad')),
+        ];
+
+        return array_filter($context, static fn($value) => $value !== null && $value !== '');
+    }
+
 public function index(Request $request)
 {
     $search = $request->input('search');
@@ -191,7 +204,7 @@ public function index(Request $request)
 
 
 
-    public function factura($id)
+    public function factura(Request $request, $id)
     {
         // Obtener el presupuesto con la bicicleta y el usuario
         $presupuesto = DB::table('appointments')
@@ -233,7 +246,9 @@ public function index(Request $request)
             . "📎 Adjuntamos el PDF con los detalles.\n\n"
             . "🔗 Puedes confirmar el presupuesto pinchando aquí: si no estás de acuerdo dime qué quieres que hagamos y te mando nuevo presupuesto. Gracias: {$presupuestoUrl}";
 
-        return view('presupuestos.factura', compact('presupuesto', 'items', 'iva', 'mensaje'));
+        $indexContext = $this->buildIndexContextFromRequest($request);
+
+        return view('presupuestos.factura', compact('presupuesto', 'items', 'iva', 'mensaje', 'indexContext'));
     }
 
 
@@ -417,7 +432,8 @@ public function index(Request $request)
             }
 
             DB::commit();
-            return redirect()->route('presupuestos.index')->with('success', 'Presupuesto actualizado correctamente.');
+            return redirect()->route('presupuestos.index', $this->buildIndexContextFromRequest($request))
+                ->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('[PresupuestoController] Error en update', [
@@ -433,7 +449,8 @@ public function index(Request $request)
     {
         $resultado = $this->cita($request, $id);
 
-        return redirect()->route('presupuestos.index')->with($resultado['tipo'], $resultado['mensaje']);
+        return redirect()->route('presupuestos.index', $this->buildIndexContextFromRequest($request))
+            ->with($resultado['tipo'], $resultado['mensaje']);
     }
 
     public function cita($request, $id)
@@ -582,7 +599,7 @@ public function index(Request $request)
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         // Iniciar una transacción para asegurarnos de que ambas tablas se actualicen correctamente
         DB::beginTransaction();
@@ -598,7 +615,7 @@ public function index(Request $request)
             DB::commit();
 
             // Redirigir con éxito
-            return redirect()->route('presupuestos.index')
+            return redirect()->route('presupuestos.index', $this->buildIndexContextFromRequest($request))
                 ->with('success', 'Cita y componentes asociados eliminados correctamente.');
         } catch (\Exception $e) {
             DB::rollback();
@@ -606,7 +623,7 @@ public function index(Request $request)
                 'presupuesto_id' => $id,
                 'error'          => $e->getMessage(),
             ]);
-            return redirect()->route('presupuestos.index')
+            return redirect()->route('presupuestos.index', $this->buildIndexContextFromRequest($request))
                 ->with('error', 'Ocurrió un error al eliminar la cita: ' . $e->getMessage());
         }
     }

@@ -6,6 +6,10 @@
 
     <h1 class="text-2xl font-bold text-center mb-4">Listado de Presupuestos</h1>
 
+    @php
+        $indexContext = request()->only(['page', 'search', 'origen', 'prioridad']);
+    @endphp
+
     <!-- Formulario de Búsqueda -->
     <form method="GET" action="{{ route('presupuestos.index') }}" class="mb-4">
         <div class="flex justify-between">
@@ -188,6 +192,10 @@
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="estado" value="aprobado">
+                                <input type="hidden" name="return_page" value="{{ request('page') }}">
+                                <input type="hidden" name="return_search" value="{{ request('search') }}">
+                                <input type="hidden" name="return_origen" value="{{ request('origen') }}">
+                                <input type="hidden" name="return_prioridad" value="{{ request('prioridad') }}">
                                 <button type="submit" class="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 w-full">
                                     Aprobar
                                 </button>
@@ -197,6 +205,10 @@
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="estado" value="denegado">
+                                <input type="hidden" name="return_page" value="{{ request('page') }}">
+                                <input type="hidden" name="return_search" value="{{ request('search') }}">
+                                <input type="hidden" name="return_origen" value="{{ request('origen') }}">
+                                <input type="hidden" name="return_prioridad" value="{{ request('prioridad') }}">
                                 <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 w-full">
                                     Denegar
                                 </button>
@@ -206,12 +218,12 @@
                         <!-- 🟨 Editar / Ver Presupuesto -->
                         <td class="py-2 px-4 text-center">
                             <div class="flex flex-col space-y-2">
-                                <a href="{{ route('presupuestos.edit', $presupuesto->id) }}"
+                                          <a href="{{ route('presupuestos.edit', array_merge(['presupuesto' => $presupuesto->id], $indexContext)) }}"
                                    class="px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
                                    Editar
                                 </a>                       
 
-                                <a href="{{ url("/presupuestos/{$presupuesto->id}/factura") }}" 
+                                          <a href="{{ route('presupuestos.factura', array_merge(['id' => $presupuesto->id], $indexContext)) }}" 
                                    class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                                    Ver Presupuesto
                                 </a>
@@ -230,13 +242,17 @@
                                       onsubmit="return confirm('¿Estás seguro de que deseas eliminar este presupuesto?')">
                                     @csrf
                                     @method('DELETE')
+                                    <input type="hidden" name="return_page" value="{{ request('page') }}">
+                                    <input type="hidden" name="return_search" value="{{ request('search') }}">
+                                    <input type="hidden" name="return_origen" value="{{ request('origen') }}">
+                                    <input type="hidden" name="return_prioridad" value="{{ request('prioridad') }}">
                                     <button type="submit" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 w-full">
                                         Eliminar
                                     </button>
                                 </form>
 
                                 <!-- Enviar correo debajo -->
-                                <a href="{{ url("/enviar/correo/presupuesto/{$presupuesto->id}") }}" 
+                                <a href="{{ url("/enviar/correo/presupuesto/{$presupuesto->id}") . (count(array_filter($indexContext, fn($v) => $v !== null && $v !== '')) ? ('?' . http_build_query(array_filter($indexContext, fn($v) => $v !== null && $v !== ''))) : '') }}" 
                                     class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                                      Enviar correo
                                  </a>
@@ -250,7 +266,7 @@
 
     <!-- Paginación -->
     <div class="mt-6">
-        {{ $presupuestos->appends(['search' => request('search')])->links() }}
+        {{ $presupuestos->appends(request()->query())->links() }}
     </div>
 </div>
 @endsection

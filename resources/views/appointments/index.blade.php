@@ -9,6 +9,11 @@
 
 <div class="w-full px-4 sm:px-6 lg:px-8 mt-6">
 
+    @php
+        $indexContext = request()->only(['page', 'search', 'filtro']);
+        $returnUrl = url()->full();
+    @endphp
+
     <h1 class="text-2xl font-bold text-center mb-6">Órdenes pendientes para reparar</h1>
 
     <!-- 🔹 Línea: Buscador + Filtros -->
@@ -16,6 +21,7 @@
 
         <!-- 🟦 Buscador -->
         <form action="{{ route('appointments.index') }}" method="GET" class="flex items-center flex-1 max-w-2xl">
+            <input type="hidden" name="filtro" value="{{ request('filtro', 'todos') }}">
             <input 
                 type="text" 
                 name="search" 
@@ -118,7 +124,7 @@
 
                                 <!-- 🟩 Completar (ancho completo) -->
                                 @if($appointment->estado == 'en proceso')
-                                    <a href="{{ route('appointments.confirmCompletion', $appointment->id) }}" 
+                                    <a href="{{ route('appointments.confirmCompletion', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
                                        class="block w-full px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600">
                                         Completar
                                     </a>
@@ -126,7 +132,7 @@
 
                                 <!-- ⚫ Reparación (ancho completo) -->
                                 @if($appointment->estado == 'en proceso')
-                                    <a href="{{ route('appointments.reparacion.show', $appointment->id) }}" 
+                                    <a href="{{ route('appointments.reparacion.show', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
                                        class="block w-full px-3 py-1 bg-black text-white rounded-md hover:bg-gray-800">
                                         Reparación
                                     </a>
@@ -138,6 +144,10 @@
                                         @csrf
                                         @method('PUT')
                                         <input type="hidden" name="estado" value="en proceso">
+                                        <input type="hidden" name="return_page" value="{{ request('page') }}">
+                                        <input type="hidden" name="return_search" value="{{ request('search') }}">
+                                        <input type="hidden" name="return_filtro" value="{{ request('filtro') }}">
+                                        <input type="hidden" name="return_url" value="{{ $returnUrl }}">
                                         <button type="submit" class="w-full px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
                                             Revisar
                                         </button>
@@ -146,12 +156,12 @@
 
                                 <!-- 🟦 Editar y Ver (2x2) -->
                                 <div class="grid grid-cols-2 gap-2 w-full justify-center">
-                                    <a href="{{ route('appointments.edit', $appointment->id) }}" 
+                                    <a href="{{ route('appointments.edit', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
                                        class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-center">
                                         Editar
                                     </a>
 
-                                    <a href="{{ route('appointments.show', $appointment->id) }}" 
+                                    <a href="{{ route('appointments.show', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
                                        class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-center">
                                         Ver
                                     </a>
@@ -161,6 +171,10 @@
                                 <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" class="w-full">
                                     @csrf
                                     @method('DELETE')
+                                    <input type="hidden" name="return_page" value="{{ request('page') }}">
+                                    <input type="hidden" name="return_search" value="{{ request('search') }}">
+                                    <input type="hidden" name="return_filtro" value="{{ request('filtro') }}">
+                                        <input type="hidden" name="return_url" value="{{ $returnUrl }}">
                                     <button type="submit" 
                                             class="w-full px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
                                             onclick="return confirm('¿Seguro que quieres eliminar esta cita?')">
@@ -184,7 +198,7 @@
 
     <!-- 🔹 Paginación -->
     <div class="mt-6 text-center">
-        {{ $appointments->appends(['search' => request('search')])->links() }}
+        {{ $appointments->appends(request()->query())->links() }}
     </div>
 </div>
 @endsection

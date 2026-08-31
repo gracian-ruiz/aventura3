@@ -46,7 +46,7 @@
 
     <div class="mt-4 flex space-x-4">
         <!-- Botón Volver -->
-        <a href="{{ route('mecanico.index') }}" class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        <a href="{{ ($returnUrl ?? request('return_url')) ?: route('mecanico.index', $indexContext ?? []) }}" class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
             Volver a Citas
         </a>
 

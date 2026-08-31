@@ -16,6 +16,37 @@ use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
+    private function getReturnUrl(Request $request): ?string
+    {
+        $returnUrl = $request->input('return_url', $request->query('return_url'));
+
+        if (!is_string($returnUrl) || $returnUrl === '') {
+            return null;
+        }
+
+        return str_starts_with($returnUrl, url('/citas')) ? $returnUrl : null;
+    }
+
+    private function redirectToAppointmentsIndex(Request $request)
+    {
+        $returnUrl = $this->getReturnUrl($request);
+
+        return $returnUrl
+            ? redirect()->to($returnUrl)
+            : redirect()->route('appointments.index', $this->buildIndexContextFromRequest($request));
+    }
+
+    private function buildIndexContextFromRequest(Request $request): array
+    {
+        $context = [
+            'page' => $request->input('return_page', $request->query('page')),
+            'search' => $request->input('return_search', $request->query('search')),
+            'filtro' => $request->input('return_filtro', $request->query('filtro')),
+        ];
+
+        return array_filter($context, static fn($value) => $value !== null && $value !== '');
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -146,7 +177,7 @@ class AppointmentController extends Controller
 
 
 
-    public function confirmCompletion(Appointment $appointment)
+    public function confirmCompletion(Request $request, Appointment $appointment)
     {
         try {
             $data = DB::table('appointment_component')
@@ -175,15 +206,19 @@ class AppointmentController extends Controller
             $telefono = $user->telefono ?? 'No disponible';
             $nombre   = $user->name;
 
+            $indexContext = $this->buildIndexContextFromRequest($request);
+            $returnUrl = $this->getReturnUrl($request);
+
             return view('appointments.confirm', compact(
-                'appointment', 'data', 'faltanComponentes', 'mensaje', 'telefono', 'nombre'
+                'appointment', 'data', 'faltanComponentes', 'mensaje', 'telefono', 'nombre', 'indexContext', 'returnUrl'
             ));
         } catch (\Exception $e) {
             Log::error('[AppointmentController] Error en confirmCompletion', [
                 'appointment_id' => $appointment->id,
                 'error' => $e->getMessage(),
             ]);
-            return redirect()->route('appointments.index')->with('error', 'Error al cargar los datos de la cita.');
+            return $this->redirectToAppointmentsIndex($request)
+                ->with('error', 'Error al cargar los datos de la cita.');
         }
     }
 
@@ -240,7 +275,8 @@ class AppointmentController extends Controller
                 ]);
             }
 
-            return redirect()->route('appointments.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
+            return $this->redirectToAppointmentsIndex($request)
+                ->with('success', '✅ Cita completada y revisiones generadas correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('[AppointmentController] Error al completar cita', [
@@ -331,7 +367,8 @@ class AppointmentController extends Controller
 
             DB::commit();
 
-            return redirect()->route('appointments.index')->with('success', 'Presupuesto actualizado correctamente.');
+            return $this->redirectToAppointmentsIndex($request)
+                ->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('[AppointmentController] Error en updatedos', ['appointment_id' => $id, 'error' => $e->getMessage()]);
@@ -340,7 +377,7 @@ class AppointmentController extends Controller
     }
 
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         // Obtener el presupuesto con los datos de la bicicleta y el usuario
         $presupuesto = DB::table('appointments')
@@ -383,7 +420,10 @@ class AppointmentController extends Controller
         $bikes = DB::table('bikes')->get();
         $components = DB::table('components')->get();
 
-        return view('appointments.edit', compact('presupuesto', 'bikes', 'components', 'presupuesto_items', 'usuariosTaller'));
+        $indexContext = $this->buildIndexContextFromRequest($request);
+        $returnUrl = $this->getReturnUrl($request);
+
+        return view('appointments.edit', compact('presupuesto', 'bikes', 'components', 'presupuesto_items', 'usuariosTaller', 'indexContext', 'returnUrl'));
     }
 
 
@@ -399,7 +439,7 @@ class AppointmentController extends Controller
             $appointment->update(['estado' => $nuevoEstado]);
 
             if ($nuevoEstado === 'reparacion') {
-                return redirect()->route('appointments.repair', ['appointment' => $appointment->id])
+                return redirect()->route('appointments.repair', array_merge(['appointment' => $appointment->id], $this->buildIndexContextFromRequest($request)))
                     ->with('success', 'Cita en fase de reparación.');
             }
 
@@ -408,7 +448,8 @@ class AppointmentController extends Controller
                     ->with('success', 'Cita completada y revisiones generadas.');
             }
 
-            return redirect()->route('appointments.index')->with('success', 'Estado de la cita actualizado.');
+            return $this->redirectToAppointmentsIndex($request)
+                ->with('success', 'Estado de la cita actualizado.');
         } catch (\Exception $e) {
             Log::error('[AppointmentController] Error al actualizar estado', [
                 'appointment_id' => $appointment->id,
@@ -443,7 +484,7 @@ class AppointmentController extends Controller
         return view('appointments.historico', compact('completedAppointments', 'search'));
     }
 
-    public function destroy(Appointment $appointment)
+    public function destroy(Request $request, Appointment $appointment)
     {
         try {
             $esHistorico = $appointment->estado === 'completada';
@@ -451,7 +492,7 @@ class AppointmentController extends Controller
 
             return $esHistorico
                 ? redirect()->route('appointments.historico')->with('success', '✅ Cita eliminada del historial.')
-                : redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
+                : $this->redirectToAppointmentsIndex($request)->with('success', '✅ Cita eliminada correctamente.');
         } catch (\Exception $e) {
             Log::error('[AppointmentController] Error al eliminar cita', [
                 'appointment_id' => $appointment->id,
@@ -622,7 +663,7 @@ class AppointmentController extends Controller
 
 
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $appointment = DB::table('appointments')
             ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
@@ -648,10 +689,13 @@ class AppointmentController extends Controller
             abort(404, 'Cita no encontrada');
         }
 
-        return view('appointments.show', compact('appointment'));
+        $indexContext = $this->buildIndexContextFromRequest($request);
+        $returnUrl = $this->getReturnUrl($request);
+
+        return view('appointments.show', compact('appointment', 'indexContext', 'returnUrl'));
     }
 
-    public function showReparacion(Appointment $appointment)
+    public function showReparacion(Request $request, Appointment $appointment)
     {
         $data = DB::table('appointment_component')
             ->join('appointments', 'appointment_component.appointment_id', '=', 'appointments.id')
@@ -685,7 +729,10 @@ class AppointmentController extends Controller
             )
             ->get();
 
-        return view('appointments.reparacion', compact('appointment', 'data'));
+        $indexContext = $this->buildIndexContextFromRequest($request);
+        $returnUrl = $this->getReturnUrl($request);
+
+        return view('appointments.reparacion', compact('appointment', 'data', 'indexContext', 'returnUrl'));
     }
 
 
@@ -744,7 +791,8 @@ class AppointmentController extends Controller
                 $appointment->save();
             }
 
-            return redirect()->route('appointments.index')->with('success', 'Reparación actualizada exitosamente.');
+            return $this->redirectToAppointmentsIndex($request)
+                ->with('success', 'Reparación actualizada exitosamente.');
         } catch (\Exception $e) {
             Log::error('[AppointmentController] Error en updateReparacion', [
                 'appointment_id' => $appointment->id,
@@ -805,7 +853,7 @@ class AppointmentController extends Controller
 
 
 
-    public function quitarOrdenTaller(Appointment $appointment)
+    public function quitarOrdenTaller(Request $request, Appointment $appointment)
     {
         try {
             // Cambiar estado a presupuesto
@@ -813,7 +861,7 @@ class AppointmentController extends Controller
                 'estado' => 'presupuesto',
             ]);
 
-            return redirect()->route('appointments.index')
+            return $this->redirectToAppointmentsIndex($request)
                 ->with('success', '✅ La cita se ha pasado a estado presupuesto correctamente.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Error al actualizar la cita: ' . $e->getMessage());

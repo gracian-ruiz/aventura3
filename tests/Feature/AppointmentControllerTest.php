@@ -88,6 +88,7 @@ class AppointmentControllerTest extends TestCase
 
         // Forzamos fallo al simular un appointment cuyo ID no existe en la tabla
         // Usamos mock del modelo para lanzar excepción en delete()
+        /** @var Appointment $mock */
         $mock = $this->partialMock(Appointment::class, function ($mock) {
             $mock->shouldReceive('delete')->andThrow(new \Exception('DB error simulado'));
         });
@@ -95,7 +96,7 @@ class AppointmentControllerTest extends TestCase
         $mock->estado = 'pendiente';
 
         $controller = new \App\Http\Controllers\AppointmentController();
-        $response   = $controller->destroy($mock);
+        $response   = $controller->destroy(request(), $mock);
 
         $this->assertEquals(302, $response->getStatusCode());
     }

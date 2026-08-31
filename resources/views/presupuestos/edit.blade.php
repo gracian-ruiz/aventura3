@@ -4,9 +4,13 @@
 <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
     <h2 class="text-2xl font-bold mb-4">Editar Presupuesto</h2>
 
-    <form action="{{ route('presupuestos.update', $presupuesto->id) }}" method="POST">
+    <form action="{{ route('presupuestos.update', array_merge(['presupuesto' => $presupuesto->id], request()->only(['page', 'search', 'origen', 'prioridad']))) }}" method="POST">
         @csrf
         @method('PUT')
+        <input type="hidden" name="return_page" value="{{ request('page') }}">
+        <input type="hidden" name="return_search" value="{{ request('search') }}">
+        <input type="hidden" name="return_origen" value="{{ request('origen') }}">
+        <input type="hidden" name="return_prioridad" value="{{ request('prioridad') }}">
 
         <!-- Selección de Bicicleta -->
         <div class="mb-4">

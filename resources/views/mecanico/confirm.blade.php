@@ -38,9 +38,13 @@
     @endif
 
     <!-- Revisiones a Generar -->
-    <form action="{{ route('mecanico.complete', $appointment->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6" id="appointment-form">
+    <form action="{{ route('mecanico.complete', array_merge(['appointment' => $appointment->id, 'return_url' => ($returnUrl ?? request('return_url'))], $indexContext ?? [])) }}" method="POST" class="bg-white shadow-md rounded-lg p-6" id="appointment-form">
         @csrf
         @method('PUT')
+        <input type="hidden" name="return_page" value="{{ ($indexContext['page'] ?? '') }}">
+        <input type="hidden" name="return_search" value="{{ ($indexContext['search'] ?? '') }}">
+        <input type="hidden" name="return_filtro" value="{{ ($indexContext['filtro'] ?? '') }}">
+        <input type="hidden" name="return_url" value="{{ $returnUrl ?? request('return_url') }}">
 
         <h2 class="text-lg font-semibold mb-2">Revisiones a Generar:</h2>
         <ul class="list-disc pl-5 text-gray-700">
@@ -99,7 +103,7 @@
 
         <!-- Botones -->
         <div class="flex justify-between mt-6">
-            <a href="{{ route('mecanico.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+            <a href="{{ ($returnUrl ?? request('return_url')) ?: route('mecanico.index', $indexContext ?? []) }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
                 Volver
             </a>
 

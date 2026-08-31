@@ -4,9 +4,13 @@
 <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-8">Reparación de Cita - {{ $appointment->bike->nombre }}</h1>
 
-    <form action="{{ route('appointments.updateReparacion', $appointment->id) }}" method="POST">
+    <form action="{{ route('appointments.updateReparacion', array_merge(['appointment' => $appointment->id, 'return_url' => ($returnUrl ?? request('return_url'))], $indexContext ?? [])) }}" method="POST">
         @csrf
         @method('PUT')
+        <input type="hidden" name="return_page" value="{{ ($indexContext['page'] ?? '') }}">
+        <input type="hidden" name="return_search" value="{{ ($indexContext['search'] ?? '') }}">
+        <input type="hidden" name="return_filtro" value="{{ ($indexContext['filtro'] ?? '') }}">
+        <input type="hidden" name="return_url" value="{{ $returnUrl ?? request('return_url') }}">
 
         <div class="space-y-6">
             <div class="mt-6">
@@ -85,7 +89,7 @@
         <a href="{{ route('presupuestos.pdf', $appointment->id) }}" class="px-6 mr-5 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" style="background-color: #E1251B;">
             <i class="fas fa-file-pdf"></i> Descargar PDF Ultimo Presupuesto
         </a>
-        <a href="{{ route('appointments.edit', $appointment->id) }}" 
+        <a href="{{ route('appointments.edit', array_merge(['appointment' => $appointment->id, 'return_url' => ($returnUrl ?? request('return_url'))], $indexContext ?? [])) }}" 
             class="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
             Editar Presupuesto
         </a>            

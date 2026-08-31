@@ -66,7 +66,7 @@
 
 <!-- Botones -->
 <div class="mt-4 d-flex justify-content-center gap-3">
-    <a href="{{ route('presupuestos.index') }}" class="btn btn-secondary">
+    <a href="{{ route('presupuestos.index', $indexContext ?? []) }}" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Volver
     </a>
     <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" class="btn text-white" style="background-color: #E1251B;">

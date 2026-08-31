@@ -46,7 +46,7 @@
 
     <div class="mt-4 flex space-x-4">
         <!-- Botón Volver -->
-        <a href="{{ route('appointments.index') }}" 
+        <a href="{{ ($returnUrl ?? request('return_url')) ?: route('appointments.index', $indexContext ?? []) }}" 
         class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
             Volver a Citas
         </a>
@@ -65,6 +65,10 @@
             onsubmit="return confirm('⚠️ ¿Seguro que quieres devolver esta cita al estado presupuesto?');">
             @csrf
             @method('PATCH')
+            <input type="hidden" name="return_page" value="{{ ($indexContext['page'] ?? '') }}">
+            <input type="hidden" name="return_search" value="{{ ($indexContext['search'] ?? '') }}">
+            <input type="hidden" name="return_filtro" value="{{ ($indexContext['filtro'] ?? '') }}">
+            <input type="hidden" name="return_url" value="{{ $returnUrl ?? request('return_url') }}">
             <button type="submit" 
                     class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
                 Quitar del Taller

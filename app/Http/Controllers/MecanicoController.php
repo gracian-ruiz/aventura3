@@ -15,6 +15,37 @@ use Illuminate\Support\Facades\Log;
 
 class MecanicoController extends Controller
 {
+    private function getReturnUrl(Request $request): ?string
+    {
+        $returnUrl = $request->input('return_url', $request->query('return_url'));
+
+        if (!is_string($returnUrl) || $returnUrl === '') {
+            return null;
+        }
+
+        return str_starts_with($returnUrl, url('/mecanico')) ? $returnUrl : null;
+    }
+
+    private function buildIndexContextFromRequest(Request $request): array
+    {
+        $context = [
+            'page' => $request->input('return_page', $request->query('page')),
+            'search' => $request->input('return_search', $request->query('search')),
+            'filtro' => $request->input('return_filtro', $request->query('filtro')),
+        ];
+
+        return array_filter($context, static fn($value) => $value !== null && $value !== '');
+    }
+
+    private function redirectToMecanicoIndex(Request $request)
+    {
+        $returnUrl = $this->getReturnUrl($request);
+
+        return $returnUrl
+            ? redirect()->to($returnUrl)
+            : redirect()->route('mecanico.index', $this->buildIndexContextFromRequest($request));
+    }
+
 public function index(Request $request)
     {
         $userId = auth()->user()->id;
@@ -113,7 +144,7 @@ public function index(Request $request)
 
         return view('mecanico.index', compact('appointments', 'search', 'filtro'));
     }
-    public function confirmCompletion(Appointment $appointment)
+    public function confirmCompletion(Request $request, Appointment $appointment)
     {
         // Obtener los componentes de la cita
         $data = DB::table('appointment_component')
@@ -148,6 +179,9 @@ public function index(Request $request)
         $telefono = $user->telefono ?? 'No disponible';
         $nombre = $user->name;
 
+        $indexContext = $this->buildIndexContextFromRequest($request);
+        $returnUrl = $this->getReturnUrl($request);
+
         // Pasar todo a la vista
         return view('mecanico.confirm', compact(
             'appointment',
@@ -155,7 +189,9 @@ public function index(Request $request)
             'faltanComponentes',
             'mensaje',
             'telefono',
-            'nombre'
+            'nombre',
+            'indexContext',
+            'returnUrl'
         ));
     }
 
@@ -200,7 +236,8 @@ public function index(Request $request)
 
             DB::commit();
 
-            return redirect()->route('mecanico.index')->with('success', '✅ Cita completada y revisiones generadas correctamente.');
+            return $this->redirectToMecanicoIndex($request)
+                ->with('success', '✅ Cita completada y revisiones generadas correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('[MecanicoController] Error en complete', [
@@ -289,7 +326,8 @@ public function index(Request $request)
 
             DB::commit();
 
-            return redirect()->route('mecanico.index')->with('success', 'Presupuesto actualizado correctamente.');
+            return $this->redirectToMecanicoIndex($request)
+                ->with('success', 'Presupuesto actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('[MecanicoController] Error en updatedos', [
@@ -301,7 +339,7 @@ public function index(Request $request)
     }
 
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         // Obtener el presupuesto con los datos de la bicicleta y el usuario
         $presupuesto = DB::table('appointments')
@@ -344,7 +382,10 @@ public function index(Request $request)
         $bikes = DB::table('bikes')->get();
         $components = DB::table('components')->get();
 
-        return view('mecanico.edit', compact('presupuesto', 'bikes', 'components', 'presupuesto_items', 'usuariosTaller'));
+        $indexContext = $this->buildIndexContextFromRequest($request);
+        $returnUrl = $this->getReturnUrl($request);
+
+        return view('mecanico.edit', compact('presupuesto', 'bikes', 'components', 'presupuesto_items', 'usuariosTaller', 'indexContext', 'returnUrl'));
     }
 
 
@@ -359,7 +400,10 @@ public function index(Request $request)
         $appointment->update(['estado' => $nuevoEstado]);
 
         if ($nuevoEstado === 'reparacion') {
-            return redirect()->route('appointments.repair', ['appointment' => $appointment->id])
+            return redirect()->route('mecanico.reparacion.show', array_merge([
+                'appointment' => $appointment->id,
+                'return_url' => $this->getReturnUrl($request),
+            ], $this->buildIndexContextFromRequest($request)))
                 ->with('success', 'Cita en fase de reparación.');
         }
 
@@ -368,7 +412,8 @@ public function index(Request $request)
                 ->with('success', 'Cita completada y revisiones generadas.');
         }
 
-        return redirect()->route('mecanico.index')->with('success', 'Estado de la cita actualizado.');
+        return $this->redirectToMecanicoIndex($request)
+            ->with('success', 'Estado de la cita actualizado.');
     }
 
 
@@ -395,7 +440,7 @@ public function index(Request $request)
         return view('mecanico.historico', compact('completedAppointments', 'search'));
     }
 
-    public function destroy(Appointment $appointment)
+    public function destroy(Request $request, Appointment $appointment)
     {
         try {
             $wasCompleted = $appointment->estado === 'completada';
@@ -403,7 +448,7 @@ public function index(Request $request)
 
             return $wasCompleted
                 ? redirect()->route('appointments.historico')->with('success', '✅ Cita eliminada del historial.')
-                : redirect()->route('appointments.index')->with('success', '✅ Cita eliminada correctamente.');
+                : $this->redirectToMecanicoIndex($request)->with('success', '✅ Cita eliminada correctamente.');
         } catch (\Exception $e) {
             Log::error('[MecanicoController] Error en destroy', [
                 'appointment_id' => $appointment->id,
@@ -497,7 +542,7 @@ private function recalcularFechasAsignadas()
 }
 
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $appointment = DB::table('appointments')
             ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
@@ -523,10 +568,13 @@ private function recalcularFechasAsignadas()
             abort(404, 'Cita no encontrada');
         }
 
-        return view('mecanico.show', compact('appointment'));
+        $indexContext = $this->buildIndexContextFromRequest($request);
+        $returnUrl = $this->getReturnUrl($request);
+
+        return view('mecanico.show', compact('appointment', 'indexContext', 'returnUrl'));
     }
 
-    public function showReparacion(Appointment $appointment)
+    public function showReparacion(Request $request, Appointment $appointment)
     {
         // Obtener los componentes asociados a la cita con joins completos
         $data = DB::table('appointment_component')
@@ -563,8 +611,11 @@ private function recalcularFechasAsignadas()
             )
             ->get();
 
+        $indexContext = $this->buildIndexContextFromRequest($request);
+        $returnUrl = $this->getReturnUrl($request);
+
         // Pasamos todo a la vista
-        return view('mecanico.reparacion', compact('appointment', 'data'));
+        return view('mecanico.reparacion', compact('appointment', 'data', 'indexContext', 'returnUrl'));
     }
 
 
@@ -640,6 +691,7 @@ private function recalcularFechasAsignadas()
             $appointment->save();
         }
 
-        return redirect()->route('mecanico.index')->with('success', 'Reparación actualizada exitosamente.');
+        return $this->redirectToMecanicoIndex($request)
+            ->with('success', 'Reparación actualizada exitosamente.');
     }
 }
