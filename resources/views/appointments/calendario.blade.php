@@ -1,36 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9fafb;
-        }
-        #calendar {
-            margin: 0 auto;
-            font-size: 16px;   /* 🔹 aumenta el tamaño base */
-        }
-
-        /* 🔹 Texto de los eventos */
-        .fc .fc-daygrid-event {
-            font-size: 13px !important; /* más grande */
-            font-weight: bold !important;
-            padding: 6px 4px;
-        }
-
-        /* 🔹 Ajustar tamaño de los títulos de los días */
-        .fc .fc-col-header-cell-cushion {
-            font-size: 16px !important;
-            font-weight: bold;
-        }
-
-        /* 🔹 Ajustar tamaño del título del mes */
-        .fc .fc-toolbar-title {
-            font-size: 22px !important;
-        }
-    </style>
-
-    <div id="calendar"></div>
+    <div class="w-full px-4 sm:px-6 lg:px-10 mt-6">
+        <h1 class="app-title text-center mb-4">Calendario de Citas</h1>
+        <div class="app-calendar-shell">
+            <div id="calendar" class="app-calendar"></div>
+        </div>
+    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

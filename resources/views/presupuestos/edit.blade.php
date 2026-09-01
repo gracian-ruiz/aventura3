@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+<div class="w-full px-4 sm:px-6 lg:px-10 mt-8">
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
     <h2 class="text-2xl font-bold mb-4">Editar Presupuesto</h2>
 
     <form action="{{ route('presupuestos.update', array_merge(['presupuesto' => $presupuesto->id], request()->only(['page', 'search', 'origen', 'prioridad']))) }}" method="POST">
@@ -26,9 +27,9 @@
             </select>
         </div>
 
-                                <div class="mb-4 flex gap-4">
+                                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <!-- Campo Prioridad -->
-                                    <div class="w-1/2">
+                                    <div>
                                         <label for="prioridad" class="block text-gray-700">Prioridad</label>
                                             <select name="prioridad" class="w-full border px-4 py-2 rounded-md" required>
                                                 <option value="normal" {{ $presupuesto->prioridad == 'normal' ? 'selected' : '' }}>Normal</option>
@@ -38,14 +39,14 @@
                                     </div>
 
                                     <!-- Campo idprograma -->
-                                    <div class="w-1/2">
+                                    <div>
                                         <label for="idprograma" class="block text-gray-700">ID Programa</label>
                                         <input type="text" name="idprograma" id="idprograma" class="w-full border px-4 py-2 rounded-md" value="{{$presupuesto->idprograma }}">
                                     </div>
                                 </div>
-                                <div class="mb-4 flex gap-4">
+                                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <!-- 📅 Calendario -->
-                                    <div class="w-1/2">
+                                    <div>
                                         <label for="calendario" class="block text-gray-700">📅 Calendario</label>
                                         <input type="date" 
                                             name="calendario" 
@@ -56,7 +57,7 @@
 
                                     <!-- 💬 Problema del Cliente -->
                                     @if(!is_null($presupuesto->descripcion_cliente))
-                                        <div class="w-1/2">
+                                        <div>
                                             <label for="descripcion_cliente" class="block text-gray-700">💬 Problema del Cliente</label>
                                             <textarea name="descripcion_cliente"
                                                     id="descripcion_cliente"
@@ -85,20 +86,20 @@
                         
 
         <!-- Tabla de Componentes -->
-        <div class="mb-4">
-            <table class="w-full border-collapse border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border px-4 py-2">Nombre</th>
-                        <th class="border px-4 py-2">Minutos Taller</th>
-                        <th class="border px-4 py-2">Precio Mano Obra</th>
-                        <th class="border px-4 py-2">Precio Material</th>
-                        <th class="border px-4 py-2">Descuento</th>
-                        <th class="border px-4 py-2">Descripción</th>
-                        <th class="border px-4 py-2">Acción</th>
+        <div class="mb-4 overflow-x-auto">
+            <table class="w-full border-collapse border border-slate-300 rounded-lg overflow-hidden text-[15px]">
+                <thead class="bg-slate-800 text-white">
+                    <tr>
+                        <th class="border border-slate-700 px-4 py-3 text-left whitespace-nowrap">Nombre</th>
+                        <th class="border border-slate-700 px-4 py-3 text-left whitespace-nowrap">Minutos Taller</th>
+                        <th class="border border-slate-700 px-4 py-3 text-left whitespace-nowrap">Precio Mano Obra</th>
+                        <th class="border border-slate-700 px-4 py-3 text-left whitespace-nowrap">Precio Material</th>
+                        <th class="border border-slate-700 px-4 py-3 text-left whitespace-nowrap">Descuento</th>
+                        <th class="border border-slate-700 px-4 py-3 text-left whitespace-nowrap">Descripción</th>
+                        <th class="border border-slate-700 px-4 py-3 text-left whitespace-nowrap">Acción</th>
                     </tr>
                 </thead>
-                <tbody id="component-list">
+                <tbody id="component-list" class="bg-white text-slate-800">
                     @foreach($presupuesto_items as $item)
                     <tr data-id="{{ $item->componente_id }}">
                         <td class="border px-2 py-2">
@@ -169,7 +170,7 @@
 
         <div class="mb-4">
             <label class="block text-gray-700">Componentes</label>
-            <div class="flex items-center">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <select id="component-select" class="w-full border px-4 py-2 rounded-md select2">
                     <option value="">Selecciona un componente</option>
                     @foreach($components as $component)
@@ -181,7 +182,7 @@
                         </option>
                     @endforeach
                 </select>
-                <button type="button" id="add-component" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                <button type="button" id="add-component" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 whitespace-nowrap">
                     + Añadir
                 </button>
             </div>
@@ -195,12 +196,9 @@
         </div>
     </form>
 </div>
+    </div>
 
 <!-- Agregar Select2 y lógica para manejar componentes -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
 <script>
     $(document).ready(function() {
         // Selección de componente con Select2

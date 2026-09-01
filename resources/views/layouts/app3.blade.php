@@ -19,7 +19,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-gray-100 m-0 p-0">
+<body class="font-sans antialiased m-0 p-0">
 
     <div class="min-h-screen d-flex flex-column">
         {{-- @include('layouts.navigation2') --}}
@@ -32,8 +32,8 @@
         @endif
 
         <!-- Page Content -->
-        <main class="flex-grow w-100">
-            <div class="w-100 px-3 pt-3">
+        <main class="flex-grow w-100 app-content">
+            <div class="w-100">
                 @yield('content')
             </div>
         </main>

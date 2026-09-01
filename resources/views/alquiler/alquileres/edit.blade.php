@@ -1,7 +1,7 @@
 @extends('layouts.app2')
 
 @section('content')
-<div class="container">
+<div class="w-full px-4 sm:px-6 lg:px-10 mt-8">
     <h1 class="text-2xl font-bold mb-4">Editar Alquiler</h1>
 
     {{-- Formulario para actualizar datos del alquiler --}}
@@ -109,7 +109,7 @@
 
 
 {{-- Formulario para añadir material al alquiler --}}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+<div class="w-full px-0 mt-8">
     <h1 class="text-2xl font-bold text-center mb-6">Crear Alquiler</h1>
 
     @if ($errors->any())
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         <!-- Nombre del material arriba con checkbox -->
                                         <div class="flex items-center space-x-2 mb-2">
                                             <input type="hidden" name="materiales[${mat.id}][id]" value="${mat.id}">
-                                            <input type="checkbox" id="material_${mat.id}" name="materiales[${mat.id}][selected]" value="on" class="h-5 w-5 text-green-600" style="margin-right: 5px;">
+                                            <input type="checkbox" id="material_${mat.id}" name="materiales[${mat.id}][selected]" value="on" class="h-5 w-5 text-green-600 mr-1">
                                             <label for="material_${mat.id}" class="text-green-700 text-lg font-semibold">
                                                 ${mat.nombre} ${mat.descripcion} ${tipoBonito(mat.tipo)} (${mat.talla})
                                             </label>

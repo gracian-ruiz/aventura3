@@ -1,7 +1,7 @@
 @extends('layouts.app2')
 
 @section('content')
-<div class="container mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 mt-8 bg-white shadow-md rounded-lg p-6">
+<div class="w-full px-4 sm:px-6 lg:px-10 mt-8 bg-white shadow-md rounded-lg p-4 sm:p-6">
     <h1 class="text-2xl font-bold text-center mb-6">Editar Material</h1>
 
     @if(session('error'))

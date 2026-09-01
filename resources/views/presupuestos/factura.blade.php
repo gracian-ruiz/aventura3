@@ -2,7 +2,7 @@
 
 @section('content')
 
-<h3 class="mt-4 mb-3">Detalles:</h3>
+<h3 class="app-title mt-4 mb-3">Detalles:</h3>
 <div class="table-responsive">
     <table class="table table-striped table-hover">
         <thead class="table-dark">
@@ -65,21 +65,21 @@
 </div>
 
 <!-- Botones -->
-<div class="mt-4 d-flex justify-content-center gap-3">
-    <a href="{{ route('presupuestos.index', $indexContext ?? []) }}" class="btn btn-secondary">
+<div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+    <a href="{{ route('presupuestos.index', $indexContext ?? []) }}" class="app-btn bg-gray-500 text-white hover:bg-gray-600">
         <i class="fas fa-arrow-left"></i> Volver
     </a>
-    <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" class="btn text-white" style="background-color: #E1251B;">
+    <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" class="app-btn app-btn-pdf">
         <i class="fas fa-file-pdf"></i> Descargar PDF
     </a>            
 </div>
 
 <br>
-<button onclick="copiarMensaje()" class="btn btn-sm btn-outline-primary position-absolute" style="top: 10px; right: 10px;background: red;">
+<button onclick="copiarMensaje()" class="app-btn app-btn-danger app-floating-action">
     COPIAR TEXTO AQUI PARA PONERSELO AL CLIENTE
 </button>
 <!-- Mensaje para enviar al cliente -->
-<div class="alert alert-info mt-5 p-4 relative" style="font-size: 1.3rem; line-height: 1.8; background-color: #e9f7fe; border-left: 6px solid #17a2b8;">
+<div class="alert alert-info mt-5 p-4 relative app-note-panel">
     <strong>Mensaje para enviar al cliente:</strong><br><br>
     <div id="mensaje-cliente">
         {!! nl2br(e($mensaje)) !!}
@@ -104,89 +104,5 @@
 </script>
 
 
-
-<style>
-    .table-responsive {
-        margin-top: 20px;
-    }
-
-    .table-striped tbody tr:nth-of-type(odd) {
-        background-color: #f9f9f9;
-    }
-
-    .table-dark th {
-        background-color: #343a40;
-        color: white;
-        text-align: center;
-    }
-
-    .table td, .table th {
-        text-align: right;
-        padding: 10px;
-    }
-
-    .text-success {
-        color: #28a745;
-        font-weight: bold;
-    }
-
-    .text-danger {
-        color: #dc3545;
-        font-weight: bold;
-    }
-
-    .fs-4 {
-        font-size: 1.25rem;
-        font-weight: bold;
-    }
-
-    .badge.bg-success {
-        background-color: #28a745;
-        color: white;
-        font-size: 1.2rem;
-        padding: 3px 15px;
-        border-radius: 10px;
-    }
-
-    .row.mt-4 {
-        margin-top: 30px;
-        font-size: 1.2rem;
-        padding-top: 20px;
-    }
-
-    .col-md-6 p {
-        margin-bottom: 10px;
-    }
-
-    .btn {
-        font-size: 1rem;
-        padding: 10px 20px;
-        border-radius: 5px;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background-color: #5a6268;
-    }
-
-    .btn.text-white {
-        background-color: #E1251B;
-        color: white;
-    }
-
-    .btn.text-white:hover {
-        background-color: #c70000;
-    }
-
-    .d-flex {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-    }
-</style>
 
 @endsection

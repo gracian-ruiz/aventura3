@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 mt-8">
+<div class="w-full px-4 sm:px-6 lg:px-10 mt-8">
     <h1 class="text-2xl font-bold text-center mb-4">Editar Componente</h1>
 
     <form action="{{ route('components.update', $component->id) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">

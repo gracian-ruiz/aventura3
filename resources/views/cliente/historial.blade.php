@@ -28,7 +28,7 @@
                             <td>{{ $cita->fecha_asignada ?? '—' }}</td>
                             <td>{{ ucfirst($cita->prioridad) }}</td>
                             <td>
-                                <span class="badge bg-{{ $cita->estado === 'completada' ? 'success' : ($cita->estado === 'en proceso' ? 'warning' : 'secondary') }}">
+                                <span class="app-badge {{ $cita->estado === 'completada' ? 'app-badge-status-completada' : ($cita->estado === 'en proceso' ? 'app-badge-status-proceso' : 'app-badge-status-pendiente') }}">
                                     {{ ucfirst($cita->estado) }}
                                 </span>
                             </td>

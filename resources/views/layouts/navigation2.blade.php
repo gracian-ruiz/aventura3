@@ -1,23 +1,23 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="app-nav border-b border-gray-100 shadow-sm">
     <!-- Contenedor Principal -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="app-nav-shell px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <!-- Logo -->
-            <div class="flex items-center">
+            <div class="flex items-center shrink-0 w-[84px] justify-center">
                 <a href="{{ route('users.index') }}">
                     <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                 </a>
             </div>
 
             <!-- Menú de Navegación (Escritorio) -->
-            <div class="hidden md:flex space-x-8">
+            <div class="hidden md:flex app-nav-main flex-1 mx-4 min-w-0 items-center gap-3 overflow-x-auto whitespace-nowrap">
                 @if(Auth::user()->role === 'admin')
-                    <x-nav-link :href="route('usuarios_alquiler.index')" :active="request()->routeIs('usuarios_alquiler.index')">Usuarios</x-nav-link>
-                    <x-nav-link :href="route('material.index')" :active="request()->routeIs('material.index')">Material</x-nav-link>
-                    <x-nav-link :href="route('alquileres.index')" :active="request()->routeIs('alquileres.index')">Alquileres</x-nav-link>
-                    <x-nav-link :href="route('alquileres.finalizado')" :active="request()->routeIs('alquileres.finalizado')">Alquileres finalizado</x-nav-link>
-                    <x-nav-link :href="route('addbicismontaña')" :active="request()->routeIs('addbicismontaña')">Alquileres formulario</x-nav-link>
-                    <x-nav-link :href="route('calendarioAlquiler')" :active="request()->routeIs('calendarioAlquiler')">Calendario</x-nav-link>
+                    <a href="{{ route('usuarios_alquiler.index') }}" class="app-nav-item {{ request()->routeIs('usuarios_alquiler.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Usuarios</a>
+                    <a href="{{ route('material.index') }}" class="app-nav-item {{ request()->routeIs('material.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Material</a>
+                    <a href="{{ route('alquileres.index') }}" class="app-nav-item {{ request()->routeIs('alquileres.*') && !request()->routeIs('alquileres.finalizado') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Alquileres activos</a>
+                    <a href="{{ route('alquileres.finalizado') }}" class="app-nav-item {{ request()->routeIs('alquileres.finalizado*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Finalizados</a>
+                    <a href="{{ route('addbicismontaña') }}" class="app-nav-item {{ request()->routeIs('addbicismontaña') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Formulario web</a>
+                    <a href="{{ route('calendarioAlquiler') }}" class="app-nav-item {{ request()->routeIs('calendarioAlquiler') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Calendario</a>
                 @endif
             </div>
 
@@ -41,7 +41,7 @@
 
 
             <!-- Botón de Usuario (Escritorio) -->
-            <div class="hidden md:flex items-center">
+            <div class="hidden md:flex items-center shrink-0 ml-4">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none">

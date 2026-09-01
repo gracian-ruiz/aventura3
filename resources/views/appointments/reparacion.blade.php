@@ -86,7 +86,7 @@
     <br><br>
     <!-- Botones -->
     <div class="mt-4 d-flex justify-content-center gap-3">
-        <a href="{{ route('presupuestos.pdf', $appointment->id) }}" class="px-6 mr-5 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" style="background-color: #E1251B;">
+        <a href="{{ route('presupuestos.pdf', $appointment->id) }}" class="app-btn app-btn-pdf px-6 mr-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
             <i class="fas fa-file-pdf"></i> Descargar PDF Ultimo Presupuesto
         </a>
         <a href="{{ route('appointments.edit', array_merge(['appointment' => $appointment->id, 'return_url' => ($returnUrl ?? request('return_url'))], $indexContext ?? [])) }}" 

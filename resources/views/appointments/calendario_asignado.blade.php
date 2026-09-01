@@ -1,47 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f9fafb;
-    }
-
-    #calendar {
-        margin: 0 auto;
-        font-size: 16px;
-    }
-
-    /* 🎨 Estilos elegantes para eventos */
-    .fc .fc-daygrid-event {
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        padding: 6px 4px;
-        border: none !important;
-        border-radius: 6px !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    }
-
-    /* 🔹 Eliminar el punto lateral de color */
-    .fc-daygrid-event-dot {
-        display: none !important;
-    }
-
-    /* 🔹 Títulos de día y mes */
-    .fc .fc-col-header-cell-cushion {
-        font-size: 16px !important;
-        font-weight: 700;
-        color: #374151;
-    }
-
-    .fc .fc-toolbar-title {
-        font-size: 22px !important;
-        font-weight: 700;
-        color: #111827;
-    }
-</style>
-
-<div id="calendar"></div>
+<div class="w-full px-4 sm:px-6 lg:px-10 mt-6">
+    <h1 class="app-title text-center mb-4">Calendario Asignado</h1>
+    <div class="app-calendar-shell">
+        <div id="calendar" class="app-calendar"></div>
+    </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

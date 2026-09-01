@@ -14,26 +14,46 @@
         $returnUrl = url()->full();
     @endphp
 
-    <h1 class="text-2xl font-bold text-center mb-4">Órdenes pendientes para reparar</h1>
+    <h1 class="app-title text-center mb-4">Órdenes pendientes para reparar</h1>
 
     <!-- 🔎 Buscador + Filtros -->
-    <form action="{{ route('mecanico.index') }}" method="GET" class="mb-4 flex flex-wrap items-center gap-2">
-        <input type="text" name="search" placeholder="Buscar por bicicleta, usuario o componente..." 
-               class="border px-4 py-2 rounded-md flex-1 min-w-[250px]"
-               value="{{ request('search') }}">
+    <div class="app-toolbar">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
+        <form action="{{ route('mecanico.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center flex-1 gap-2 mb-0">
+            <input type="hidden" name="filtro" value="{{ request('filtro', 'todos') }}">
+            <input type="text" name="search" placeholder="Buscar por bicicleta, usuario o componente..." 
+                class="border border-gray-300 px-4 py-2 rounded-md sm:rounded-l-md sm:rounded-r-none w-full text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value="{{ request('search') }}">
 
-        <select name="filtro" class="border px-4 py-2 rounded-md">
-            <option value="todos" {{ request('filtro') == 'todos' ? 'selected' : '' }}>Todos</option>
-            <option value="proceso" {{ request('filtro') == 'proceso' ? 'selected' : '' }}>En proceso</option>
-            <option value="sin-hacer" {{ request('filtro') == 'sin-hacer' ? 'selected' : '' }}>Pendientes</option>
-            <option value="premium" {{ request('filtro') == 'premium' ? 'selected' : '' }}>Premium</option>
-            <option value="incidencia" {{ request('filtro') == 'incidencia' ? 'selected' : '' }}>Con incidencia</option>
-        </select>
-
-        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-            Buscar
-        </button>
-    </form>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md sm:rounded-l-none sm:rounded-r-md hover:bg-blue-600 whitespace-nowrap">
+                Buscar
+            </button>
+        </form>
+        <div class="flex flex-wrap gap-2 xl:justify-end xl:max-w-[48%]">
+            @php
+                $botones = [
+                    'todos' => 'Todos',
+                    'proceso' => 'En proceso',
+                    'incidencia' => 'Incidencias',
+                    'sin-hacer' => 'Sin hacer',
+                    'premium' => 'Premium',
+                ];
+            @endphp
+            @foreach ($botones as $key => $label)
+                <a href="{{ route('mecanico.index', ['filtro' => $key, 'search' => request('search')]) }}"
+                   class="px-3 py-2 rounded-md font-semibold transition
+                   {{ request('filtro', 'todos') === $key
+                        ? 'bg-blue-600 text-white shadow-md scale-105'
+                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300' }}">
+                    {{ $label }}
+                </a>
+            @endforeach
+        </div>
+        </div>
+        <div class="mt-2 text-sm text-slate-600">
+            Mostrando {{ $appointments->count() }} de {{ $appointments->total() }} órdenes
+        </div>
+    </div>
 
     @if (session('success'))
         <div class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
@@ -43,15 +63,15 @@
 
     <!-- 🔹 Tabla a pantalla completa -->
     <div class="overflow-x-auto mt-6">
-        <table class="w-full bg-white shadow-md rounded-lg">
+        <table class="w-full bg-white shadow-md rounded-lg table-mobile-friendly">
             <thead class="bg-gray-800 text-white">
                 <tr>
                     <th class="py-2 px-4 text-left">Bicicleta</th>
                     <th class="py-2 px-4 text-left">Usuario</th>
                     <th class="py-2 px-4 text-left">Componentes</th>
-                    <th class="py-2 px-4 text-left">Prioridad</th>
+                    <th class="py-2 px-4 text-left min-w-[120px]">Prioridad</th>
                     <th class="py-2 px-4 text-left">Tiempo de Reparación</th>
-                    <th class="py-2 px-4 text-center">Acciones</th>
+                    <th class="py-2 px-4 text-center min-w-[220px]">Acciones</th>
                     <th class="py-2 px-4 text-left">Mecánico</th>
                 </tr>
             </thead>
@@ -73,20 +93,21 @@
                                 N/A
                             @endif
                         </td>
-                        <td class="py-2 px-4">
-                            <span class="px-2 py-1 rounded-full text-xs font-bold 
+                        <td class="py-2 px-4 min-w-[120px]">
+                            <span class="app-badge
                                 @if ($appointment->prioridad == 'urgente')
-                                    bg-red-500 text-white
+                                    app-badge-priority-urgente
                                 @elseif ($appointment->prioridad == 'premium')
-                                    bg-black text-white border border-gray-700 shadow-sm
+                                    app-badge-priority-premium
                                 @else
-                                    bg-blue-500 text-white
-                                @endif">
+                                    app-badge-priority-normal
+                                @endif whitespace-nowrap min-w-[88px] justify-center">
                                 {{ ucfirst($appointment->prioridad) }}
                             </span>
                         </td>
                         <td class="py-2 px-4">{{ $appointment->horas_total }} min</td>
-                        <td class="py-2 px-4 text-center">
+                        <td class="py-2 px-4 text-center min-w-[220px]">
+                            <div class="flex flex-col items-center justify-center gap-2 min-w-[190px] mx-auto">
                             <!-- Botón Revisar (solo si está pendiente) -->
                             @if($appointment->estado == 'pendiente')
                                 <form action="{{ route('mecanico.updateEstado', $appointment->id) }}" method="POST" class="inline-block">
@@ -97,7 +118,7 @@
                                     <input type="hidden" name="return_search" value="{{ request('search') }}">
                                     <input type="hidden" name="return_filtro" value="{{ request('filtro') }}">
                                     <input type="hidden" name="return_url" value="{{ $returnUrl }}">
-                                    <button type="submit" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                                    <button type="submit" class="px-3 py-1 min-w-[112px] whitespace-nowrap bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
                                         Revisar
                                     </button>
                                 </form>
@@ -106,19 +127,20 @@
                             <!-- Botón Completar (solo si está en proceso) -->
                             @if($appointment->estado == 'en proceso')
                                 <a href="{{ route('mecanico.confirmCompletion', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
-                                   class="block px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 my-1">
+                                   class="block px-3 py-1 min-w-[112px] whitespace-nowrap bg-green-500 text-white rounded-md hover:bg-green-600 text-center">
                                     Finalizar
                                 </a>
                                 <a href="{{ route('mecanico.reparacion.show', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
-                                   class="block px-3 py-1 bg-black text-white rounded-md hover:bg-gray-800 my-1">
+                                   class="block px-3 py-1 min-w-[112px] whitespace-nowrap bg-black text-white rounded-md hover:bg-gray-800 text-center">
                                    Reparación
                                 </a>
                             @endif
                             
                             <a href="{{ route('mecanico.show', array_merge(['appointment' => $appointment->id, 'return_url' => $returnUrl], $indexContext)) }}" 
-                               class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-center">
+                               class="px-3 py-1 min-w-[84px] whitespace-nowrap bg-gray-500 text-white rounded-md hover:bg-gray-600 text-center">
                                 Ver
                             </a>
+                            </div>
                         </td>
                         <td class="py-2 px-4">
                             @foreach ($appointment->usuarios_asignados as $usuario)

@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-bold mb-4">Detalles de la Cita</h2>
+<div class="w-full lg:max-w-5xl mx-auto app-panel p-6">
+    <h2 class="app-title mb-4">Detalles de la Cita</h2>
 
     @if ($appointment->isNotEmpty())
         <!-- Información de la Bicicleta -->
@@ -50,16 +50,16 @@
         <p class="text-gray-600">No se encontró la cita.</p>
     @endif
 
-    <div class="mt-4 flex space-x-4">
+    <div class="mt-6 flex flex-wrap gap-3">
         <!-- Botón Volver -->
-        <a href="{{ ($returnUrl ?? request('return_url')) ?: route('mecanico.index', $indexContext ?? []) }}" class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        <a href="{{ ($returnUrl ?? request('return_url')) ?: route('mecanico.index', $indexContext ?? []) }}" class="app-btn app-btn-primary">
             Volver a Citas
         </a>
 
         <!-- Botón Descargar Presupuesto -->
         @if (!empty($appointment[0]->presupuesto))
-        <a href="{{ route('presupuestos.pdf', $appointment[0]->presupuesto) }}" 
-           class="btn text-white px-4 py-2 rounded-md" style="background-color: #E1251B;">
+          <a href="{{ route('presupuestos.pdf', $appointment[0]->presupuesto) }}" 
+              class="app-btn app-btn-pdf">
             <i class="fas fa-file-pdf"></i> Descargar PDF
         </a>
     @endif

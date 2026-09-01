@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-bold mb-4">Detalles de la Cita</h2>
+<div class="w-full lg:max-w-5xl mx-auto app-panel p-6">
+    <h2 class="app-title mb-4">Detalles de la Cita</h2>
 
     @if ($appointment->isNotEmpty())
         <!-- Información de la Bicicleta -->
@@ -50,17 +50,17 @@
         <p class="text-gray-600">No se encontró la cita.</p>
     @endif
 
-    <div class="mt-4 flex space-x-4">
+    <div class="mt-6 flex flex-wrap gap-3">
         <!-- Botón Volver -->
         <a href="{{ ($returnUrl ?? request('return_url')) ?: route('appointments.index', $indexContext ?? []) }}" 
-        class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        class="app-btn app-btn-primary">
             Volver a Citas
         </a>
 
         <!-- Botón Descargar Presupuesto -->
         @if (!empty($appointment[0]->appointment_id))
             <a href="{{ route('presupuestos.pdf', $appointment[0]->appointment_id) }}" 
-            class="btn text-white px-4 py-2 rounded-md" style="background-color: #E1251B;">
+            class="app-btn app-btn-pdf">
                 <i class="fas fa-file-pdf"></i> Descargar PDF
             </a>
         @endif
@@ -76,7 +76,7 @@
             <input type="hidden" name="return_filtro" value="{{ ($indexContext['filtro'] ?? '') }}">
             <input type="hidden" name="return_url" value="{{ $returnUrl ?? request('return_url') }}">
             <button type="submit" 
-                    class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                    class="app-btn bg-yellow-500 text-white hover:bg-yellow-600">
                 Quitar del Taller
             </button>
         </form>

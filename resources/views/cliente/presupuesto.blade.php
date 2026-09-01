@@ -8,7 +8,7 @@
         <div class="card-body">
             <h5 class="card-title text-primary">Bicicleta: {{ $appointment->bike->marca }} - {{ $appointment->bike->nombre }}</h5>
             <p class="mb-1"><strong>Fecha de cita:</strong> {{ $appointment->calendario ? \Carbon\Carbon::parse($appointment->calendario)->format('d/m/Y') : 'Sin fecha' }}</p>
-            <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-warning">{{ ucfirst($appointment->estado) }}</span></p>
+            <p class="mb-1"><strong>Estado:</strong> <span class="app-badge {{ $appointment->estado === 'completada' ? 'app-badge-status-completada' : ($appointment->estado === 'en proceso' ? 'app-badge-status-proceso' : 'app-badge-status-pendiente') }}">{{ ucfirst($appointment->estado) }}</span></p>
             
             @if($appointment->descripcion_cliente)
                 <p class="mb-0"><strong>Descripción del problema:</strong> {{ $appointment->descripcion_cliente }}</p>
@@ -160,24 +160,5 @@
         </div>
     </div>
 </div>
-
-<style>
-@media (max-width: 600px) {
-    .table-responsive table {
-        font-size: 0.95rem;
-    }
-    .btn-lg {
-        font-size: 1rem;
-        padding: 0.75rem 1rem;
-    }
-    .d-flex.flex-md-row {
-        flex-direction: column !important;
-    }
-    .d-flex.flex-md-row .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-}
-</style>
 
 @endsection

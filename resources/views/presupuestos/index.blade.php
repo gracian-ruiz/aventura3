@@ -4,26 +4,26 @@
 <!-- 🔹 Contenedor a pantalla completa -->
 <div class="w-full px-4 sm:px-6 lg:px-10 mt-8">
 
-    <h1 class="text-2xl font-bold text-center mb-4">Listado de Presupuestos</h1>
+    <h1 class="app-title text-center mb-4">Listado de Presupuestos</h1>
 
     @php
         $indexContext = request()->only(['page', 'search', 'origen', 'prioridad']);
     @endphp
 
-    <!-- Formulario de Búsqueda -->
+    <!-- Formulario de Búsqueda + Filtros -->
+    <div class="app-toolbar">
     <form method="GET" action="{{ route('presupuestos.index') }}" class="mb-4">
-        <div class="flex justify-between">
+        <div class="app-search-row">
             <input type="text" name="search" value="{{ request('search') }}" 
                 placeholder="Buscar presupuesto por cliente o bicicleta..."
-                class="border px-4 py-2 rounded-md w-2/3">
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                class="app-search-input sm:flex-1">
+            <button type="submit" class="app-btn app-btn-primary">
                 Buscar
             </button>
         </div>
     </form>
 
-    <!-- 🔹 Botones de Filtro -->
-    <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+    <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
         <div class="flex flex-wrap gap-3 items-center">
             <span class="font-semibold text-gray-700 mr-2">Filtros:</span>
             
@@ -95,6 +95,10 @@
             </div>
         @endif
     </div>
+    <div class="mt-2 text-sm text-slate-600">
+        Mostrando {{ $presupuestos->count() }} de {{ $presupuestos->total() }} presupuestos
+    </div>
+    </div>
 
     <!-- Mensajes de éxito -->
     @if (session('success'))
@@ -105,7 +109,7 @@
 
     <!-- 🔹 Tabla a ancho completo -->
     <div class="overflow-x-auto mt-6">
-        <table class="w-full bg-white shadow-md rounded-lg">
+        <table class="w-full bg-white shadow-md rounded-lg table-mobile-friendly">
             <thead class="bg-gray-800 text-white text-sm">
                 <tr>
                     <th class="py-2 px-4 text-left">ID</th>
@@ -142,17 +146,17 @@
                         </td>
 
                         <td class="py-2 px-4 text-center">
-                            <span class="px-2 py-1 rounded-full text-xs font-bold 
+                            <span class="app-badge
                                 @if ($presupuesto->prioridad == 'urgente')
-                                    bg-red-500 text-white
+                                    app-badge-priority-urgente
                                 @elseif ($presupuesto->prioridad == 'premium')
-                                    bg-amber-400 text-black border border-amber-600 shadow-sm premium
+                                    app-badge-priority-premium
                                 @else
-                                    bg-blue-500 text-white
+                                    app-badge-priority-normal
                                 @endif">
                                 {{ ucfirst($presupuesto->prioridad) }}
                                 @if ($presupuesto->web && $presupuesto->prioridad == 'premium')
-                                    <i class="bi bi-bell-fill text-orange-600" title="Premium desde Web"></i>
+                                    <i class="bi bi-bell-fill text-orange-600 icon-bell-ring" title="Premium desde Web"></i>
                                 @endif
                             </span>
                         </td>
@@ -169,22 +173,6 @@
                                 </span>
                             @endif
                         </td>
-
-                        <style>
-                            .premium {
-                                background: rgb(242, 255, 99);
-                            }
-                            .bi-bell-fill {
-                                animation: ring 2s ease-in-out infinite;
-                                display: inline-block;
-                                margin-left: 4px;
-                            }
-                            @keyframes ring {
-                                0%, 100% { transform: rotate(0deg); }
-                                10%, 30% { transform: rotate(-10deg); }
-                                20%, 40% { transform: rotate(10deg); }
-                            }
-                        </style>
 
                         <!-- 🟩 Aprobar / Denegar -->
                         <td class="py-2 px-4 text-center">

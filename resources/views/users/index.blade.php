@@ -1,21 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="w-full mt-8 px-0">
-    <h1 class="text-2xl font-bold text-center mb-4">Gestión de Usuarios</h1>
+<div class="w-full mt-8 px-4 sm:px-6 lg:px-10">
+    <h1 class="app-title text-center mb-4">Gestión de Usuarios</h1>
     
     <!-- Formulario de Búsqueda -->
-    <form method="GET" action="{{ route('users.index') }}" class="mb-4">
-        <div class="flex justify-between">
-            <input type="text" name="search" value="{{ request('search') }}" 
-                placeholder="Buscar usuario por nombre o email..."
-                class="border px-4 py-2 rounded-md w-2/3">
+    <div class="app-toolbar">
+        <form method="GET" action="{{ route('users.index') }}" class="mb-2">
+            <div class="app-search-row">
+                <input type="text" name="search" value="{{ request('search') }}" 
+                    placeholder="Buscar usuario por nombre o email..."
+                    class="app-search-input sm:flex-1">
 
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                Buscar
-            </button>
+                <button type="submit" class="app-btn app-btn-primary">
+                    Buscar
+                </button>
+            </div>
+        </form>
+        <div class="text-sm text-slate-600">
+            Mostrando {{ $users->count() }} de {{ $users->total() }} usuarios
         </div>
-    </form>
+    </div>
 
     <!-- Botón para Añadir Nuevo Usuario (Solo Admins) -->
     @if(Auth::user()->role === 'admin')
@@ -35,7 +40,7 @@
 
     <!-- Tabla de Usuarios -->
     <div class="overflow-x-auto mt-6">
-        <table class="min-w-full bg-white shadow-md rounded-lg">
+        <table class="min-w-full bg-white shadow-md rounded-lg table-mobile-friendly">
             <thead class="bg-gray-800 text-white">
                 <tr>
                     <th class="py-2 px-4 text-left">ID</th>
@@ -69,22 +74,10 @@
                         </td>
                         
                         <td>
-                            <a href="{{ route('presupuestos.create', $user->id) }}" class="btn custom-btn">
+                            <a href="{{ route('presupuestos.create', $user->id) }}" class="app-btn app-btn-success">
                                 Crear Presupuesto
                             </a>
                         </td>
-                        
-                        <style>
-                            .custom-btn {
-                                background-color: #30e16e; /* Verde */
-                                color: white;
-                                border: none;
-                            }
-                        
-                            .custom-btn:hover {
-                                background-color: #2cb865; /* Verde más oscuro */
-                            }
-                        </style>
                         
                         @if(Auth::user()->role === 'admin')
                             <td class="py-2 px-4 text-center">

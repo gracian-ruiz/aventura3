@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container py-4">
-    <h1 class="mb-4">📦 Detalle del Alquiler <span class="text-muted">#{{ $alquiler->id }}</span></h1>
+    <h1 class="app-title mb-4">Detalle del Alquiler <span class="text-muted">#{{ $alquiler->id }}</span></h1>
 
     <!-- Estado del alquiler -->
     <div class="mb-4">
@@ -10,16 +10,16 @@
             <strong>🔄 Estado del Alquiler:</strong>
             @switch($alquiler->estado)
                 @case('reservado')
-                    <span class="badge bg-warning text-dark fs-5">Reserva</span>
+                    <span class="app-badge app-badge-status-pendiente">Reserva</span>
                     @break
                 @case('activo')
-                    <span class="badge bg-primary fs-5">Activo</span>
+                    <span class="app-badge app-badge-status-activo">Activo</span>
                     @break
                 @case('finalizado')
-                    <span class="badge bg-success fs-5">Finalizado</span>
+                    <span class="app-badge app-badge-status-finalizado">Finalizado</span>
                     @break
                 @default
-                    <span class="badge bg-secondary fs-5">Desconocido</span>
+                    <span class="app-badge app-badge-status-pendiente">Desconocido</span>
             @endswitch
         </h3>
     </div>
@@ -170,12 +170,11 @@
     @if($alquiler->fotos && $alquiler->fotos->isNotEmpty())
         <div class="d-flex flex-wrap gap-3">
             @foreach($alquiler->fotos as $foto)
-                <div class="border rounded shadow-sm p-2 text-center" style="width: 160px; cursor: pointer;">
+                <div class="border rounded shadow-sm p-2 text-center app-dni-card">
                     <img 
                         src="{{ route('admin.dni.mostrar', $foto->id) }}" 
                         alt="Foto DNI" 
-                        class="img-fluid rounded mb-2 zoomable-img" 
-                        style="max-height: 120px; object-fit: cover;"
+                        class="img-fluid rounded mb-2 zoomable-img app-dni-img"
                         data-bs-toggle="modal"
                         data-bs-target="#imagenModal"
                         data-src="{{ route('admin.dni.mostrar', $foto->id) }}"

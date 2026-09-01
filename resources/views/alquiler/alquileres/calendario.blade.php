@@ -1,23 +1,12 @@
 @extends('layouts.app2')
 
 @section('content')
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f9fafb;
-        }
-        #calendar {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-    </style>
-</head>
-<body>
-
-    <h2 style="text-align:center;">📅 Alquileres por Usuario y Bicicleta</h2>
-
-    <div id="calendar"></div>
+    <div class="w-full px-4 sm:px-6 lg:px-10 mt-6">
+        <h2 class="app-title text-center mb-4">Alquileres por Usuario y Bicicleta</h2>
+        <div class="app-calendar-shell">
+            <div id="calendar" class="app-calendar"></div>
+        </div>
+    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -43,7 +32,6 @@
     });
     </script>
 
-</body>
 @endsection
 
 

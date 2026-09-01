@@ -1,32 +1,31 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="app-nav border-b border-gray-100 shadow-sm">
     <!-- Contenedor Principal -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="app-nav-shell px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <!-- Logo -->
-            <div class="flex items-center">
+            <div class="flex items-center shrink-0 w-[84px] justify-center">
                 <a href="{{ route('users.index') }}">
+                    <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                 </a>
             </div>
 
             <!-- Menú de Navegación (Escritorio) -->
-            <div class="hidden md:flex space-x-8">
+            <div class="hidden md:flex app-nav-main flex-1 mx-4 min-w-0 items-center gap-3 overflow-x-auto whitespace-nowrap">
                 @if(Auth::user()->role === 'user2')
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">Usuarios</x-nav-link>
-                    <x-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-nav-link>
-                    <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Orden de taller</x-nav-link>
-                    <x-nav-link :href="route('mecanico.index')" :active="request()->routeIs('mecanico.index')">Orden de taller Asignado</x-nav-link>
-{{--                     <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-nav-link> --}}
-                    <x-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">Bicicletas</x-nav-link>
-                    <x-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-nav-link>
-{{--                     <x-nav-link :href="route('avisos.index')" :active="request()->routeIs('avisos.*')">Mensajes</x-nav-link> --}}
-                    <x-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">Histórico Citas</x-nav-link>
-                    <x-nav-link :href="route('calendario-citas')" :active="request()->routeIs('calendario-citas')">Calendario Manual</x-nav-link>
-                    <x-nav-link :href="route('calendario-asignado')" :active="request()->routeIs('calendario-asignado')">Calendario Automatico</x-nav-link>
+                    <a href="{{ route('users.index') }}" class="app-nav-item {{ request()->routeIs('users.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Usuarios</a>
+                    <a href="{{ route('presupuestos.index') }}" class="app-nav-item {{ request()->routeIs('presupuestos.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Presupuestos</a>
+                    <a href="{{ route('appointments.index') }}" class="app-nav-item {{ request()->routeIs('appointments.*') && !request()->routeIs('appointments.historico') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Orden de taller</a>
+                    <a href="{{ route('mecanico.index') }}" class="app-nav-item {{ request()->routeIs('mecanico.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Orden taller asignado</a>
+                    <a href="{{ route('bikes.index') }}" class="app-nav-item {{ request()->routeIs('bikes.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Bicicletas</a>
+                    <a href="{{ route('components.index') }}" class="app-nav-item {{ request()->routeIs('components.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Componentes</a>
+                    <a href="{{ route('appointments.historico') }}" class="app-nav-item {{ request()->routeIs('appointments.historico*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Histórico</a>
+                    <a href="{{ route('calendario-citas') }}" class="app-nav-item {{ request()->routeIs('calendario-citas') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Calendario manual</a>
+                    <a href="{{ route('calendario-asignado') }}" class="app-nav-item {{ request()->routeIs('calendario-asignado') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Calendario automático</a>
                 @endif
             </div>
             
             <!-- Botón de Usuario (Escritorio) -->
-            <div class="hidden md:flex items-center">
+            <div class="hidden md:flex items-center shrink-0 ml-4">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none">
@@ -64,16 +63,16 @@
     <!-- Menú Desplegable (Móvil) -->
     <div :class="{ 'block': open, 'hidden': !open }" class="md:hidden bg-white border-t border-gray-200">
         <div class="py-2">
-            @if(Auth::user()->role === 'admin')
-                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">Usuarios</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Orden de taller
+            @if(Auth::user()->role === 'user2')
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">Usuarios</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.*')">Presupuestos</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.*') && !request()->routeIs('appointments.historico')">Orden de taller
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('mecanico.index')" :active="request()->routeIs('mecanico.index')">Orden de taller Asignado</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('mecanico.index')" :active="request()->routeIs('mecanico.*')">Orden de taller Asignado</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.index')">Bicicletas</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('bikes.index')" :active="request()->routeIs('bikes.*')">Bicicletas</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('components.index')" :active="request()->routeIs('components.*')">Componentes</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico')">Histórico Citas</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('appointments.historico')" :active="request()->routeIs('appointments.historico*')">Histórico Citas</x-responsive-nav-link>
             @endif
         </div>
 
