@@ -377,7 +377,7 @@
                             <tbody>
                                 <tr><td>Sonora Domingos</td><td>S, M, L</td><td>18€</td></tr>
                                 <tr><td>Bicicleta de niño</td><td>-</td><td>18€</td></tr>
-                                <tr><td>Paseo eléctrica</td><td>-</td><td>25€</td></tr>
+                                <tr><td>Paseo eléctrica</td><td>-</td><td>35€</td></tr>
                             </tbody>
                         </table>
                     </div>
