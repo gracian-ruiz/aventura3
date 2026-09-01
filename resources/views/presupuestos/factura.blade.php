@@ -11,7 +11,7 @@
                 <th>Precio sin IVA</th>
                 <th>Mano de Obra</th>
                 <th>Material</th>
-                <th>Descuento</th>
+                <th>Descuento (%)</th>
                 <th>Total Final</th>
                 <th>Descripción</th>
             </tr>
@@ -28,16 +28,17 @@
                 @php
                     $manoObra = (float) ($item->total_precio ?? 0);
                     $material = (float) ($item->precio_material ?? 0);
-                    $descuento = (float) ($item->descuento ?? 0);
+                    $descuentoPct = (float) ($item->descuento ?? 0);
                     $precioBruto = $manoObra + $material;
                     $precioSinIVA = $precioBruto / (1 + $iva / 100);
                     $ivaImporte = $precioBruto - $precioSinIVA;
-                    $precioConDescuento = max($precioBruto - $descuento, 0);
+                    $descuentoImporte = round($precioBruto * ($descuentoPct / 100), 2);
+                    $precioConDescuento = max($precioBruto - $descuentoImporte, 0);
 
                     // Acumular valores para totales
                     $totalSinIVA += $precioSinIVA;
                     $totalIVA += $ivaImporte;
-                    $totalDescuento += $descuento;
+                    $totalDescuento += $descuentoImporte;
                     $totalConDescuento += $precioConDescuento;
                 @endphp
                 <tr>
@@ -45,7 +46,7 @@
                     <td>{{ number_format($precioSinIVA, 2) }}€</td>
                     <td class="text-success fw-bold">{{ number_format($manoObra, 2) }}€</td>
                     <td class="text-success fw-bold">{{ number_format($material, 2) }}€</td>
-                    <td class="text-danger">-{{ number_format($descuento, 2) }}€</td>
+                    <td class="text-danger">{{ number_format($descuentoPct, 2) }}% (-{{ number_format($descuentoImporte, 2) }}€)</td>
                     <td class="text-success fw-bold">{{ number_format($precioConDescuento, 2) }}€</td>
                     <td>{{ $item->texto }}</td>
                 </tr>

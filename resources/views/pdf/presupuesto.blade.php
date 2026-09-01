@@ -101,7 +101,7 @@
                 <th>Precio sin IVA</th>
                 <th>Mano de Obra</th>
                 <th>Material</th>
-                <th>Descuento</th>
+                <th>Descuento (%)</th>
                 <th>Total Final</th>
                 <th>Descripción</th>
             </tr>
@@ -119,7 +119,7 @@
                 @php
                     $manoObra = (float) ($item->total_precio ?? 0);
                     $material = (float) ($item->precio_material ?? 0);
-                    $descuento = (float) ($item->descuento ?? 0);
+                    $descuentoPct = (float) ($item->descuento ?? 0);
                     $precioConIVA = $manoObra + $material;
 
                     // Precio sin IVA
@@ -128,13 +128,14 @@
                     // IVA de la línea
                     $ivaImporte = $precioConIVA - $precioSinIVA;
 
-                    // Precio final con descuento absoluto
-                    $precioFinal = max($precioConIVA - $descuento, 0);
+                    // Precio final con descuento porcentual
+                    $descuentoImporte = round($precioConIVA * ($descuentoPct / 100), 2);
+                    $precioFinal = max($precioConIVA - $descuentoImporte, 0);
 
                     // Acumular totales
                     $totalSinIVA += $precioSinIVA;
                     $totalIVA += $ivaImporte;
-                    $totalDescuento += $descuento;
+                    $totalDescuento += $descuentoImporte;
                     $totalConDescuento += $precioFinal;
                 @endphp
                 <tr>
@@ -142,7 +143,7 @@
                     <td style="text-align: right;">{{ number_format($precioSinIVA, 2, ',', '.') }}€</td>
                     <td style="text-align: right;">{{ number_format($manoObra, 2, ',', '.') }}€</td>
                     <td style="text-align: right;">{{ number_format($material, 2, ',', '.') }}€</td>
-                    <td style="text-align: right;">-{{ number_format($descuento, 2, ',', '.') }}€</td>
+                    <td style="text-align: right;">{{ number_format($descuentoPct, 2, ',', '.') }}% (-{{ number_format($descuentoImporte, 2, ',', '.') }}€)</td>
                     <td style="text-align: right; font-weight: bold;">{{ number_format($precioFinal, 2, ',', '.') }}€</td>
                     <td style="font-size: 8px;">{{ $item->texto }}</td>
                 </tr>
