@@ -117,7 +117,7 @@ public function index(Request $request)
             'precios.*' => 'nullable|numeric|min:0',
             'precio_materiales.*' => 'nullable|numeric|min:0',
             'idprograma*' => 'nullable',
-            'descuentos.*' => 'nullable|integer|min:0',
+            'descuentos.*' => 'nullable|numeric|min:0|max:100',
             'asignacion_taller' => 'nullable|array',
             'asignacion_taller.*' => 'exists:users,id',
         ]);
@@ -175,8 +175,10 @@ public function index(Request $request)
                     $precioManoObra = (float) $precios[$index];
                     $precioMaterial = (float) ($precioMateriales[$index] ?? 0);
                     $texto = $textos[$index] ?? '';
-                    $descuento = isset($descuentos[$index]) ? (int) $descuentos[$index] : 0;
+                    $descuentoPorcentaje = isset($descuentos[$index]) ? (float) $descuentos[$index] : 0;
+                    $descuentoPorcentaje = max(0, min(100, $descuentoPorcentaje));
                     $precioBruto = $precioManoObra + $precioMaterial;
+                    $descuentoAplicado = round($precioBruto * ($descuentoPorcentaje / 100), 2);
 
                     $itemData = [
                         'appointment_id' => $presupuesto->id,
@@ -184,7 +186,7 @@ public function index(Request $request)
                         'horas_trabajo' => $horas,
                         'total_precio' => $precioManoObra,
                         'texto' => $texto,
-                        'descuento' => $descuento,
+                        'descuento' => $descuentoPorcentaje,
                     ];
 
                     if ($hasPrecioMaterial) {
@@ -194,8 +196,8 @@ public function index(Request $request)
                     AppointmentComponent::create($itemData);
 
                     $totalHoras += $horas;
-                    $totalPrecio += max($precioBruto - $descuento, 0);
-                    $totalDescuento += $descuento;
+                    $totalPrecio += max($precioBruto - $descuentoAplicado, 0);
+                    $totalDescuento += $descuentoAplicado;
                 }
 
                 $presupuesto->update([
@@ -379,6 +381,7 @@ public function index(Request $request)
             'precio_material' => 'nullable|array',
             'textos' => 'nullable|array',
             'descuento' => 'nullable|array',
+            'descuento.*' => 'nullable|numeric|min:0|max:100',
             'asignacion_taller' => 'nullable|array',
             'asignacion_taller.*' => 'exists:users,id',
             'prioridad' => 'nullable|string',
@@ -412,18 +415,20 @@ public function index(Request $request)
                     $horas_trabajo = (int) $request->horas_trabajo[$index];
                     $precio_mano_obra = (float) $request->precio[$index];
                     $precio_material = (float) ($request->precio_material[$index] ?? 0);
-                    $total_descuento = (float) $request->descuento[$index];
+                    $descuentoPorcentaje = (float) ($request->descuento[$index] ?? 0);
+                    $descuentoPorcentaje = max(0, min(100, $descuentoPorcentaje));
                     $precio_bruto = $precio_mano_obra + $precio_material;
+                    $descuentoAplicado = round($precio_bruto * ($descuentoPorcentaje / 100), 2);
 
-                    $totalPresupuesto += max($precio_bruto - $total_descuento, 0);
-                    $totalDescuento += $total_descuento;
+                    $totalPresupuesto += max($precio_bruto - $descuentoAplicado, 0);
+                    $totalDescuento += $descuentoAplicado;
                     $totalHoras += $horas_trabajo;
 
                     $datosItem = [
                         'appointment_id' => $id,
                         'horas_trabajo' => $horas_trabajo,
                         'total_precio' => $precio_mano_obra,
-                        'descuento' => $total_descuento,
+                        'descuento' => $descuentoPorcentaje,
                         'texto' => $request->textos[$index] ?? '',
                         'updated_at' => now(),
                     ];

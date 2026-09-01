@@ -93,7 +93,7 @@
                         <th class="border px-4 py-2">Minutos Taller</th>
                         <th class="border px-4 py-2">Precio Mano Obra</th>
                         <th class="border px-4 py-2">Precio Material</th>
-                        <th class="border px-4 py-2">Descuento</th>
+                        <th class="border px-4 py-2">Descuento (%)</th>
                         <th class="border px-4 py-2">Descripción</th>
                         <th class="border px-4 py-2">Acción</th>
                     </tr>
@@ -125,8 +125,8 @@
                     
                         <!-- Descuento: más estrecho -->
                         <td class="border px-2 py-2 w-24">
-                            <input type="number" name="descuento[]" value="{{ old('precio.' . $loop->index, $item->descuento) }}" min="0" step="0.01"
-                                class="w-full border rounded px-2 py-1 text-sm">
+                            <input type="number" name="descuento[]" value="{{ old('descuento.' . $loop->index, $item->descuento) }}" min="0" max="100" step="0.01"
+                                class="w-full border rounded px-2 py-1 text-sm" placeholder="%">
                         </td>
                     
                         <!-- Descripción más amplia -->
@@ -238,7 +238,7 @@
                         <input type="number" name="precio_material[]" value="0" min="0" step="0.01" class="w-full border rounded px-2 py-1">
                     </td>
                     <td class="border px-4 py-2">
-                        <input type="number" name="descuento[]" value="${componentDescuento}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                        <input type="number" name="descuento[]" value="${componentDescuento}" min="0" max="100" step="0.01" class="w-full border rounded px-2 py-1" placeholder="%">
                     </td>
                     <td class="border px-4 py-2">
                         <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">
@@ -288,7 +288,7 @@
                         <input type="number" name="precio_material[]" value="0" min="0" step="0.01" class="w-full border rounded px-2 py-1">
                     </td>
                     <td class="border px-4 py-2">
-                        <input type="number" name="descuento[]" value="${componentDescuento}" min="0" step="0.01" class="w-full border rounded px-2 py-1">
+                        <input type="number" name="descuento[]" value="${componentDescuento}" min="0" max="100" step="0.01" class="w-full border rounded px-2 py-1" placeholder="%">
                     </td>
                     <td class="border px-4 py-2">
                         <input type="text" name="textos[]" placeholder="Descripción del trabajo" class="w-full border rounded px-2 py-1">

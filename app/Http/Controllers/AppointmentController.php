@@ -302,6 +302,7 @@ class AppointmentController extends Controller
             'idprograma' => 'nullable',
             'prioridad' => 'required|in:normal,urgente,premium',
             'descuento' => 'nullable|array', // Validación de descuentos
+            'descuento.*' => 'nullable|numeric|min:0|max:100',
             'asignacion_taller' => 'nullable|array',
             'asignacion_taller.*' => 'exists:users,id',
         ]);
@@ -322,23 +323,27 @@ class AppointmentController extends Controller
                 ->toArray();
 
             $totalPresupuesto = 0;
+            $totalDescuento = 0;
             $totalHoras = 0;
 
             foreach ($request->componentes as $index => $componente_id) {
                 $horas_trabajo = (int) $request->horas_trabajo[$index];
                 $precio_mano_obra = (float) $request->precio[$index];
                 $precio_material = (float) ($request->precio_material[$index] ?? 0);
-                $descuento = isset($request->descuento[$index]) ? (float) $request->descuento[$index] : 0; // Obtener descuento
+                $descuentoPorcentaje = isset($request->descuento[$index]) ? (float) $request->descuento[$index] : 0;
+                $descuentoPorcentaje = max(0, min(100, $descuentoPorcentaje));
                 $precio_bruto = $precio_mano_obra + $precio_material;
+                $descuentoAplicado = round($precio_bruto * ($descuentoPorcentaje / 100), 2);
 
-                $totalPresupuesto += max($precio_bruto - $descuento, 0);
+                $totalPresupuesto += max($precio_bruto - $descuentoAplicado, 0);
+                $totalDescuento += $descuentoAplicado;
                 $totalHoras += $horas_trabajo;
 
                 $datosItem = [
                     'appointment_id' => $id,
                     'horas_trabajo' => $horas_trabajo,
                     'total_precio' => $precio_mano_obra,
-                    'descuento' => $descuento, // Incluir descuento
+                    'descuento' => $descuentoPorcentaje,
                     'texto' => isset($request->textos[$index]) ? $request->textos[$index] : '', // Texto del trabajo
                     'updated_at' => now(),
                 ];
@@ -370,6 +375,7 @@ class AppointmentController extends Controller
                 ->update([
                     'horas_total' => $totalHoras,
                     'precio_total' => $totalPresupuesto,
+                    'descuento' => $totalDescuento,
                     'asignacion_taller' => $request->asignacion_taller ?? [],
                     'idprograma' => $request->idprograma,
                     'calendario' => $request->calendario

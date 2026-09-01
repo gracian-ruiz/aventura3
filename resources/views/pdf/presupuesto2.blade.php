@@ -56,7 +56,7 @@
                 <th>Precio sin IVA</th>
                 <th>Mano de Obra</th>
                 <th>Material</th>
-                <th>Descuento</th>
+                <th>Descuento (%)</th>
                 <th>Total Final</th>
                 <th>Descripción</th>
             </tr>
@@ -74,7 +74,7 @@
                 @php
                     $manoObra = (float) ($item->total_precio ?? 0);
                     $material = (float) ($item->precio_material ?? 0);
-                    $descuento = (float) ($item->descuento ?? 0);
+                    $descuentoPct = (float) ($item->descuento ?? 0);
                     $precioConIVA = $manoObra + $material;
 
                     $precioSinIVA = $precioConIVA / (1 + $iva / 100);
@@ -82,9 +82,10 @@
 
                     $totalSinIVA += $precioSinIVA;
                     $totalIVA += $ivaImporte;
-                    $precioproducto = max($precioConIVA - $descuento, 0);
+                    $descuentoImporte = round($precioConIVA * ($descuentoPct / 100), 2);
+                    $precioproducto = max($precioConIVA - $descuentoImporte, 0);
                     $precioproductototal += $precioproducto;
-                    $preciodescuentotototal += $descuento;
+                    $preciodescuentotototal += $descuentoImporte;
 
                 @endphp
                 <tr>
@@ -92,7 +93,7 @@
                     <td>{{ number_format($precioSinIVA, 2) }}€</td>
                     <td class="text-success fw-bold">{{ number_format($manoObra, 2) }}€</td>
                     <td class="text-success fw-bold">{{ number_format($material, 2) }}€</td>
-                    <td class="text-danger">-{{ number_format($descuento, 2) }}€</td>
+                    <td class="text-danger">{{ number_format($descuentoPct, 2) }}% (-{{ number_format($descuentoImporte, 2) }}€)</td>
                     <td class="text-success fw-bold">
                         {{ number_format($precioproducto, 2) }}€
                     </td>
@@ -105,9 +106,9 @@
     <p class="total"><strong>Total sin IVA:</strong> {{ number_format($totalSinIVA, 2) }}€</p>
     <p class="total"><strong>Total IVA ({{ $iva }}%):</strong> {{ number_format($totalIVA, 2) }}€</p>
     @if ($presupuesto->descuento > 0)
-        <p class="total"><strong>Descuento total aplicado:</strong> -{{ $preciodescuentotototal }}€</p>
+        <p class="total"><strong>Descuento total aplicado:</strong> -{{ number_format($preciodescuentotototal, 2) }}€</p>
         @endif
-    <p class="total"><strong>Total a Pagar:</strong> {{ $precioproductototal }}€</p>
+    <p class="total"><strong>Total a Pagar:</strong> {{ number_format($precioproductototal, 2) }}€</p>
 
 
 </body>

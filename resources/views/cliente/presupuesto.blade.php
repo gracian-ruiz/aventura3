@@ -34,7 +34,7 @@
                                 <th>Descripción</th>
                                 <th class="text-center">Tiempo (min)</th>
                                 <th class="text-end">Precio</th>
-                                <th class="text-end">Descuento</th>
+                                <th class="text-end">Descuento (%)</th>
                                 <th class="text-end">Total</th>
                             </tr>
                         </thead>
@@ -44,17 +44,22 @@
                             @endphp
                             @foreach($data as $item)
                                 @php
-                                    $precioFinal = $item->total_precio - ($item->descuento ?? 0);
+                                    $manoObra = (float) ($item->total_precio ?? 0);
+                                    $material = (float) ($item->precio_material ?? 0);
+                                    $precioBruto = $manoObra + $material;
+                                    $descuentoPct = (float) ($item->descuento ?? 0);
+                                    $descuentoImporte = round($precioBruto * ($descuentoPct / 100), 2);
+                                    $precioFinal = max($precioBruto - $descuentoImporte, 0);
                                     $totalGeneral += $precioFinal;
                                 @endphp
                                 <tr>
                                     <td><strong>{{ $item->componente_nombre }}</strong></td>
                                     <td>{{ $item->texto ?? 'Sin descripción' }}</td>
                                     <td class="text-center">{{ $item->horas_trabajo }} min</td>
-                                    <td class="text-end">{{ number_format($item->total_precio, 2) }}€</td>
+                                    <td class="text-end">{{ number_format($precioBruto, 2) }}€</td>
                                     <td class="text-end text-danger">
-                                        @if($item->descuento && $item->descuento > 0)
-                                            -{{ number_format($item->descuento, 2) }}€
+                                        @if($descuentoPct > 0)
+                                            {{ number_format($descuentoPct, 2) }}% (-{{ number_format($descuentoImporte, 2) }}€)
                                         @else
                                             -
                                         @endif
