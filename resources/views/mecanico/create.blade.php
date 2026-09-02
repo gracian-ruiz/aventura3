@@ -73,34 +73,49 @@
 <!-- Agregar Select2 para búsqueda en los selects y lógica para múltiples componentes -->
 @section('scripts')
 <script>
-    $(document).ready(function() {
-        $('#bike_id').select2({
-            placeholder: "Selecciona una bicicleta...",
-            allowClear: true,
-            width: '100%'
+    (function initMecanicoCreate() {
+        function boot() {
+            $('#bike_id').select2({
+                placeholder: "Selecciona una bicicleta...",
+                allowClear: true,
+                width: '100%'
+            });
+
+            const addComponentButton = document.getElementById('add-component');
+            if (!addComponentButton) return;
+
+            addComponentButton.addEventListener('click', function() {
+                let container = document.getElementById('component-container');
+                let newGroup = document.createElement('div');
+                newGroup.classList.add('flex', 'items-center', 'mt-2', 'component-group');
+
+                let select = document.querySelector('.component-group select').cloneNode(true);
+                select.value = "";
+                newGroup.appendChild(select);
+
+                let removeButton = document.createElement('button');
+                removeButton.type = "button";
+                removeButton.classList.add('ml-2', 'px-4', 'py-2', 'bg-red-500', 'text-white', 'rounded-md', 'hover:bg-red-600');
+                removeButton.innerText = "Eliminar";
+                removeButton.addEventListener('click', function() {
+                    container.removeChild(newGroup);
+                });
+                newGroup.appendChild(removeButton);
+
+                container.appendChild(newGroup);
+            });
+        }
+
+        if (window.jQuery) {
+            window.jQuery(boot);
+            return;
+        }
+
+        window.addEventListener('load', function() {
+            if (window.jQuery) {
+                window.jQuery(boot);
+            }
         });
-    });
-
-    document.getElementById('add-component').addEventListener('click', function() {
-        let container = document.getElementById('component-container');
-        let newGroup = document.createElement('div');
-        newGroup.classList.add('flex', 'items-center', 'mt-2', 'component-group');
-
-        let select = document.querySelector('.component-group select').cloneNode(true);
-        select.value = "";
-        newGroup.appendChild(select);
-
-        let removeButton = document.createElement('button');
-        removeButton.type = "button";
-        removeButton.classList.add('ml-2', 'px-4', 'py-2', 'bg-red-500', 'text-white', 'rounded-md', 'hover:bg-red-600');
-        removeButton.innerText = "Eliminar";
-        removeButton.addEventListener('click', function() {
-            container.removeChild(newGroup);
-        });
-        newGroup.appendChild(removeButton);
-
-        container.appendChild(newGroup);
-    });
+    })();
 </script>
-@endsection
 @endsection

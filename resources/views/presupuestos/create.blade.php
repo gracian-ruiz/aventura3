@@ -173,7 +173,8 @@
 </style>
 
 <script>
-$(document).ready(function() {
+(function initPresupuestoCreate() {
+    function boot() {
     $('.select2').select2({
         placeholder: "Selecciona una opción",
         allowClear: true,
@@ -286,6 +287,18 @@ $(document).ready(function() {
 
         addComponent(componentId, nombre, horas, precio);
     });
-});
+    }
+
+    if (window.jQuery) {
+        window.jQuery(boot);
+        return;
+    }
+
+    window.addEventListener('load', function() {
+        if (window.jQuery) {
+            window.jQuery(boot);
+        }
+    });
+})();
 </script>
 @endsection
