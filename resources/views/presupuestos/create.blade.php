@@ -97,13 +97,13 @@
             <table class="w-full border-collapse border border-gray-300 text-xs sm:text-sm">
                 <thead>
                     <tr class="bg-gray-200">
-                        <th class="border px-2 sm:px-4 py-2">Nombre</th>
-                        <th class="border px-2 sm:px-4 py-2">Minutos</th>
-                        <th class="border px-2 sm:px-4 py-2">Precio Mano Obra</th>
-                        <th class="border px-2 sm:px-4 py-2">Precio Material</th>
-                        <th class="border px-2 sm:px-4 py-2">Desc. (%)</th>
-                        <th class="border px-2 sm:px-4 py-2">Descripción</th>
-                        <th class="border px-2 sm:px-4 py-2">Acción</th>
+                        <th class="border px-2 sm:px-4 py-2 text-black">Nombre</th>
+                        <th class="border px-2 sm:px-4 py-2 text-black">Minutos</th>
+                        <th class="border px-2 sm:px-4 py-2 text-black">Precio Mano Obra</th>
+                        <th class="border px-2 sm:px-4 py-2 text-black">Precio Material</th>
+                        <th class="border px-2 sm:px-4 py-2 text-black">Desc. (%)</th>
+                        <th class="border px-2 sm:px-4 py-2 text-black">Descripción</th>
+                        <th class="border px-2 sm:px-4 py-2 text-black">Acción</th>
                     </tr>
                 </thead>
                 <tbody id="component-list">
