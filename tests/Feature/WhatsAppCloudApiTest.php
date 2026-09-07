@@ -51,4 +51,36 @@ class WhatsAppCloudApiTest extends TestCase
                 && $request['type'] === 'text';
         });
     }
+
+    /** @test */
+    public function el_webhook_de_meta_acepta_status_failed_y_responde_ok()
+    {
+        $payload = [
+            'object' => 'whatsapp_business_account',
+            'entry' => [[
+                'id' => '2207697569983804',
+                'changes' => [[
+                    'field' => 'messages',
+                    'value' => [
+                        'statuses' => [[
+                            'id' => 'wamid.test',
+                            'status' => 'failed',
+                            'timestamp' => '1788804732',
+                            'recipient_id' => '34637319765',
+                            'errors' => [[
+                                'code' => 131026,
+                                'title' => 'Message Undeliverable',
+                                'message' => 'No se pudo entregar el mensaje',
+                            ]],
+                        ]],
+                    ],
+                ]],
+            ]],
+        ];
+
+        $response = $this->postJson('/api/whatsapp/webhook', $payload);
+
+        $response->assertOk();
+        $response->assertJson(['status' => 'ok']);
+    }
 }
