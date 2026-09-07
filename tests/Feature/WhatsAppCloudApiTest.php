@@ -47,7 +47,7 @@ class WhatsAppCloudApiTest extends TestCase
             return $request->url() === 'https://graph.facebook.com/v23.0/123456789/messages'
                 && $request->hasHeader('Authorization', 'Bearer token-permanente')
                 && $request['messaging_product'] === 'whatsapp'
-                && $request['to'] === '31637319765'
+                && $request['to'] === '34637319765'
                 && $request['type'] === 'text';
         });
     }

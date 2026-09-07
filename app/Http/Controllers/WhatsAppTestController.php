@@ -9,7 +9,7 @@ use Throwable;
 
 class WhatsAppTestController extends Controller
 {
-    private const TARGET_NUMBER = '+31 637319765';
+    private const TARGET_NUMBER = '+34 637319765';
 
     public function __construct(private readonly WhatsAppCloudApiService $whatsAppCloudApiService)
     {

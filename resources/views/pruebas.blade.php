@@ -101,7 +101,7 @@
 <body>
     <div class="card">
         <h1>Prueba de WhatsApp Cloud API</h1>
-        <p>Este botón envía un mensaje de prueba a +31 637319765 usando la API de Meta.</p>
+        <p>Este botón envía un mensaje de prueba a +34 637319765 usando la API de Meta.</p>
 
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
