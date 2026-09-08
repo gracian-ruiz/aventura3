@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\WhatsAppMessage;
 use App\Models\User;
+use App\Models\Bike;
+use App\Models\Appointment;
 use App\Services\WhatsAppCloudApiService;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
@@ -63,17 +65,52 @@ class WhatsAppInboxController extends Controller
         $this->ensureMessagesTableExists();
 
         $normalizedPhone = $this->normalizePhone($phone);
+        $messageSearch = trim((string) $request->input('q', ''));
 
-        $messages = WhatsAppMessage::query()
+        $query = WhatsAppMessage::query()
             ->with(['user', 'bike', 'appointment'])
             ->where(function ($query) use ($normalizedPhone) {
                 $query->where('from_phone', $normalizedPhone)
                     ->orWhere('to_phone', $normalizedPhone);
             })
-            ->orderByRaw('COALESCE(received_at, sent_at, created_at) asc')
-            ->get();
+            ->orderByRaw('COALESCE(received_at, sent_at, created_at) asc');
 
-        return view('whatsapp.show', compact('messages', 'normalizedPhone'));
+        if ($messageSearch !== '') {
+            $query->where(function ($subQuery) use ($messageSearch) {
+                $subQuery->where('body', 'like', '%' . $messageSearch . '%')
+                    ->orWhere('status', 'like', '%' . $messageSearch . '%')
+                    ->orWhere('message_type', 'like', '%' . $messageSearch . '%');
+            });
+        }
+
+        $messages = $query->get();
+
+        $conversationUser = $messages->firstWhere('user_id', '!=', null)?->user;
+        if (!$conversationUser) {
+            $conversationUser = $this->resolveUserByPhone($normalizedPhone);
+        }
+
+        $conversationBike = $messages->firstWhere('bike_id', '!=', null)?->bike;
+        if (!$conversationBike && $conversationUser) {
+            $conversationBike = Bike::query()->where('user_id', $conversationUser->id)->latest('id')->first();
+        }
+
+        $conversationAppointment = $messages->firstWhere('appointment_id', '!=', null)?->appointment;
+        if (!$conversationAppointment && $conversationBike) {
+            $conversationAppointment = Appointment::query()->where('bike_id', $conversationBike->id)->latest('id')->first();
+        }
+
+        $conversationTitle = $conversationUser?->name ?: $normalizedPhone;
+
+        return view('whatsapp.show', compact(
+            'messages',
+            'normalizedPhone',
+            'messageSearch',
+            'conversationUser',
+            'conversationBike',
+            'conversationAppointment',
+            'conversationTitle'
+        ));
     }
 
     public function reply(Request $request, string $phone)
@@ -209,7 +246,7 @@ class WhatsAppInboxController extends Controller
         }
 
         $users = User::query()
-            ->select('id', 'email', 'telefono')
+            ->select('id', 'name', 'email', 'telefono')
             ->whereNotNull('telefono')
             ->get();
 

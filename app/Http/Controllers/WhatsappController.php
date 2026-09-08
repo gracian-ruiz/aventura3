@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\WhatsAppMessage;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
@@ -172,6 +173,21 @@ class WhatsAppController extends Controller
             DB::table('appointments')
                 ->where('id', $presupuestoId)
                 ->update(['presupuesto_enviado' => true]);
+
+            WhatsAppMessage::create([
+                'user_id' => $clienteId = DB::table('appointments')->where('id', $presupuestoId)->value('user_id'),
+                'bike_id' => DB::table('appointments')->where('id', $presupuestoId)->value('bike_id'),
+                'appointment_id' => $presupuestoId,
+                'wa_id' => data_get($response, 'messages.0.id'),
+                'from_phone' => (string) config('services.whatsapp.phone_number_id'),
+                'to_phone' => $this->normalizePhone((string) $telefono),
+                'direction' => 'outbound',
+                'message_type' => 'document',
+                'body' => 'PDF de presupuesto enviado por WhatsApp',
+                'status' => 'sent',
+                'payload' => $response,
+                'sent_at' => now(),
+            ]);
 
             Log::info('WhatsApp presupuesto: marcado como enviado en BD', [
                 'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,

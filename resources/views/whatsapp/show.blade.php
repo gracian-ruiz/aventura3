@@ -5,7 +5,16 @@
     <div class="flex items-center justify-between gap-4 mb-6">
         <div>
             <a href="{{ route('whatsapp.index') }}" class="text-sm text-green-700 hover:text-green-900">← Volver a WhatsApp</a>
-            <h1 class="text-2xl font-bold text-gray-900 mt-2">Conversación {{ $normalizedPhone }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900 mt-2">{{ $conversationTitle }}</h1>
+            <div class="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                <span>{{ $normalizedPhone }}</span>
+                @if($conversationBike)
+                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ $conversationBike->marca ?? '' }} {{ $conversationBike->nombre }}</span>
+                @endif
+                @if($conversationAppointment)
+                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Cita #{{ $conversationAppointment->id }}</span>
+                @endif
+            </div>
             <p class="text-sm text-gray-500 mt-1">Vista de hilo con mensajes del cliente, respuestas del taller y estados de entrega.</p>
         </div>
     </div>
@@ -22,10 +31,23 @@
                 </div>
             </div>
 
+            <div class="px-5 py-4 border-b border-gray-100 bg-white">
+                <form method="GET" action="{{ route('whatsapp.show', ['phone' => $normalizedPhone]) }}">
+                    <div class="flex flex-col gap-3 sm:flex-row">
+                        <input type="search" name="q" value="{{ $messageSearch }}" placeholder="Buscar dentro de la conversación"
+                            class="w-full rounded-2xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition-colors">
+                            Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <div class="p-4 sm:p-5 space-y-4 max-h-[70vh] overflow-y-auto bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_14%,#f8fafc_100%)]">
                 @forelse($messages as $message)
                     @php
                         $isStatus = $message->message_type === 'status';
+                        $isDocument = $message->message_type === 'document';
                         $timestamp = optional($message->received_at ?? $message->sent_at)->format('d/m/Y H:i');
                         $directionLabel = $message->direction === 'outbound' ? 'Taller' : 'Cliente';
                         $statusTone = match ($message->status ?? $message->body) {
@@ -46,15 +68,20 @@
                         </div>
                     @else
                         <div class="flex {{ $message->direction === 'outbound' ? 'justify-end' : 'justify-start' }}">
-                            <div class="max-w-[88%] sm:max-w-[78%] rounded-[22px] px-4 py-3 shadow-sm border {{ $message->direction === 'outbound' ? 'bg-green-600 text-white border-green-500' : 'bg-white text-gray-900 border-gray-200' }}">
+                            <div class="max-w-[88%] sm:max-w-[78%] rounded-[22px] px-4 py-3 shadow-sm border {{ $isDocument ? 'bg-amber-50 text-amber-950 border-amber-200' : ($message->direction === 'outbound' ? 'bg-green-600 text-white border-green-500' : 'bg-white text-gray-900 border-gray-200') }}">
                                 <div class="flex items-center justify-between gap-3 mb-2">
-                                    <span class="text-[11px] font-semibold uppercase tracking-[0.18em] {{ $message->direction === 'outbound' ? 'text-green-100' : 'text-gray-400' }}">
+                                    <span class="text-[11px] font-semibold uppercase tracking-[0.18em] {{ $isDocument ? 'text-amber-700' : ($message->direction === 'outbound' ? 'text-green-100' : 'text-gray-400') }}">
                                         {{ $directionLabel }}
                                     </span>
-                                    <span class="text-[11px] {{ $message->direction === 'outbound' ? 'text-green-100/90' : 'text-gray-400' }}">
+                                    <span class="text-[11px] {{ $isDocument ? 'text-amber-700' : ($message->direction === 'outbound' ? 'text-green-100/90' : 'text-gray-400') }}">
                                         {{ $timestamp }}
                                     </span>
                                 </div>
+                                @if($isDocument)
+                                    <div class="mb-2 inline-flex items-center rounded-full bg-amber-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-800">
+                                        PDF enviado
+                                    </div>
+                                @endif
                                 <div class="text-sm leading-6 whitespace-pre-line">{{ $message->body ?? 'Sin contenido' }}</div>
                             </div>
                         </div>
@@ -94,9 +121,9 @@
             </form>
 
             <div class="mt-6 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-gray-600 space-y-3">
-                <div><span class="font-semibold text-gray-900">Cliente:</span> {{ $messages->first()?->user?->name ?? 'No vinculado' }}</div>
-                <div><span class="font-semibold text-gray-900">Bicicleta:</span> {{ $messages->first()?->bike?->nombre ?? 'No vinculada' }}</div>
-                <div><span class="font-semibold text-gray-900">Cita:</span> {{ $messages->first()?->appointment?->id ?? 'No vinculada' }}</div>
+                <div><span class="font-semibold text-gray-900">Cliente:</span> {{ $conversationUser?->name ?? 'No vinculado' }}</div>
+                <div><span class="font-semibold text-gray-900">Bicicleta:</span> {{ $conversationBike?->nombre ?? 'No vinculada' }}</div>
+                <div><span class="font-semibold text-gray-900">Cita:</span> {{ $conversationAppointment?->id ?? 'No vinculada' }}</div>
                 <div><span class="font-semibold text-gray-900">Teléfono:</span> {{ $normalizedPhone }}</div>
             </div>
         </div>
