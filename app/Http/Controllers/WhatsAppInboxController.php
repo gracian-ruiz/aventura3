@@ -86,15 +86,14 @@ class WhatsAppInboxController extends Controller
 
         $normalizedPhone = $this->normalizePhone($phone);
 
-        $user = User::query()
-            ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(telefono, ''), '+', ''), ' ', ''), '-', ''), '(', ''), ')', '') = ?", [$normalizedPhone])
-            ->first();
+        $user = $this->resolveUserByPhone($normalizedPhone);
 
         if (!$this->whatsappTestGateAllows($normalizedPhone, $user?->email)) {
             Log::warning('WhatsApp inbox: envio bloqueado por filtro de pruebas', [
                 'to' => $normalizedPhone,
                 'resolved_user_id' => $user?->id,
                 'resolved_email' => $user?->email,
+                'resolved_phone' => $user?->telefono,
             ]);
 
             return back()->with('error', 'Envio bloqueado: solo se permite el cliente de pruebas autorizado.');
@@ -170,8 +169,56 @@ class WhatsAppInboxController extends Controller
             return false;
         }
 
-        return $normalizedPhone === $allowedPhone
-            && strtolower(trim((string) $email)) === $allowedEmail;
+        if (!$this->phoneMatches($normalizedPhone, $allowedPhone)) {
+            return false;
+        }
+
+        // Si no se ha podido vincular usuario, permitimos por teléfono exacto de pruebas.
+        if (!is_string($email) || trim($email) === '') {
+            return true;
+        }
+
+        return strtolower(trim($email)) === $allowedEmail;
+    }
+
+    private function resolveUserByPhone(string $normalizedPhone): ?User
+    {
+        if ($normalizedPhone === '') {
+            return null;
+        }
+
+        $users = User::query()
+            ->select('id', 'email', 'telefono')
+            ->whereNotNull('telefono')
+            ->get();
+
+        foreach ($users as $user) {
+            $userPhone = self::normalizePhone((string) $user->telefono);
+
+            if ($this->phoneMatches($normalizedPhone, $userPhone)) {
+                return $user;
+            }
+        }
+
+        return null;
+    }
+
+    private function phoneMatches(string $a, string $b): bool
+    {
+        if ($a === '' || $b === '') {
+            return false;
+        }
+
+        if ($a === $b) {
+            return true;
+        }
+
+        $aLast9 = substr($a, -9);
+        $bLast9 = substr($b, -9);
+
+        return $aLast9 !== false
+            && $bLast9 !== false
+            && $aLast9 === $bLast9;
     }
 
     public static function storeIncoming(array $message, array $context = []): WhatsAppMessage
