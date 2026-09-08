@@ -162,10 +162,10 @@ class WhatsAppInboxController extends Controller
 
     private function whatsappTestGateAllows(string $normalizedPhone, ?string $email): bool
     {
-        $allowedEmail = strtolower(trim((string) config('services.whatsapp.notice_email_gate')));
+        $allowedEmails = $this->allowedEmails();
         $allowedPhone = self::normalizePhone((string) config('services.whatsapp.notice_phone_gate'));
 
-        if ($allowedEmail === '' || $allowedPhone === '') {
+        if (empty($allowedEmails) || $allowedPhone === '') {
             return false;
         }
 
@@ -178,7 +178,23 @@ class WhatsAppInboxController extends Controller
             return true;
         }
 
-        return strtolower(trim($email)) === $allowedEmail;
+        return in_array(strtolower(trim($email)), $allowedEmails, true);
+    }
+
+    private function allowedEmails(): array
+    {
+        $list = (string) config('services.whatsapp.notice_email_gate_list', '');
+        $single = (string) config('services.whatsapp.notice_email_gate', '');
+
+        $emails = array_filter(array_map(
+            static fn (string $value): string => strtolower(trim($value)),
+            array_merge(
+                $list !== '' ? explode(',', $list) : [],
+                $single !== '' ? [$single] : []
+            )
+        ));
+
+        return array_values(array_unique($emails));
     }
 
     private function resolveUserByPhone(string $normalizedPhone): ?User

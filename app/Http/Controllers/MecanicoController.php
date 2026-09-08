@@ -282,15 +282,31 @@ public function index(Request $request)
 
     private function whatsappTestGateAllows(?string $email, ?string $telefono): bool
     {
-        $allowedEmail = trim((string) config('services.whatsapp.notice_email_gate'));
+        $allowedEmails = $this->allowedEmails();
         $allowedPhone = preg_replace('/\D+/', '', (string) config('services.whatsapp.notice_phone_gate')) ?? '';
 
-        if ($allowedEmail === '' || $allowedPhone === '') {
+        if (empty($allowedEmails) || $allowedPhone === '') {
             return false;
         }
 
-        return strtolower(trim((string) $email)) === strtolower($allowedEmail)
+        return in_array(strtolower(trim((string) $email)), $allowedEmails, true)
             && preg_replace('/\D+/', '', (string) $telefono) === $allowedPhone;
+    }
+
+    private function allowedEmails(): array
+    {
+        $list = (string) config('services.whatsapp.notice_email_gate_list', '');
+        $single = (string) config('services.whatsapp.notice_email_gate', '');
+
+        $emails = array_filter(array_map(
+            static fn (string $value): string => strtolower(trim($value)),
+            array_merge(
+                $list !== '' ? explode(',', $list) : [],
+                $single !== '' ? [$single] : []
+            )
+        ));
+
+        return array_values(array_unique($emails));
     }
 
     public function updatedos(Request $request, $id)

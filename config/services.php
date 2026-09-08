@@ -36,6 +36,7 @@ return [
         'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
         'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
         'notice_email_gate' => env('WHATSAPP_NOTICE_EMAIL_GATE', 'gracianmiguel1995@gmail.com'),
+        'notice_email_gate_list' => env('WHATSAPP_NOTICE_EMAIL_GATE_LIST', 'gracianmiguel1995@gmail.com,graciancristales@hotmail.com'),
         'notice_phone_gate' => env('WHATSAPP_NOTICE_PHONE_GATE', '34637319765'),
     ],
 
