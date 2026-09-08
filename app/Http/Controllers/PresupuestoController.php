@@ -313,6 +313,62 @@ public function index(Request $request)
         }
     }
 
+    public function descargarPDFPublico(Request $request, $presupuestoId)
+    {
+        $token = (string) $request->query('token', '');
+
+        try {
+            $presupuesto = DB::table('appointments')
+                ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
+                ->join('users', 'bikes.user_id', '=', 'users.id')
+                ->where('appointments.id', $presupuestoId)
+                ->where('appointments.token_presupuesto', $token)
+                ->select('appointments.*', 'bikes.nombre as bicicleta_nombre', 'bikes.marca as marca', 'users.name as usuario_nombre')
+                ->first();
+
+            if (!$presupuesto) {
+                Log::warning('[PresupuestoController] PDF publico no autorizado', [
+                    'presupuesto_id' => $presupuestoId,
+                    'token_present' => $token !== '',
+                ]);
+
+                abort(403, 'Token inválido o presupuesto no encontrado');
+            }
+
+            $items = DB::table('appointment_component')
+                ->join('components', 'appointment_component.componente_id', '=', 'components.id')
+                ->where('appointment_component.appointment_id', $presupuestoId)
+                ->select('appointment_component.*', 'components.nombre as componente_nombre')
+                ->get();
+
+            $limpiarNombre = fn($texto) => preg_replace('/[^A-Za-z0-9_\-]/', '_', $texto);
+            $usuarioLimpio = $limpiarNombre($presupuesto->usuario_nombre);
+            $bicicletaLimpia = $limpiarNombre($presupuesto->bicicleta_nombre);
+            $fecha = date('Y-m-d', strtotime($presupuesto->created_at));
+            $nombreArchivo = "Presupuesto_{$usuarioLimpio}_{$bicicletaLimpia}_{$fecha}.pdf";
+
+            Log::info('[PresupuestoController] Generando PDF publico para WhatsApp', [
+                'presupuesto_id' => $presupuestoId,
+                'items_count' => $items->count(),
+            ]);
+
+            $pdf = Pdf::loadView('pdf.presupuesto', compact('presupuesto', 'items'));
+
+            return response($pdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $nombreArchivo . '"',
+                'Cache-Control' => 'private, max-age=300',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[PresupuestoController] Error en descargarPDFPublico', [
+                'presupuesto_id' => $presupuestoId,
+                'error' => $e->getMessage(),
+            ]);
+
+            abort(500, 'Error al generar el PDF público.');
+        }
+    }
+
     public function edit($id)
     {
         $hasPrecioMaterial = Schema::hasColumn('appointment_component', 'precio_material');

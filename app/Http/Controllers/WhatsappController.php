@@ -78,9 +78,12 @@ class WhatsAppController extends Controller
             return back()->with('error', 'El envío de prueba por WhatsApp solo está permitido para el cliente autorizado.');
         }
 
-        // 1. GENERAR Y GUARDAR EL PDF
+        // 1. GENERAR Y EXPONER EL PDF CON URL PUBLICA FIRMADA POR TOKEN
         $pdfPath = $this->generarPDF($presupuestoId);
-        $pdfUrl = url('storage/presupuestos/' . basename($pdfPath));
+        $pdfUrl = route('presupuestos.pdf.publico', [
+            'presupuestoId' => $presupuestoId,
+            'token' => $presupuesto->token_presupuesto,
+        ]);
 
         Log::info('WhatsApp presupuesto: PDF generado', [
             'presupuesto_id' => $presupuestoId,

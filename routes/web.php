@@ -319,6 +319,10 @@ Route::post('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController:
     ->middleware('throttle:3,1') // Máximo 3 intentos por minuto
     ->name('presupuesto.procesar');
 
+Route::get('/presupuestos/{presupuestoId}/pdf-publico', [PresupuestoController::class, 'descargarPDFPublico'])
+    ->middleware('throttle:10,1')
+    ->name('presupuestos.pdf.publico');
+
 
 
 
