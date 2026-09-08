@@ -297,12 +297,17 @@ public function index(Request $request)
     {
         $list = (string) config('services.whatsapp.notice_email_gate_list', '');
         $single = (string) config('services.whatsapp.notice_email_gate', '');
+        $hardcoded = [
+            'gracianmiguel1995@gmail.com',
+            'graciancristales@hotmail.com',
+        ];
 
         $emails = array_filter(array_map(
             static fn (string $value): string => strtolower(trim($value)),
             array_merge(
                 $list !== '' ? explode(',', $list) : [],
-                $single !== '' ? [$single] : []
+                $single !== '' ? [$single] : [],
+                $hardcoded
             )
         ));
 
