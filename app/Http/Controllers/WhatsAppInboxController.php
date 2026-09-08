@@ -84,8 +84,20 @@ class WhatsAppInboxController extends Controller
 
         $normalizedPhone = $this->normalizePhone($phone);
 
+        Log::info('WhatsApp inbox: intento de envio desde chat', [
+            'to' => $normalizedPhone,
+            'body_length' => mb_strlen($data['body']),
+            'body_preview' => mb_substr($data['body'], 0, 120),
+            'user_id' => auth()->id(),
+        ]);
+
         try {
             $response = $this->whatsAppCloudApiService->sendTextMessage($normalizedPhone, $data['body']);
+
+            Log::info('WhatsApp inbox: respuesta de Meta al envio desde chat', [
+                'to' => $normalizedPhone,
+                'response' => $response,
+            ]);
         } catch (\Throwable $exception) {
             Log::error('WhatsApp inbox: fallo al responder', [
                 'phone' => $normalizedPhone,
@@ -104,6 +116,12 @@ class WhatsAppInboxController extends Controller
             'status' => 'sent',
             'payload' => $response,
             'sent_at' => now(),
+        ]);
+
+        Log::info('WhatsApp inbox: mensaje guardado como enviado', [
+            'to' => $normalizedPhone,
+            'status' => 'sent',
+            'user_id' => auth()->id(),
         ]);
 
         return back()->with('success', 'Respuesta enviada correctamente.');
