@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\WhatsAppMessage;
 use App\Services\WhatsAppCloudApiService;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -99,9 +100,27 @@ class WhatsAppInboxController extends Controller
                 'response' => $response,
             ]);
         } catch (\Throwable $exception) {
+            $metaError = [];
+
+            if ($exception instanceof RequestException && $exception->response !== null) {
+                $error = $exception->response->json('error');
+                $metaError = is_array($error)
+                    ? [
+                        'http_status' => $exception->response->status(),
+                        'message' => $error['message'] ?? null,
+                        'type' => $error['type'] ?? null,
+                        'code' => $error['code'] ?? null,
+                        'error_subcode' => $error['error_subcode'] ?? null,
+                        'details' => data_get($error, 'error_data.details'),
+                        'fbtrace_id' => $error['fbtrace_id'] ?? null,
+                    ]
+                    : ['http_status' => $exception->response->status()];
+            }
+
             Log::error('WhatsApp inbox: fallo al responder', [
                 'phone' => $normalizedPhone,
                 'error' => $exception->getMessage(),
+                'meta_error' => $metaError,
             ]);
 
             return back()->with('error', 'No se ha podido enviar la respuesta. Revisa las credenciales o la ventana de 24 horas.');

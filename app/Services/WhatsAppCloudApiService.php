@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -61,6 +62,7 @@ class WhatsAppCloudApiService
                 'to' => $normalizedTo,
                 'phone_number_id' => $phoneNumberId,
                 'error' => $exception->getMessage(),
+                'meta_error' => $this->extractMetaError($exception),
             ]);
 
             throw $exception;
@@ -106,10 +108,36 @@ class WhatsAppCloudApiService
                 'to' => $normalizedTo,
                 'phone_number_id' => $phoneNumberId,
                 'error' => $exception->getMessage(),
+                'meta_error' => $this->extractMetaError($exception),
             ]);
 
             throw $exception;
         }
+    }
+
+    private function extractMetaError(Throwable $exception): array
+    {
+        if (!$exception instanceof RequestException || $exception->response === null) {
+            return [];
+        }
+
+        $status = $exception->response->status();
+        $json = $exception->response->json();
+        $error = is_array($json) ? ($json['error'] ?? null) : null;
+
+        if (!is_array($error)) {
+            return ['http_status' => $status];
+        }
+
+        return [
+            'http_status' => $status,
+            'message' => $error['message'] ?? null,
+            'type' => $error['type'] ?? null,
+            'code' => $error['code'] ?? null,
+            'error_subcode' => $error['error_subcode'] ?? null,
+            'details' => data_get($error, 'error_data.details'),
+            'fbtrace_id' => $error['fbtrace_id'] ?? null,
+        ];
     }
 
     private function normalizePhoneNumber(string $phoneNumber): string
