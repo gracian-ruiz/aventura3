@@ -35,8 +35,8 @@ return [
         'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
         'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
         'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
-        'notice_email_gate' => env('WHATSAPP_NOTICE_EMAIL_GATE'),
-        'notice_phone_gate' => env('WHATSAPP_NOTICE_PHONE_GATE'),
+        'notice_email_gate' => env('WHATSAPP_NOTICE_EMAIL_GATE', 'gracianmiguel1995@gmail.com'),
+        'notice_phone_gate' => env('WHATSAPP_NOTICE_PHONE_GATE', '34637319765'),
     ],
 
 ];

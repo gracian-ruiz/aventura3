@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\WhatsAppMessage;
+use App\Models\User;
 use App\Services\WhatsAppCloudApiService;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
@@ -85,6 +86,20 @@ class WhatsAppInboxController extends Controller
 
         $normalizedPhone = $this->normalizePhone($phone);
 
+        $user = User::query()
+            ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(telefono, ''), '+', ''), ' ', ''), '-', ''), '(', ''), ')', '') = ?", [$normalizedPhone])
+            ->first();
+
+        if (!$this->whatsappTestGateAllows($normalizedPhone, $user?->email)) {
+            Log::warning('WhatsApp inbox: envio bloqueado por filtro de pruebas', [
+                'to' => $normalizedPhone,
+                'resolved_user_id' => $user?->id,
+                'resolved_email' => $user?->email,
+            ]);
+
+            return back()->with('error', 'Envio bloqueado: solo se permite el cliente de pruebas autorizado.');
+        }
+
         Log::info('WhatsApp inbox: intento de envio desde chat', [
             'to' => $normalizedPhone,
             'body_length' => mb_strlen($data['body']),
@@ -144,6 +159,19 @@ class WhatsAppInboxController extends Controller
         ]);
 
         return back()->with('success', 'Respuesta enviada correctamente.');
+    }
+
+    private function whatsappTestGateAllows(string $normalizedPhone, ?string $email): bool
+    {
+        $allowedEmail = strtolower(trim((string) config('services.whatsapp.notice_email_gate')));
+        $allowedPhone = self::normalizePhone((string) config('services.whatsapp.notice_phone_gate'));
+
+        if ($allowedEmail === '' || $allowedPhone === '') {
+            return false;
+        }
+
+        return $normalizedPhone === $allowedPhone
+            && strtolower(trim((string) $email)) === $allowedEmail;
     }
 
     public static function storeIncoming(array $message, array $context = []): WhatsAppMessage
