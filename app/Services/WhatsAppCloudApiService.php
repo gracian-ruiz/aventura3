@@ -10,6 +10,8 @@ use Throwable;
 
 class WhatsAppCloudApiService
 {
+    private const LOG_VERSION = 'whatsapp-cloud-service-v2-media-id';
+
     public function sendTextMessage(string $to, string $body): array
     {
         $phoneNumberId = (string) config('services.whatsapp.phone_number_id');
@@ -132,6 +134,7 @@ class WhatsAppCloudApiService
         $resolvedFilename = $filename ?: basename($filePath);
 
         Log::info('WhatsApp Cloud API: subiendo documento a Meta', [
+            'version' => self::LOG_VERSION,
             'to' => $normalizedTo,
             'phone_number_id' => $phoneNumberId,
             'file_path' => $filePath,
@@ -155,6 +158,7 @@ class WhatsAppCloudApiService
             }
 
             Log::info('WhatsApp Cloud API: documento subido a Meta', [
+                'version' => self::LOG_VERSION,
                 'to' => $normalizedTo,
                 'phone_number_id' => $phoneNumberId,
                 'media_id' => $mediaId,

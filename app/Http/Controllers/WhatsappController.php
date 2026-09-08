@@ -11,6 +11,8 @@ use App\Services\WhatsAppCloudApiService;
 
 class WhatsAppController extends Controller
 {
+    private const WHATSAPP_PRESUPUESTO_LOG_VERSION = 'presupuesto-whatsapp-v2-media-id';
+
     public function __construct(private readonly WhatsAppCloudApiService $whatsAppCloudApiService)
     {
     }
@@ -18,6 +20,7 @@ class WhatsAppController extends Controller
     public function enviarPresupuestoWhatsApp($clienteId, $presupuestoId)
     {
         Log::info('WhatsApp presupuesto: inicio de envio desde listado', [
+            'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
             'cliente_id' => $clienteId,
             'presupuesto_id' => $presupuestoId,
             'auth_user_id' => auth()->id(),
@@ -59,6 +62,7 @@ class WhatsAppController extends Controller
         $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
 
         Log::info('WhatsApp presupuesto: datos cargados', [
+            'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
             'cliente_id' => $cliente->id ?? null,
             'cliente_email' => $cliente->email ?? null,
             'cliente_telefono' => $cliente->telefono ?? null,
@@ -83,6 +87,7 @@ class WhatsAppController extends Controller
         $pdfFilename = basename($pdfPath);
 
         Log::info('WhatsApp presupuesto: PDF generado', [
+            'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
             'presupuesto_id' => $presupuestoId,
             'pdf_path' => $pdfPath,
             'pdf_filename' => $pdfFilename,
@@ -94,6 +99,7 @@ class WhatsAppController extends Controller
                 . "🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
 
             Log::info('WhatsApp presupuesto: enviando documento por Cloud API', [
+                'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
                 'presupuesto_id' => $presupuestoId,
                 'to' => $this->normalizePhone((string) $cliente->telefono),
                 'body_length' => mb_strlen($mensaje),
@@ -121,6 +127,7 @@ class WhatsAppController extends Controller
             ->first();
 
         Log::info('WhatsApp presupuesto: preparando datos de PDF', [
+            'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
             'presupuesto_id' => $presupuestoId,
             'presupuesto_found' => (bool) $presupuesto,
         ]);
@@ -141,6 +148,7 @@ class WhatsAppController extends Controller
         Storage::put($rutaAlmacenamiento, $pdf->output());
 
         Log::info('WhatsApp presupuesto: PDF guardado', [
+            'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
             'presupuesto_id' => $presupuestoId,
             'storage_path' => $rutaAlmacenamiento,
             'items_count' => $items->count(),
@@ -155,6 +163,7 @@ class WhatsAppController extends Controller
             $response = $this->whatsAppCloudApiService->sendDocumentMessageFromFile($telefono, $mensaje, $pdfPath, basename($pdfPath));
 
             Log::info('WhatsApp presupuesto: Meta acepto el envio', [
+                'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
                 'presupuesto_id' => $presupuestoId,
                 'to' => $this->normalizePhone((string) $telefono),
                 'response' => $response,
@@ -165,6 +174,7 @@ class WhatsAppController extends Controller
                 ->update(['presupuesto_enviado' => true]);
 
             Log::info('WhatsApp presupuesto: marcado como enviado en BD', [
+                'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
                 'presupuesto_id' => $presupuestoId,
             ]);
 
