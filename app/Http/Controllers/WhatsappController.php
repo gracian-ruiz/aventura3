@@ -17,9 +17,20 @@ class WhatsAppController extends Controller
 
     public function enviarPresupuestoWhatsApp($clienteId, $presupuestoId)
     {
+        Log::info('WhatsApp presupuesto: inicio de envio desde listado', [
+            'cliente_id' => $clienteId,
+            'presupuesto_id' => $presupuestoId,
+            'auth_user_id' => auth()->id(),
+        ]);
+
         // Buscar el cliente
         $cliente = DB::table('users')->where('id', $clienteId)->first();
         if (!$cliente) {
+            Log::warning('WhatsApp presupuesto: cliente no encontrado', [
+                'cliente_id' => $clienteId,
+                'presupuesto_id' => $presupuestoId,
+            ]);
+
             return response()->json(['error' => 'Cliente no encontrado'], 404);
         }
 
@@ -36,17 +47,32 @@ class WhatsAppController extends Controller
             )
             ->first();
 
-        $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
-
         if (!$presupuesto) {
+            Log::warning('WhatsApp presupuesto: presupuesto no encontrado', [
+                'cliente_id' => $clienteId,
+                'presupuesto_id' => $presupuestoId,
+            ]);
+
             return response()->json(['error' => 'Presupuesto no encontrado'], 404);
         }
+
+        $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
+
+        Log::info('WhatsApp presupuesto: datos cargados', [
+            'cliente_id' => $cliente->id ?? null,
+            'cliente_email' => $cliente->email ?? null,
+            'cliente_telefono' => $cliente->telefono ?? null,
+            'presupuesto_estado' => $presupuesto->estado ?? null,
+            'presupuesto_enviado' => $presupuesto->presupuesto_enviado ?? null,
+        ]);
 
         if (!$this->whatsappTestGateAllows($cliente->email ?? null, $cliente->telefono ?? null)) {
             Log::warning('WhatsApp presupuesto bloqueado por filtro de prueba', [
                 'cliente_id' => $cliente->id ?? null,
                 'email' => $cliente->email ?? null,
                 'telefono' => $cliente->telefono ?? null,
+                'allowed_emails' => $this->allowedEmails(),
+                'allowed_phone' => $this->normalizePhone((string) config('services.whatsapp.notice_phone_gate')),
             ]);
 
             return back()->with('error', 'El envío de prueba por WhatsApp solo está permitido para el cliente autorizado.');
@@ -56,16 +82,29 @@ class WhatsAppController extends Controller
         $pdfPath = $this->generarPDF($presupuestoId);
         $pdfUrl = url('storage/presupuestos/' . basename($pdfPath));
 
+        Log::info('WhatsApp presupuesto: PDF generado', [
+            'presupuesto_id' => $presupuestoId,
+            'pdf_path' => $pdfPath,
+            'pdf_url' => $pdfUrl,
+        ]);
+
         // 2. ENVIAR POR WHATSAPP
         if (!empty($cliente->telefono)) {
-            // 2. ENVIAR POR WHATSAPP
-            if (!empty($cliente->telefono)) {
-                $mensaje = "📄 ¡Hola {$cliente->name}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
-                    . "🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
+            $mensaje = "📄 ¡Hola {$cliente->name}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
+                . "🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
 
-                $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfUrl, $presupuestoId);
-            }
+            Log::info('WhatsApp presupuesto: enviando documento por Cloud API', [
+                'presupuesto_id' => $presupuestoId,
+                'to' => $this->normalizePhone((string) $cliente->telefono),
+                'body_length' => mb_strlen($mensaje),
+            ]);
 
+            $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfUrl, $presupuestoId);
+        } else {
+            Log::warning('WhatsApp presupuesto: cliente sin telefono', [
+                'cliente_id' => $cliente->id ?? null,
+                'presupuesto_id' => $presupuestoId,
+            ]);
         }
 
         return back()->with('success', '📩 Presupuesto enviado por WhatsApp.');
@@ -80,6 +119,11 @@ class WhatsAppController extends Controller
             ->where('appointments.id', $presupuestoId)
             ->select('appointments.*', 'bikes.nombre as bicicleta_nombre','bikes.marca as marca', 'users.name as usuario_nombre')
             ->first();
+
+        Log::info('WhatsApp presupuesto: preparando datos de PDF', [
+            'presupuesto_id' => $presupuestoId,
+            'presupuesto_found' => (bool) $presupuesto,
+        ]);
             
 
         $items = DB::table('appointment_component')
@@ -96,20 +140,43 @@ class WhatsAppController extends Controller
         $pdf = Pdf::loadView('pdf.presupuesto2', compact('presupuesto', 'items'));
         Storage::put($rutaAlmacenamiento, $pdf->output());
 
+        Log::info('WhatsApp presupuesto: PDF guardado', [
+            'presupuesto_id' => $presupuestoId,
+            'storage_path' => $rutaAlmacenamiento,
+            'items_count' => $items->count(),
+        ]);
+
         return storage_path("app/$rutaAlmacenamiento");
     }
 
     private function enviarMensajeWhatsApp($telefono, $mensaje, $pdfUrl, $presupuestoId)
     {
         try {
-            $this->whatsAppCloudApiService->sendDocumentMessage($telefono, $mensaje, $pdfUrl, basename($pdfUrl));
+            $response = $this->whatsAppCloudApiService->sendDocumentMessage($telefono, $mensaje, $pdfUrl, basename($pdfUrl));
+
+            Log::info('WhatsApp presupuesto: Meta acepto el envio', [
+                'presupuesto_id' => $presupuestoId,
+                'to' => $this->normalizePhone((string) $telefono),
+                'response' => $response,
+            ]);
 
             DB::table('appointments')
                 ->where('id', $presupuestoId)
                 ->update(['presupuesto_enviado' => true]);
 
+            Log::info('WhatsApp presupuesto: marcado como enviado en BD', [
+                'presupuesto_id' => $presupuestoId,
+            ]);
+
         } catch (\Exception $e) {
-            Log::error("Error al enviar mensaje de WhatsApp: " . $e->getMessage());
+            Log::error('WhatsApp presupuesto: fallo al enviar mensaje', [
+                'presupuesto_id' => $presupuestoId,
+                'to' => $this->normalizePhone((string) $telefono),
+                'pdf_url' => $pdfUrl,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
         }
     }
 

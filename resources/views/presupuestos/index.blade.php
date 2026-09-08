@@ -107,6 +107,12 @@
         </div>
     @endif
 
+    @if (session('error'))
+        <div class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <!-- 🔹 Tabla a ancho completo -->
     <div class="overflow-x-auto mt-6">
         <table class="w-full bg-white shadow-md rounded-lg table-mobile-friendly">
