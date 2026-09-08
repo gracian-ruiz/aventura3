@@ -27,17 +27,6 @@ class WhatsAppController extends Controller
             'auth_user_id' => auth()->id(),
         ]);
 
-        // Buscar el cliente
-        $cliente = DB::table('users')->where('id', $clienteId)->first();
-        if (!$cliente) {
-            Log::warning('WhatsApp presupuesto: cliente no encontrado', [
-                'cliente_id' => $clienteId,
-                'presupuesto_id' => $presupuestoId,
-            ]);
-
-            return response()->json(['error' => 'Cliente no encontrado'], 404);
-        }
-
         // Buscar el presupuesto y la bicicleta
         $presupuesto = DB::table('appointments')
             ->join('bikes', 'appointments.bike_id', '=', 'bikes.id')
@@ -46,6 +35,7 @@ class WhatsAppController extends Controller
             ->select(
                 'appointments.*',
                 'bikes.nombre as bicicleta_nombre',
+                'users.id as usuario_id',
                 'users.name as usuario_nombre',
                 'users.telefono as usuario_telefono'
             )
@@ -64,24 +54,12 @@ class WhatsAppController extends Controller
 
         Log::info('WhatsApp presupuesto: datos cargados', [
             'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
-            'cliente_id' => $cliente->id ?? null,
-            'cliente_email' => $cliente->email ?? null,
-            'cliente_telefono' => $cliente->telefono ?? null,
+            'cliente_id' => $presupuesto->usuario_id ?? null,
+            'cliente_nombre' => $presupuesto->usuario_nombre ?? null,
+            'cliente_telefono' => $presupuesto->usuario_telefono ?? null,
             'presupuesto_estado' => $presupuesto->estado ?? null,
             'presupuesto_enviado' => $presupuesto->presupuesto_enviado ?? null,
         ]);
-
-        if (!$this->whatsappTestGateAllows($cliente->email ?? null, $cliente->telefono ?? null)) {
-            Log::warning('WhatsApp presupuesto bloqueado por filtro de prueba', [
-                'cliente_id' => $cliente->id ?? null,
-                'email' => $cliente->email ?? null,
-                'telefono' => $cliente->telefono ?? null,
-                'allowed_emails' => $this->allowedEmails(),
-                'allowed_phone' => $this->normalizePhone((string) config('services.whatsapp.notice_phone_gate')),
-            ]);
-
-            return back()->with('error', 'El envío de prueba por WhatsApp solo está permitido para el cliente autorizado.');
-        }
 
         // 1. GENERAR EL PDF EN LOCAL PARA SUBIRLO DIRECTAMENTE A META
         $pdfPath = $this->generarPDF($presupuestoId);
@@ -95,23 +73,27 @@ class WhatsAppController extends Controller
         ]);
 
         // 2. ENVIAR POR WHATSAPP
-        if (!empty($cliente->telefono)) {
-            $mensaje = "📄 ¡Hola {$cliente->name}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
+        $telefonoDestino = $presupuesto->usuario_telefono ?? null;
+
+        if (!empty($telefonoDestino)) {
+            $mensaje = "📄 ¡Hola {$presupuesto->usuario_nombre}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
                 . "🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
 
             Log::info('WhatsApp presupuesto: enviando documento por Cloud API', [
                 'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
                 'presupuesto_id' => $presupuestoId,
-                'to' => $this->normalizePhone((string) $cliente->telefono),
+                'to' => $this->normalizePhone((string) $telefonoDestino),
                 'body_length' => mb_strlen($mensaje),
             ]);
 
-            $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
+            $this->enviarMensajeWhatsApp($telefonoDestino, $mensaje, $pdfPath, $presupuestoId);
         } else {
             Log::warning('WhatsApp presupuesto: cliente sin telefono', [
-                'cliente_id' => $cliente->id ?? null,
+                'cliente_id' => $presupuesto->usuario_id ?? null,
                 'presupuesto_id' => $presupuestoId,
             ]);
+
+            return back()->with('error', 'El cliente de este presupuesto no tiene teléfono registrado para WhatsApp.');
         }
 
         return back()->with('success', '📩 Presupuesto enviado por WhatsApp.');
@@ -204,40 +186,6 @@ class WhatsAppController extends Controller
 
             throw $e;
         }
-    }
-
-    private function whatsappTestGateAllows(?string $email, ?string $telefono): bool
-    {
-        $allowedEmails = $this->allowedEmails();
-        $allowedPhone = $this->normalizePhone((string) config('services.whatsapp.notice_phone_gate'));
-
-        if (empty($allowedEmails) || $allowedPhone === '') {
-            return false;
-        }
-
-        return in_array(strtolower(trim((string) $email)), $allowedEmails, true)
-            && $this->normalizePhone((string) $telefono) === $allowedPhone;
-    }
-
-    private function allowedEmails(): array
-    {
-        $list = (string) config('services.whatsapp.notice_email_gate_list', '');
-        $single = (string) config('services.whatsapp.notice_email_gate', '');
-        $hardcoded = [
-            'gracianmiguel1995@gmail.com',
-            'graciancristales@hotmail.com',
-        ];
-
-        $emails = array_filter(array_map(
-            static fn (string $value): string => strtolower(trim($value)),
-            array_merge(
-                $list !== '' ? explode(',', $list) : [],
-                $single !== '' ? [$single] : [],
-                $hardcoded
-            )
-        ));
-
-        return array_values(array_unique($emails));
     }
 
     private function normalizePhone(string $phone): string

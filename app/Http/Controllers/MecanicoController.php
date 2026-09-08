@@ -258,26 +258,11 @@ public function index(Request $request)
 
     private function enviarAvisoWhatsAppCompletado(Appointment $appointment): void
     {
-        $usuario = $appointment->bike?->user;
+        Log::info('[MecanicoController] Aviso WhatsApp desactivado temporalmente al completar orden', [
+            'appointment_id' => $appointment->id,
+        ]);
 
-        if (!$usuario || empty($usuario->telefono)) {
-            return;
-        }
-
-        if (!$this->whatsappTestGateAllows($usuario->email ?? null, $usuario->telefono ?? null)) {
-            return;
-        }
-
-        $mensaje = "✅ Hola {$usuario->name}, tu bicicleta {$appointment->bike?->nombre} ya está lista para recoger.";
-        try {
-            $this->whatsAppCloudApiService->sendTextMessage($usuario->telefono, $mensaje);
-        } catch (\Throwable $exception) {
-            Log::warning('[MecanicoController] No se pudo enviar aviso WhatsApp de cita completada', [
-                'appointment_id' => $appointment->id,
-                'user_id' => $usuario->id,
-                'error' => $exception->getMessage(),
-            ]);
-        }
+        return;
     }
 
     private function whatsappTestGateAllows(?string $email, ?string $telefono): bool
