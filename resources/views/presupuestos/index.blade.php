@@ -120,7 +120,7 @@
                     <th class="py-2 px-4 text-center">Origen</th>
                     <th class="py-2 px-4 text-center">Aprobar / Denegar</th>
                     <th class="py-2 px-4 text-center">Editar / Ver Presupuesto</th>
-                    <th class="py-2 px-4 text-center">Eliminar / Enviar Correo</th>
+                    <th class="py-2 px-4 text-center">Eliminar / Enviar</th>
                 </tr>
             </thead>
 
@@ -222,7 +222,7 @@
                             </div>
                         </td>
 
-                        <!-- 🟥 Eliminar / Enviar correo -->
+                        <!-- 🟥 Eliminar / Enviar -->
                         <td class="py-2 px-4 text-center">
                             <div class="flex flex-col space-y-2">
                                 <!-- Eliminar -->
@@ -244,6 +244,17 @@
                                     class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                                      Enviar correo
                                  </a>
+
+                                @if (!empty($presupuesto->user_id) && !empty($presupuesto->user_telefono))
+                                    <a href="{{ route('presupuesto.enviar', ['clienteId' => $presupuesto->user_id, 'presupuestoId' => $presupuesto->id]) }}"
+                                        class="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                        Enviar WhatsApp
+                                    </a>
+                                @else
+                                    <span class="px-3 py-2 bg-gray-200 text-gray-500 rounded-md cursor-not-allowed">
+                                        Sin teléfono WhatsApp
+                                    </span>
+                                @endif
                             </div>
                         </td>
                     </tr>

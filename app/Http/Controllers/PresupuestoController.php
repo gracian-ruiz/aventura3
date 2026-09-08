@@ -44,7 +44,8 @@ public function index(Request $request)
             'bikes.nombre as bike_nombre',
             'bikes.marca as bike_marca',
             'users.name as user_nombre',
-            'users.role as user_role'
+            'users.role as user_role',
+            'users.telefono as user_telefono'
         )
         ->whereIn('appointments.estado', ['presupuesto', 'denegado', 'vacia'])
         ->when($search, function ($query, $search) {
