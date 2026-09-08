@@ -78,17 +78,14 @@ class WhatsAppController extends Controller
             return back()->with('error', 'El envío de prueba por WhatsApp solo está permitido para el cliente autorizado.');
         }
 
-        // 1. GENERAR Y EXPONER EL PDF CON URL PUBLICA FIRMADA POR TOKEN
+        // 1. GENERAR EL PDF EN LOCAL PARA SUBIRLO DIRECTAMENTE A META
         $pdfPath = $this->generarPDF($presupuestoId);
-        $pdfUrl = route('presupuestos.pdf.publico', [
-            'presupuestoId' => $presupuestoId,
-            'token' => $presupuesto->token_presupuesto,
-        ]);
+        $pdfFilename = basename($pdfPath);
 
         Log::info('WhatsApp presupuesto: PDF generado', [
             'presupuesto_id' => $presupuestoId,
             'pdf_path' => $pdfPath,
-            'pdf_url' => $pdfUrl,
+            'pdf_filename' => $pdfFilename,
         ]);
 
         // 2. ENVIAR POR WHATSAPP
@@ -102,7 +99,7 @@ class WhatsAppController extends Controller
                 'body_length' => mb_strlen($mensaje),
             ]);
 
-            $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfUrl, $presupuestoId);
+            $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
         } else {
             Log::warning('WhatsApp presupuesto: cliente sin telefono', [
                 'cliente_id' => $cliente->id ?? null,
@@ -152,10 +149,10 @@ class WhatsAppController extends Controller
         return storage_path("app/$rutaAlmacenamiento");
     }
 
-    private function enviarMensajeWhatsApp($telefono, $mensaje, $pdfUrl, $presupuestoId)
+    private function enviarMensajeWhatsApp($telefono, $mensaje, $pdfPath, $presupuestoId)
     {
         try {
-            $response = $this->whatsAppCloudApiService->sendDocumentMessage($telefono, $mensaje, $pdfUrl, basename($pdfUrl));
+            $response = $this->whatsAppCloudApiService->sendDocumentMessageFromFile($telefono, $mensaje, $pdfPath, basename($pdfPath));
 
             Log::info('WhatsApp presupuesto: Meta acepto el envio', [
                 'presupuesto_id' => $presupuestoId,
@@ -175,7 +172,7 @@ class WhatsAppController extends Controller
             Log::error('WhatsApp presupuesto: fallo al enviar mensaje', [
                 'presupuesto_id' => $presupuestoId,
                 'to' => $this->normalizePhone((string) $telefono),
-                'pdf_url' => $pdfUrl,
+                'pdf_path' => $pdfPath,
                 'error' => $e->getMessage(),
             ]);
 

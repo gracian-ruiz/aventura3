@@ -115,6 +115,86 @@ class WhatsAppCloudApiService
         }
     }
 
+    public function sendDocumentMessageFromFile(string $to, string $caption, string $filePath, ?string $filename = null): array
+    {
+        $phoneNumberId = (string) config('services.whatsapp.phone_number_id');
+        $accessToken = (string) config('services.whatsapp.access_token');
+
+        if ($phoneNumberId === '' || $accessToken === '') {
+            throw new RuntimeException('Faltan credenciales de WhatsApp Cloud API para enviar documentos.');
+        }
+
+        if (!is_file($filePath)) {
+            throw new RuntimeException('No existe el archivo PDF a enviar por WhatsApp: ' . $filePath);
+        }
+
+        $normalizedTo = $this->normalizePhoneNumber($to);
+        $resolvedFilename = $filename ?: basename($filePath);
+
+        Log::info('WhatsApp Cloud API: subiendo documento a Meta', [
+            'to' => $normalizedTo,
+            'phone_number_id' => $phoneNumberId,
+            'file_path' => $filePath,
+            'filename' => $resolvedFilename,
+        ]);
+
+        try {
+            $mediaResponse = Http::withToken($accessToken)
+                ->attach('file', fopen($filePath, 'r'), $resolvedFilename)
+                ->post($this->mediaUploadUrl($phoneNumberId), [
+                    'messaging_product' => 'whatsapp',
+                    'type' => 'application/pdf',
+                ])
+                ->throw()
+                ->json();
+
+            $mediaId = (string) ($mediaResponse['id'] ?? '');
+
+            if ($mediaId === '') {
+                throw new RuntimeException('Meta no devolvió un media_id al subir el PDF.');
+            }
+
+            Log::info('WhatsApp Cloud API: documento subido a Meta', [
+                'to' => $normalizedTo,
+                'phone_number_id' => $phoneNumberId,
+                'media_id' => $mediaId,
+            ]);
+
+            return Http::withToken($accessToken)
+                ->acceptJson()
+                ->post($this->messagesUrl($phoneNumberId), [
+                    'messaging_product' => 'whatsapp',
+                    'recipient_type' => 'individual',
+                    'to' => $normalizedTo,
+                    'type' => 'document',
+                    'document' => array_filter([
+                        'id' => $mediaId,
+                        'caption' => $caption,
+                        'filename' => $resolvedFilename,
+                    ], static fn ($value) => $value !== null && $value !== ''),
+                ])
+                ->throw()
+                ->json();
+        } catch (Throwable $exception) {
+            Log::error('WhatsApp Cloud API: fallo al enviar documento desde archivo', [
+                'to' => $normalizedTo,
+                'phone_number_id' => $phoneNumberId,
+                'file_path' => $filePath,
+                'error' => $exception->getMessage(),
+                'meta_error' => $this->extractMetaError($exception),
+            ]);
+
+            throw $exception;
+        }
+    }
+
+    public function mediaUploadUrl(?string $phoneNumberId = null): string
+    {
+        $resolvedPhoneNumberId = $phoneNumberId ?: (string) config('services.whatsapp.phone_number_id');
+
+        return sprintf('https://graph.facebook.com/v23.0/%s/media', $resolvedPhoneNumberId);
+    }
+
     private function extractMetaError(Throwable $exception): array
     {
         if (!$exception instanceof RequestException || $exception->response === null) {
