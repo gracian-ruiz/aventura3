@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Twilio\Rest\Client;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\AvisoEnviado;
+use App\Services\WhatsAppCloudApiService;
 
 class WhatsAppController extends Controller
 {
+    public function __construct(private readonly WhatsAppCloudApiService $whatsAppCloudApiService)
+    {
+    }
+
     public function enviarPresupuestoWhatsApp($clienteId, $presupuestoId)
     {
         // Buscar el cliente
@@ -39,18 +42,28 @@ class WhatsAppController extends Controller
             return response()->json(['error' => 'Presupuesto no encontrado'], 404);
         }
 
+        if (!$this->whatsappTestGateAllows($cliente->email ?? null, $cliente->telefono ?? null)) {
+            Log::warning('WhatsApp presupuesto bloqueado por filtro de prueba', [
+                'cliente_id' => $cliente->id ?? null,
+                'email' => $cliente->email ?? null,
+                'telefono' => $cliente->telefono ?? null,
+            ]);
+
+            return back()->with('error', 'El envío de prueba por WhatsApp solo está permitido para el cliente autorizado.');
+        }
+
         // 1. GENERAR Y GUARDAR EL PDF
         $pdfPath = $this->generarPDF($presupuestoId);
+        $pdfUrl = url('storage/presupuestos/' . basename($pdfPath));
 
         // 2. ENVIAR POR WHATSAPP
         if (!empty($cliente->telefono)) {
             // 2. ENVIAR POR WHATSAPP
             if (!empty($cliente->telefono)) {
                 $mensaje = "📄 ¡Hola {$cliente->name}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
-                    . "📎 Adjuntamos el PDF con los detalles.\n\n" // Doble salto de línea aquí
-                    . "🔗 Puedes confirmar el presupuesto pinchando aquí: si no estás de acuerdo dime que quieres que hagamos y te mando nuevo presupuesto. Gracias: {$presupuestoUrl}";
+                    . "🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
 
-                $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfPath, $presupuestoId);
+                $this->enviarMensajeWhatsApp($cliente->telefono, $mensaje, $pdfUrl, $presupuestoId);
             }
 
         }
@@ -86,32 +99,35 @@ class WhatsAppController extends Controller
         return storage_path("app/$rutaAlmacenamiento");
     }
 
-    private function enviarMensajeWhatsApp($telefono, $mensaje, $pdfPath, $presupuestoId)
+    private function enviarMensajeWhatsApp($telefono, $mensaje, $pdfUrl, $presupuestoId)
     {
         try {
-            // Configurar Twilio
-            $twilio = new Client(env('TWILIO_SID'), env('TWILIO_AUTH_TOKEN'));
+            $this->whatsAppCloudApiService->sendDocumentMessage($telefono, $mensaje, $pdfUrl, basename($pdfUrl));
 
-            // Obtener URL del PDF
-            $pdfUrl = url("storage/presupuestos/" . basename($pdfPath));
-
-            // Enviar mensaje con PDF adjunto
-            $twilio->messages->create(
-                "whatsapp:+34$telefono",
-                [
-                    "from" => env('TWILIO_WHATSAPP_FROM'),
-                    "body" => $mensaje,
-                    "mediaUrl" => [$pdfUrl]
-                ]
-            );
-
-
-                DB::table('appointments')
-                    ->where('id', $presupuestoId)
-                    ->update(['presupuesto_enviado' => true]);
+            DB::table('appointments')
+                ->where('id', $presupuestoId)
+                ->update(['presupuesto_enviado' => true]);
 
         } catch (\Exception $e) {
             Log::error("Error al enviar mensaje de WhatsApp: " . $e->getMessage());
         }
+    }
+
+    private function whatsappTestGateAllows(?string $email, ?string $telefono): bool
+    {
+        $allowedEmail = trim((string) config('services.whatsapp.notice_email_gate'));
+        $allowedPhone = $this->normalizePhone((string) config('services.whatsapp.notice_phone_gate'));
+
+        if ($allowedEmail === '' || $allowedPhone === '') {
+            return false;
+        }
+
+        return strtolower(trim((string) $email)) === strtolower($allowedEmail)
+            && $this->normalizePhone((string) $telefono) === $allowedPhone;
+    }
+
+    private function normalizePhone(string $phone): string
+    {
+        return preg_replace('/\D+/', '', $phone) ?? '';
     }
 }

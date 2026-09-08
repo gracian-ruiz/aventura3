@@ -16,6 +16,7 @@
                     <a href="{{ route('presupuestos.index') }}" class="app-nav-item {{ request()->routeIs('presupuestos.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Presupuestos</a>
                     <a href="{{ route('appointments.index') }}" class="app-nav-item {{ request()->routeIs('appointments.*') && !request()->routeIs('appointments.historico') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Orden de taller</a>
                     <a href="{{ route('mecanico.index') }}" class="app-nav-item {{ request()->routeIs('mecanico.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Orden taller asignado</a>
+                    <a href="{{ route('whatsapp.index') }}" class="app-nav-item {{ request()->routeIs('whatsapp.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">WhatsApp</a>
                     <a href="{{ route('bikes.index') }}" class="app-nav-item {{ request()->routeIs('bikes.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Bicicletas</a>
                     <a href="{{ route('components.index') }}" class="app-nav-item {{ request()->routeIs('components.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Componentes</a>
                     <a href="{{ route('appointments.historico') }}" class="app-nav-item {{ request()->routeIs('appointments.historico*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Histórico</a>
@@ -90,6 +91,7 @@
                 <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.*') && !request()->routeIs('appointments.historico')">Orden de taller
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('mecanico.index')" :active="request()->routeIs('mecanico.*')">Orden de taller Asignado</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('whatsapp.index')" :active="request()->routeIs('whatsapp.*')">WhatsApp</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('calendario-citas')" :active="request()->routeIs('calendario-citas')">Calendario Manual</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('calendario-asignado')" :active="request()->routeIs('calendario-asignado')">Calendario Automatico</x-responsive-nav-link>

@@ -11,12 +11,17 @@ use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use App\Http\Controllers\Alquiler\EnviarCorreosController;
 use App\Http\Controllers\EnviarCorreosController as ControllersEnviarCorreosController;
+use App\Services\WhatsAppCloudApiService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class AppointmentController extends Controller
 {
+    public function __construct(private readonly WhatsAppCloudApiService $whatsAppCloudApiService)
+    {
+    }
+
     private function getReturnUrl(Request $request): ?string
     {
         $returnUrl = $request->input('return_url', $request->query('return_url'));
@@ -276,6 +281,8 @@ class AppointmentController extends Controller
                 ]);
             }
 
+            $this->enviarAvisoWhatsAppCompletado($appointment);
+
             return $this->redirectToAppointmentsIndex($request)
                 ->with('success', '✅ Cita completada y revisiones generadas correctamente.');
         } catch (\Exception $e) {
@@ -285,6 +292,31 @@ class AppointmentController extends Controller
                 'error' => $e->getMessage(),
             ]);
             return redirect()->back()->with('error', 'Error al completar la cita. Inténtalo de nuevo.');
+        }
+    }
+
+    private function enviarAvisoWhatsAppCompletado(Appointment $appointment): void
+    {
+        $usuario = $appointment->bike?->user;
+
+        if (!$usuario || empty($usuario->telefono)) {
+            return;
+        }
+
+        if (!$this->whatsappTestGateAllows($usuario->email ?? null, $usuario->telefono ?? null)) {
+            return;
+        }
+
+        $mensaje = "✅ Hola {$usuario->name}, tu bicicleta {$appointment->bike?->nombre} ya está lista para recoger.";
+
+        try {
+            $this->whatsAppCloudApiService->sendTextMessage($usuario->telefono, $mensaje);
+        } catch (\Throwable $exception) {
+            Log::warning('[AppointmentController] No se pudo enviar aviso WhatsApp de cita completada', [
+                'appointment_id' => $appointment->id,
+                'user_id' => $usuario->id,
+                'error' => $exception->getMessage(),
+            ]);
         }
     }
 
@@ -598,6 +630,7 @@ class AppointmentController extends Controller
                         $fecha_actual->addDay();
                     }
                 }
+
             }
         } catch (\Exception $e) {
             Log::error('[AppointmentController] Error en recalcularFechasAsignadas2', ['error' => $e->getMessage()]);
@@ -681,6 +714,19 @@ class AppointmentController extends Controller
         } catch (\Exception $e) {
             Log::error('[AppointmentController] Error en recalcularFechasAsignadas', ['error' => $e->getMessage()]);
         }
+    }
+
+    private function whatsappTestGateAllows(?string $email, ?string $telefono): bool
+    {
+        $allowedEmail = trim((string) config('services.whatsapp.notice_email_gate'));
+        $allowedPhone = preg_replace('/\D+/', '', (string) config('services.whatsapp.notice_phone_gate')) ?? '';
+
+        if ($allowedEmail === '' || $allowedPhone === '') {
+            return false;
+        }
+
+        return strtolower(trim((string) $email)) === strtolower($allowedEmail)
+            && preg_replace('/\D+/', '', (string) $telefono) === $allowedPhone;
     }
 
 

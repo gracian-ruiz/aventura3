@@ -18,6 +18,7 @@ use App\Http\Controllers\EnviarCorreosController;
 use App\Http\Controllers\MecanicoController;
 use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\WhatsAppTestController;
+use App\Http\Controllers\WhatsAppInboxController;
 use App\Models\Bike;
 use App\Models\Material;
 use App\Http\Controllers\ClienteController;
@@ -208,6 +209,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/presupuesto/{clienteId}/{presupuestoId}/enviar', [WhatsAppController::class, 'enviarPresupuestoWhatsApp'])
         ->name('presupuesto.enviar');
+
+    Route::get('/whatsapp', [WhatsAppInboxController::class, 'index'])->name('whatsapp.index');
+    Route::get('/whatsapp/{phone}', [WhatsAppInboxController::class, 'show'])->name('whatsapp.show');
+    Route::post('/whatsapp/{phone}', [WhatsAppInboxController::class, 'reply'])->name('whatsapp.reply');
 
 
 

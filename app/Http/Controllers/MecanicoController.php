@@ -13,9 +13,14 @@ use App\Http\Requests\UpdateAppointmentRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use App\Services\WhatsAppCloudApiService;
 
 class MecanicoController extends Controller
 {
+    public function __construct(private readonly WhatsAppCloudApiService $whatsAppCloudApiService)
+    {
+    }
+
     private function getReturnUrl(Request $request): ?string
     {
         $returnUrl = $request->input('return_url', $request->query('return_url'));
@@ -237,6 +242,8 @@ public function index(Request $request)
 
             DB::commit();
 
+            $this->enviarAvisoWhatsAppCompletado($appointment);
+
             return $this->redirectToMecanicoIndex($request)
                 ->with('success', '✅ Cita completada y revisiones generadas correctamente.');
         } catch (\Exception $e) {
@@ -247,6 +254,43 @@ public function index(Request $request)
             ]);
             return redirect()->back()->with('error', 'Error al completar la cita. Inténtalo de nuevo.');
         }
+    }
+
+    private function enviarAvisoWhatsAppCompletado(Appointment $appointment): void
+    {
+        $usuario = $appointment->bike?->user;
+
+        if (!$usuario || empty($usuario->telefono)) {
+            return;
+        }
+
+        if (!$this->whatsappTestGateAllows($usuario->email ?? null, $usuario->telefono ?? null)) {
+            return;
+        }
+
+        $mensaje = "✅ Hola {$usuario->name}, tu bicicleta {$appointment->bike?->nombre} ya está lista para recoger.";
+        try {
+            $this->whatsAppCloudApiService->sendTextMessage($usuario->telefono, $mensaje);
+        } catch (\Throwable $exception) {
+            Log::warning('[MecanicoController] No se pudo enviar aviso WhatsApp de cita completada', [
+                'appointment_id' => $appointment->id,
+                'user_id' => $usuario->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    private function whatsappTestGateAllows(?string $email, ?string $telefono): bool
+    {
+        $allowedEmail = trim((string) config('services.whatsapp.notice_email_gate'));
+        $allowedPhone = preg_replace('/\D+/', '', (string) config('services.whatsapp.notice_phone_gate')) ?? '';
+
+        if ($allowedEmail === '' || $allowedPhone === '') {
+            return false;
+        }
+
+        return strtolower(trim((string) $email)) === strtolower($allowedEmail)
+            && preg_replace('/\D+/', '', (string) $telefono) === $allowedPhone;
     }
 
     public function updatedos(Request $request, $id)
