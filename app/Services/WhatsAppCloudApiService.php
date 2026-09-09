@@ -192,6 +192,60 @@ class WhatsAppCloudApiService
         }
     }
 
+    public function sendTemplateMessage(string $to, string $templateName, string $languageCode = 'es'): array
+    {
+        $phoneNumberId = (string) config('services.whatsapp.phone_number_id');
+        $accessToken = (string) config('services.whatsapp.access_token');
+
+        if ($phoneNumberId === '' || $accessToken === '') {
+            throw new RuntimeException('Faltan credenciales de WhatsApp Cloud API para enviar plantillas.');
+        }
+
+        if (trim($templateName) === '') {
+            throw new RuntimeException('Falta el nombre de plantilla de WhatsApp.');
+        }
+
+        $normalizedTo = $this->normalizePhoneNumber($to);
+
+        Log::info('WhatsApp Cloud API: enviando plantilla', [
+            'version' => self::LOG_VERSION,
+            'to' => $normalizedTo,
+            'phone_number_id' => $phoneNumberId,
+            'template' => $templateName,
+            'language' => $languageCode,
+        ]);
+
+        try {
+            return Http::withToken($accessToken)
+                ->acceptJson()
+                ->post($this->messagesUrl($phoneNumberId), [
+                    'messaging_product' => 'whatsapp',
+                    'recipient_type' => 'individual',
+                    'to' => $normalizedTo,
+                    'type' => 'template',
+                    'template' => [
+                        'name' => $templateName,
+                        'language' => [
+                            'code' => $languageCode,
+                        ],
+                    ],
+                ])
+                ->throw()
+                ->json();
+        } catch (Throwable $exception) {
+            Log::error('WhatsApp Cloud API: fallo al enviar plantilla', [
+                'to' => $normalizedTo,
+                'phone_number_id' => $phoneNumberId,
+                'template' => $templateName,
+                'language' => $languageCode,
+                'error' => $exception->getMessage(),
+                'meta_error' => $this->extractMetaError($exception),
+            ]);
+
+            throw $exception;
+        }
+    }
+
     public function mediaUploadUrl(?string $phoneNumberId = null): string
     {
         $resolvedPhoneNumberId = $phoneNumberId ?: (string) config('services.whatsapp.phone_number_id');

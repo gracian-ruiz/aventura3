@@ -12,7 +12,9 @@ use App\Services\WhatsAppCloudApiService;
 
 class WhatsAppController extends Controller
 {
-    private const WHATSAPP_PRESUPUESTO_LOG_VERSION = 'presupuesto-whatsapp-v2-media-id';
+    private const WHATSAPP_PRESUPUESTO_LOG_VERSION = 'presupuesto-whatsapp-v3-template';
+    private const PRESUPUESTO_TEMPLATE_NAME = 'presupuesto_reparacion';
+    private const PRESUPUESTO_TEMPLATE_LANG = 'es';
 
     public function __construct(private readonly WhatsAppCloudApiService $whatsAppCloudApiService)
     {
@@ -61,32 +63,20 @@ class WhatsAppController extends Controller
             'presupuesto_enviado' => $presupuesto->presupuesto_enviado ?? null,
         ]);
 
-        // 1. GENERAR EL PDF EN LOCAL PARA SUBIRLO DIRECTAMENTE A META
-        $pdfPath = $this->generarPDF($presupuestoId);
-        $pdfFilename = basename($pdfPath);
-
-        Log::info('WhatsApp presupuesto: PDF generado', [
-            'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
-            'presupuesto_id' => $presupuestoId,
-            'pdf_path' => $pdfPath,
-            'pdf_filename' => $pdfFilename,
-        ]);
-
-        // 2. ENVIAR POR WHATSAPP
+        // Enviar plantilla por WhatsApp
         $telefonoDestino = $presupuesto->usuario_telefono ?? null;
 
         if (!empty($telefonoDestino)) {
-            $mensaje = "📄 ¡Hola {$presupuesto->usuario_nombre}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"
-                . "🔗 Puedes confirmar el presupuesto aquí: {$presupuestoUrl}";
-
-            Log::info('WhatsApp presupuesto: enviando documento por Cloud API', [
+            Log::info('WhatsApp presupuesto: enviando plantilla por Cloud API', [
                 'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
                 'presupuesto_id' => $presupuestoId,
                 'to' => $this->normalizePhone((string) $telefonoDestino),
-                'body_length' => mb_strlen($mensaje),
+                'template' => self::PRESUPUESTO_TEMPLATE_NAME,
+                'language' => self::PRESUPUESTO_TEMPLATE_LANG,
+                'presupuesto_url' => $presupuestoUrl,
             ]);
 
-            $this->enviarMensajeWhatsApp($telefonoDestino, $mensaje, $pdfPath, $presupuestoId);
+            $this->enviarPlantillaWhatsApp($telefonoDestino, $presupuestoId);
         } else {
             Log::warning('WhatsApp presupuesto: cliente sin telefono', [
                 'cliente_id' => $presupuesto->usuario_id ?? null,
@@ -97,6 +87,59 @@ class WhatsAppController extends Controller
         }
 
         return back()->with('success', '📩 Presupuesto enviado por WhatsApp.');
+    }
+
+    private function enviarPlantillaWhatsApp(string $telefono, int|string $presupuestoId): void
+    {
+        try {
+            $response = $this->whatsAppCloudApiService->sendTemplateMessage(
+                $telefono,
+                self::PRESUPUESTO_TEMPLATE_NAME,
+                self::PRESUPUESTO_TEMPLATE_LANG
+            );
+
+            Log::info('WhatsApp presupuesto: Meta acepto la plantilla', [
+                'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
+                'presupuesto_id' => $presupuestoId,
+                'to' => $this->normalizePhone((string) $telefono),
+                'template' => self::PRESUPUESTO_TEMPLATE_NAME,
+                'response' => $response,
+            ]);
+
+            DB::table('appointments')
+                ->where('id', $presupuestoId)
+                ->update(['presupuesto_enviado' => true]);
+
+            WhatsAppMessage::create([
+                'user_id' => DB::table('appointments')->where('id', $presupuestoId)->value('user_id'),
+                'bike_id' => DB::table('appointments')->where('id', $presupuestoId)->value('bike_id'),
+                'appointment_id' => $presupuestoId,
+                'wa_id' => data_get($response, 'messages.0.id'),
+                'from_phone' => (string) config('services.whatsapp.phone_number_id'),
+                'to_phone' => $this->normalizePhone((string) $telefono),
+                'direction' => 'outbound',
+                'message_type' => 'template',
+                'body' => 'Plantilla presupuesto_reparacion enviada por WhatsApp',
+                'status' => 'sent',
+                'payload' => $response,
+                'sent_at' => now(),
+            ]);
+
+            Log::info('WhatsApp presupuesto: marcado como enviado en BD', [
+                'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
+                'presupuesto_id' => $presupuestoId,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('WhatsApp presupuesto: fallo al enviar plantilla', [
+                'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
+                'presupuesto_id' => $presupuestoId,
+                'to' => $this->normalizePhone((string) $telefono),
+                'template' => self::PRESUPUESTO_TEMPLATE_NAME,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 
     private function generarPDF($presupuestoId)
@@ -192,4 +235,5 @@ class WhatsAppController extends Controller
     {
         return preg_replace('/\D+/', '', $phone) ?? '';
     }
+
 }
