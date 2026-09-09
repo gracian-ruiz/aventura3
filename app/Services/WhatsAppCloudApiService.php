@@ -192,7 +192,14 @@ class WhatsAppCloudApiService
         }
     }
 
-    public function sendTemplateMessage(string $to, string $templateName, string $languageCode = 'es', array $bodyParams = []): array
+    public function sendTemplateMessage(
+        string $to,
+        string $templateName,
+        string $languageCode = 'es',
+        array $bodyParams = [],
+        ?array $headerDocument = null,
+        ?array $buttonComponent = null
+    ): array
     {
         $phoneNumberId = (string) config('services.whatsapp.phone_number_id');
         $accessToken = (string) config('services.whatsapp.access_token');
@@ -214,6 +221,8 @@ class WhatsAppCloudApiService
             'template' => $templateName,
             'language' => $languageCode,
             'body_params_count' => count($bodyParams),
+            'has_header_document' => is_array($headerDocument),
+            'has_button_component' => is_array($buttonComponent),
         ]);
 
         $templatePayload = [
@@ -223,19 +232,47 @@ class WhatsAppCloudApiService
             ],
         ];
 
-        if (!empty($bodyParams)) {
-            $templatePayload['components'] = [
-                [
-                    'type' => 'body',
-                    'parameters' => array_map(
-                        static fn (mixed $value): array => [
-                            'type' => 'text',
-                            'text' => (string) $value,
+        $components = [];
+
+        if (is_array($headerDocument)) {
+            $link = trim((string) ($headerDocument['link'] ?? ''));
+            $filename = trim((string) ($headerDocument['filename'] ?? 'presupuesto.pdf'));
+
+            if ($link !== '') {
+                $components[] = [
+                    'type' => 'header',
+                    'parameters' => [
+                        [
+                            'type' => 'document',
+                            'document' => [
+                                'link' => $link,
+                                'filename' => $filename,
+                            ],
                         ],
-                        $bodyParams
-                    ),
-                ],
+                    ],
+                ];
+            }
+        }
+
+        if (!empty($bodyParams)) {
+            $components[] = [
+                'type' => 'body',
+                'parameters' => array_map(
+                    static fn (mixed $value): array => [
+                        'type' => 'text',
+                        'text' => (string) $value,
+                    ],
+                    $bodyParams
+                ),
             ];
+        }
+
+        if (is_array($buttonComponent) && !empty($buttonComponent)) {
+            $components[] = $buttonComponent;
+        }
+
+        if (!empty($components)) {
+            $templatePayload['components'] = $components;
         }
 
         try {

@@ -55,6 +55,10 @@ class WhatsAppController extends Controller
         }
 
         $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
+        $presupuestoPdfPublicoUrl = route('presupuestos.pdf.publico', [
+            'presupuestoId' => $presupuestoId,
+            'token' => $presupuesto->token_presupuesto,
+        ]);
 
         Log::info('WhatsApp presupuesto: datos cargados', [
             'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
@@ -76,6 +80,7 @@ class WhatsAppController extends Controller
                 'template' => self::PRESUPUESTO_TEMPLATE_NAME,
                 'language' => self::PRESUPUESTO_TEMPLATE_LANG,
                 'presupuesto_url' => $presupuestoUrl,
+                'pdf_public_url' => $presupuestoPdfPublicoUrl,
             ]);
 
             try {
@@ -88,6 +93,10 @@ class WhatsAppController extends Controller
                     [
                         $nombreCliente,
                         $nombreBicicleta,
+                    ],
+                    [
+                        'link' => $presupuestoPdfPublicoUrl,
+                        'filename' => "presupuesto_{$presupuestoId}.pdf",
                     ]
                 );
             } catch (\Throwable $exception) {
@@ -100,6 +109,10 @@ class WhatsAppController extends Controller
 
                 if ($metaCode === 132000) {
                     return back()->with('error', 'No se pudo enviar WhatsApp: la plantilla requiere parámetros que no coinciden con los enviados (código 132000). Revisa la estructura de presupuesto_reparacion en Meta.');
+                }
+
+                if ($metaCode === 132012) {
+                    return back()->with('error', 'No se pudo enviar WhatsApp: formato de plantilla inválido (código 132012). Meta esperaba DOCUMENTO en el encabezado y un formato distinto en alguno de los componentes.');
                 }
 
                 return back()->with('error', 'No se pudo enviar la plantilla de WhatsApp. Revisa logs de WhatsApp Cloud API para más detalle.');
@@ -116,14 +129,20 @@ class WhatsAppController extends Controller
         return back()->with('success', '📩 Presupuesto enviado por WhatsApp.');
     }
 
-    private function enviarPlantillaWhatsApp(string $telefono, int|string $presupuestoId, array $bodyParams = []): void
+    private function enviarPlantillaWhatsApp(
+        string $telefono,
+        int|string $presupuestoId,
+        array $bodyParams = [],
+        ?array $headerDocument = null
+    ): void
     {
         try {
             $response = $this->whatsAppCloudApiService->sendTemplateMessage(
                 $telefono,
                 self::PRESUPUESTO_TEMPLATE_NAME,
                 self::PRESUPUESTO_TEMPLATE_LANG,
-                $bodyParams
+                $bodyParams,
+                $headerDocument
             );
 
             Log::info('WhatsApp presupuesto: Meta acepto la plantilla', [
@@ -132,6 +151,7 @@ class WhatsAppController extends Controller
                 'to' => $this->normalizePhone((string) $telefono),
                 'template' => self::PRESUPUESTO_TEMPLATE_NAME,
                 'body_params_count' => count($bodyParams),
+                'has_header_document' => is_array($headerDocument),
                 'response' => $response,
             ]);
 
@@ -165,6 +185,7 @@ class WhatsAppController extends Controller
                 'to' => $this->normalizePhone((string) $telefono),
                 'template' => self::PRESUPUESTO_TEMPLATE_NAME,
                 'body_params_count' => count($bodyParams),
+                'has_header_document' => is_array($headerDocument),
                 'error' => $e->getMessage(),
             ]);
 
