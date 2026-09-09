@@ -37,6 +37,7 @@ class WhatsAppController extends Controller
             ->where('appointments.id', $presupuestoId)
             ->select(
                 'appointments.*',
+                'bikes.marca as bicicleta_marca',
                 'bikes.nombre as bicicleta_nombre',
                 'users.id as usuario_id',
                 'users.name as usuario_nombre',
@@ -78,12 +79,15 @@ class WhatsAppController extends Controller
             ]);
 
             try {
+                $nombreCliente = trim((string) ($presupuesto->usuario_nombre ?? ''));
+                $nombreBicicleta = trim((string) ($presupuesto->bicicleta_marca ?? '') . ' ' . (string) ($presupuesto->bicicleta_nombre ?? ''));
+
                 $this->enviarPlantillaWhatsApp(
                     $telefonoDestino,
                     $presupuestoId,
                     [
-                        (string) ($presupuesto->usuario_nombre ?? ''),
-                        (string) $presupuestoUrl,
+                        $nombreCliente,
+                        $nombreBicicleta,
                     ]
                 );
             } catch (\Throwable $exception) {
