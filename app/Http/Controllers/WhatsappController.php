@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\WhatsAppMessage;
 use Illuminate\Http\Request;
+use Illuminate\Http\Client\RequestException;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -76,7 +77,18 @@ class WhatsAppController extends Controller
                 'presupuesto_url' => $presupuestoUrl,
             ]);
 
-            $this->enviarPlantillaWhatsApp($telefonoDestino, $presupuestoId);
+            try {
+                $this->enviarPlantillaWhatsApp($telefonoDestino, $presupuestoId);
+            } catch (\Throwable $exception) {
+                $metaError = $this->extractMetaErrorFromException($exception);
+                $metaCode = (int) ($metaError['code'] ?? 0);
+
+                if ($metaCode === 190) {
+                    return back()->with('error', 'No se pudo enviar WhatsApp: token de Meta inválido o expirado (código 190). Actualiza WHATSAPP_ACCESS_TOKEN.');
+                }
+
+                return back()->with('error', 'No se pudo enviar la plantilla de WhatsApp. Revisa logs de WhatsApp Cloud API para más detalle.');
+            }
         } else {
             Log::warning('WhatsApp presupuesto: cliente sin telefono', [
                 'cliente_id' => $presupuesto->usuario_id ?? null,
@@ -234,6 +246,31 @@ class WhatsAppController extends Controller
     private function normalizePhone(string $phone): string
     {
         return preg_replace('/\D+/', '', $phone) ?? '';
+    }
+
+    private function extractMetaErrorFromException(\Throwable $exception): array
+    {
+        if (!$exception instanceof RequestException || $exception->response === null) {
+            return [];
+        }
+
+        $status = $exception->response->status();
+        $json = $exception->response->json();
+        $error = is_array($json) ? ($json['error'] ?? null) : null;
+
+        if (!is_array($error)) {
+            return ['http_status' => $status];
+        }
+
+        return [
+            'http_status' => $status,
+            'message' => $error['message'] ?? null,
+            'type' => $error['type'] ?? null,
+            'code' => $error['code'] ?? null,
+            'error_subcode' => $error['error_subcode'] ?? null,
+            'details' => data_get($error, 'error_data.details'),
+            'fbtrace_id' => $error['fbtrace_id'] ?? null,
+        ];
     }
 
 }
