@@ -192,7 +192,7 @@ class WhatsAppCloudApiService
         }
     }
 
-    public function sendTemplateMessage(string $to, string $templateName, string $languageCode = 'es'): array
+    public function sendTemplateMessage(string $to, string $templateName, string $languageCode = 'es', array $bodyParams = []): array
     {
         $phoneNumberId = (string) config('services.whatsapp.phone_number_id');
         $accessToken = (string) config('services.whatsapp.access_token');
@@ -213,7 +213,30 @@ class WhatsAppCloudApiService
             'phone_number_id' => $phoneNumberId,
             'template' => $templateName,
             'language' => $languageCode,
+            'body_params_count' => count($bodyParams),
         ]);
+
+        $templatePayload = [
+            'name' => $templateName,
+            'language' => [
+                'code' => $languageCode,
+            ],
+        ];
+
+        if (!empty($bodyParams)) {
+            $templatePayload['components'] = [
+                [
+                    'type' => 'body',
+                    'parameters' => array_map(
+                        static fn (mixed $value): array => [
+                            'type' => 'text',
+                            'text' => (string) $value,
+                        ],
+                        $bodyParams
+                    ),
+                ],
+            ];
+        }
 
         try {
             return Http::withToken($accessToken)
@@ -223,12 +246,7 @@ class WhatsAppCloudApiService
                     'recipient_type' => 'individual',
                     'to' => $normalizedTo,
                     'type' => 'template',
-                    'template' => [
-                        'name' => $templateName,
-                        'language' => [
-                            'code' => $languageCode,
-                        ],
-                    ],
+                    'template' => $templatePayload,
                 ])
                 ->throw()
                 ->json();
