@@ -549,4 +549,16 @@
 	.overflow-x-auto {
 		-webkit-overflow-scrolling: touch;
 	}
+
+	/* Responsive estable para movil: conservar tabla y permitir scroll horizontal */
+	.overflow-x-auto > table,
+	.table-responsive > table,
+	.table-mobile-friendly {
+		min-width: 760px !important;
+	}
+
+	.table-mobile-friendly th,
+	.table-mobile-friendly td {
+		white-space: nowrap;
+	}
 }

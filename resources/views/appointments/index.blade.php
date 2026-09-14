@@ -95,15 +95,15 @@
                             bg-yellow-200
                         @endif
                     ">
-                        <td class="py-2 px-4">
+                        <td class="py-2 px-4" data-label="Bicicleta">
                             {{ $appointment->bike->marca }} {{ $appointment->bike->nombre }} {{ $appointment->bike->color }}
                             <br><br> <span class="text-gray-500 text-sm">ID: {{$appointment->idprograma}}</span>
                         </td>
-                        <td class="py-2 px-4">{{ $appointment->bike->user->name }}</td>
-                        <td class="py-2 px-4">
+                        <td class="py-2 px-4" data-label="Usuario">{{ $appointment->bike->user->name }}</td>
+                        <td class="py-2 px-4" data-label="Componentes">
                             {{ $appointment->componentes->isNotEmpty() ? $appointment->componentes->pluck('nombre')->join(', ') : 'N/A' }}
                         </td>
-                        <td class="py-2 px-4 min-w-[120px]">
+                        <td class="py-2 px-4 min-w-[120px]" data-label="Prioridad">
                             <span class="app-badge
                                 @if ($appointment->prioridad == 'urgente')
                                     app-badge-priority-urgente
@@ -115,16 +115,16 @@
                                 {{ ucfirst($appointment->prioridad) }}
                             </span>
                         </td>
-                        <td class="py-2 px-4">{{ $appointment->horas_total }} min</td>
-                        <td class="py-2 px-4">
+                        <td class="py-2 px-4" data-label="Tiempo de Reparación">{{ $appointment->horas_total }} min</td>
+                        <td class="py-2 px-4" data-label="Fecha Creación">
                             {{ \Carbon\Carbon::parse($appointment->created_at)->addHour()->format('d/m/Y H:i') }}
                         </td>
-                        <td class="py-2 px-4">
+                        <td class="py-2 px-4" data-label="Fecha Asignada">
                             {{ $appointment->fecha_asignada ? \Carbon\Carbon::parse($appointment->fecha_asignada)->format('d/m/Y') : 'Pendiente' }}
                         </td>
 
                         <!-- 🔹 Acciones -->
-                        <td class="py-2 px-4 text-center min-w-[220px]">
+                        <td class="py-2 px-4 text-center min-w-[220px]" data-label="Acciones">
                             <div class="flex flex-col items-center justify-center gap-2 min-w-[190px] mx-auto">
 
                                 <!-- 🟩 Completar (ancho completo) -->
