@@ -453,6 +453,7 @@
 		border-radius: 0.85rem;
 		overflow: hidden;
 		box-shadow: var(--app-shadow);
+		border-collapse: collapse;
 	}
 
 	.overflow-x-auto thead,
@@ -467,6 +468,17 @@
 	.table-responsive td {
 		padding: 0.7rem 0.8rem;
 		vertical-align: middle;
+		border-bottom: 1px solid #e8edf3;
+	}
+
+	.overflow-x-auto thead th,
+	.table-responsive thead th {
+		border-bottom: 1px solid #dbe4ee;
+	}
+
+	.overflow-x-auto tbody tr:last-child td,
+	.table-responsive tbody tr:last-child td {
+		border-bottom: 0;
 	}
 
 	.overflow-x-auto tbody tr:nth-child(even),
@@ -500,18 +512,32 @@
 
 @media (max-width: 768px) {
 	h1 {
-		font-size: 1.35rem;
+		font-size: 1.15rem;
 		line-height: 1.3;
 	}
 
 	h2 {
-		font-size: 1.2rem;
+		font-size: 1.05rem;
+	}
+
+	body {
+		font-size: 14px;
 	}
 
 	button,
 	.btn,
 	a[class*="px-"] {
-		min-height: 42px;
+		min-height: 32px;
+		font-size: 0.8rem;
+	}
+
+	.app-toolbar {
+		position: static;
+		top: auto;
+		z-index: auto;
+		backdrop-filter: none;
+		padding: 0.65rem;
+		margin-bottom: 0.65rem;
 	}
 
 	.app-table-wrap {
@@ -524,7 +550,7 @@
 
 	.overflow-x-auto > table,
 	.table-responsive > table {
-		min-width: 560px;
+		min-width: 520px;
 	}
 
 	.app-search-row {
@@ -554,11 +580,95 @@
 	.overflow-x-auto > table,
 	.table-responsive > table,
 	.table-mobile-friendly {
-		min-width: 760px !important;
+		min-width: 620px !important;
 	}
 
 	.table-mobile-friendly th,
 	.table-mobile-friendly td {
 		white-space: nowrap;
+	}
+
+	.overflow-x-auto th,
+	.overflow-x-auto td,
+	.table-responsive th,
+	.table-responsive td {
+		font-size: 0.74rem;
+		padding: 0.32rem 0.42rem;
+		line-height: 1.2;
+		border-bottom: 0.75px solid #ebf0f5;
+	}
+
+	.table-mobile-friendly tbody tr {
+		height: auto;
+	}
+
+	.table-mobile-friendly td,
+	.table-mobile-friendly th {
+		line-height: 1.15;
+	}
+
+	/* Compacta columnas de acciones para reducir alto de cada registro */
+	.table-mobile-friendly td .flex.flex-col,
+	.table-mobile-friendly td .flex-col {
+		flex-direction: row !important;
+		flex-wrap: wrap;
+		gap: 0.25rem !important;
+		min-width: 0 !important;
+	}
+
+	.table-mobile-friendly td .flex.flex-col > *,
+	.table-mobile-friendly td .flex-col > * {
+		flex: 1 1 calc(50% - 0.2rem);
+		margin: 0 !important;
+		min-width: 0 !important;
+	}
+
+	.table-mobile-friendly td .grid {
+		grid-template-columns: 1fr 1fr !important;
+		gap: 0.25rem !important;
+	}
+
+	.table-mobile-friendly td a,
+	.table-mobile-friendly td button,
+	.table-mobile-friendly td .btn {
+		min-height: 28px !important;
+		padding: 0.22rem 0.38rem !important;
+		font-size: 0.7rem !important;
+		line-height: 1.1;
+	}
+
+	.app-badge {
+		font-size: 0.6rem;
+		padding: 0.12rem 0.42rem;
+	}
+
+	/* Alquiler web: tablas de modelos mas compactas y legibles en movil */
+	#modelos .card {
+		border-radius: 0.55rem;
+	}
+
+	#modelos .card-header {
+		padding: 0.35rem 0.45rem !important;
+	}
+
+	#modelos .card-header h6 {
+		font-size: 0.78rem;
+		line-height: 1.25;
+	}
+
+	#modelos .card-body {
+		padding: 0.35rem !important;
+		overflow-x: auto;
+	}
+
+	#modelos .table {
+		margin-bottom: 0;
+		font-size: 0.74rem;
+	}
+
+	#modelos .table th,
+	#modelos .table td {
+		padding: 0.25rem 0.32rem;
+		white-space: normal;
 	}
 }

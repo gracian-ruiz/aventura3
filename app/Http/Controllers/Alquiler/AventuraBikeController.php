@@ -10,6 +10,8 @@ use App\Models\Alquiler;
 use App\Models\Material;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservaAlquilerMail;
 use Illuminate\Support\Facades\Log;
@@ -19,13 +21,16 @@ class AventuraBikeController extends Controller
 {
     public function bicismontaña()
     {
-
-        return view('alquiler.aventurabike.montana');
+        return view('alquiler.aventurabike.montana', [
+            'alquilerFormToken' => $this->issueAlquilerFormToken(),
+        ]);
     }
-        public function bicismontañados()
-    {
 
-        return view('alquiler.aventurabike.montana2');
+    public function bicismontañados()
+    {
+        return view('alquiler.aventurabike.montana2', [
+            'alquilerFormToken' => $this->issueAlquilerFormToken(),
+        ]);
     }
 
 
@@ -84,6 +89,7 @@ class AventuraBikeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'form_submission_token' => 'required|string',
             'nombre' => 'required|string',
             'apellido' => 'required|string',
             'email' => 'required|email',
@@ -124,6 +130,28 @@ class AventuraBikeController extends Controller
         // 🕵️‍♂️ Honeypot anti-spam
         if (!empty($request->input('website'))) {
             return back()->with('error', 'Detección de spam. Solicitud rechazada.');
+        }
+
+        $submittedToken = (string) $request->input('form_submission_token', '');
+        $sessionToken = (string) $request->session()->pull('alquiler_form_token', '');
+
+        if ($submittedToken === '' || $sessionToken === '' || !hash_equals($sessionToken, $submittedToken)) {
+            Log::warning('[AventuraBikeController] Reserva bloqueada por token invalido o reutilizado', [
+                'has_submitted_token' => $submittedToken !== '',
+                'has_session_token' => $sessionToken !== '',
+                'ip' => $request->ip(),
+            ]);
+
+            return back()->with('error', 'Esta reserva ya fue enviada o la sesion expiro. Recarga la pagina e intentalo de nuevo.')->withInput();
+        }
+
+        $idempotencyKey = 'alquiler-form-submit:' . $submittedToken;
+        if (!Cache::add($idempotencyKey, now()->toIso8601String(), now()->addMinutes(15))) {
+            Log::warning('[AventuraBikeController] Reserva duplicada bloqueada por idempotencia', [
+                'ip' => $request->ip(),
+            ]);
+
+            return back()->with('error', 'Estamos procesando tu solicitud. No es necesario enviar la reserva dos veces.')->withInput();
         }
 
         DB::beginTransaction();
@@ -284,6 +312,14 @@ class AventuraBikeController extends Controller
 
         // 📂 Muestra la imagen de forma segura sin hacerla pública
         return response()->file(storage_path('app/' . $foto->ruta));
+    }
+
+    private function issueAlquilerFormToken(): string
+    {
+        $token = (string) Str::uuid();
+        session(['alquiler_form_token' => $token]);
+
+        return $token;
     }
     
 }

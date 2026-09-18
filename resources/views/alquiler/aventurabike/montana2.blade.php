@@ -28,8 +28,9 @@
     @endif
 
     <!-- Formulario -->
-    <form action="{{ route('addbicismontaña') }}" method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
+    <form id="alquiler-form" action="{{ route('addbicismontaña') }}" method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
         @csrf
+        <input type="hidden" name="form_submission_token" value="{{ $alquilerFormToken ?? session('alquiler_form_token') }}">
 
         <!-- Datos personales -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
@@ -248,7 +249,7 @@
                 Cancelar / Cancel
             </a>
 
-            <button type="submit"
+            <button id="alquiler-submit-btn" type="submit"
                     class="px-6 py-2 bg-green-400 hover:bg-green-500 text-black rounded-md font-semibold">
                 Enviar Reserva / Submit Booking
             </button>
@@ -550,8 +551,38 @@
             alert(`⚠️ Completa todos los campos de:\n${listaBicis}\n\nPlease fill in all fields for the bicycles listed above.`);
         }
 
-        return valido;
+        if (!valido) {
+            return false;
+        }
+
+        if (window.__alquilerSubmitting === true) {
+            return false;
+        }
+
+        window.__alquilerSubmitting = true;
+        const submitBtn = document.getElementById('alquiler-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+            submitBtn.textContent = 'Enviando... / Sending...';
+        }
+
+        return true;
     }
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('alquiler-form');
+    if (!form) {
+        return;
+    }
+
+    form.addEventListener('submit', function (event) {
+        if (window.__alquilerSubmitting === true) {
+            event.preventDefault();
+        }
+    });
+});
 </script>
 <script>
 function enviarAltura() {

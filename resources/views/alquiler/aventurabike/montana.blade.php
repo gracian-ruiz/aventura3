@@ -91,9 +91,10 @@
     @endif
 
     <!-- Formulario -->
-    <form action="{{ route('addbicismontaña') }}" method="POST" enctype="multipart/form-data">
+    <form id="alquiler-form" action="{{ route('addbicismontaña') }}" method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
 
         @csrf
+        <input type="hidden" name="form_submission_token" value="{{ $alquilerFormToken ?? session('alquiler_form_token') }}">
 
         <!-- Datos personales -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
@@ -241,7 +242,7 @@
             <a href="{{ route('usuarios_alquiler.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
                 {{ __('messages.cancel') }}
             </a>
-            <button type="submit" onclick="return validarFormulario()" class="px-6 py-2 bg-green-400 hover:bg-green-500 text-black rounded-md font-semibold">
+            <button id="alquiler-submit-btn" type="submit" class="px-6 py-2 bg-green-400 hover:bg-green-500 text-black rounded-md font-semibold">
                 {{ __('messages.submit_booking') }}
             </button>
         </div>
@@ -555,7 +556,32 @@
             return false;
         }
         
+        if (window.__alquilerSubmitting === true) {
+            return false;
+        }
+
+        window.__alquilerSubmitting = true;
+        const submitBtn = document.getElementById('alquiler-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+            submitBtn.textContent = lang === 'en' ? 'Sending...' : 'Enviando...';
+        }
+
         return true;
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('alquiler-form');
+        if (!form) {
+            return;
+        }
+
+        form.addEventListener('submit', function (event) {
+            if (window.__alquilerSubmitting === true) {
+                event.preventDefault();
+            }
+        });
+    });
 </script>
 @endsection
