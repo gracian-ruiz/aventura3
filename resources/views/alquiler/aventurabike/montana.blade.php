@@ -571,17 +571,5 @@
         return true;
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('alquiler-form');
-        if (!form) {
-            return;
-        }
-
-        form.addEventListener('submit', function (event) {
-            if (window.__alquilerSubmitting === true) {
-                event.preventDefault();
-            }
-        });
-    });
 </script>
 @endsection
