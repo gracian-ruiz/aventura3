@@ -147,8 +147,59 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    // Arranca con scroll al final para mostrar los ultimos mensajes como WhatsApp.
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    const logChatState = function (label) {
+        const inner = chatContainer.querySelector('#chat-messages-inner');
+        const firstId = inner ? inner.dataset.firstId : null;
+        const lastId = inner ? inner.dataset.lastId : null;
+        const count = inner ? inner.dataset.count : null;
+
+        console.log('[WhatsApp Debug]', label, {
+            firstId,
+            lastId,
+            count,
+            scrollTop: chatContainer.scrollTop,
+            scrollHeight: chatContainer.scrollHeight,
+            clientHeight: chatContainer.clientHeight,
+            distanceToBottom: chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight,
+        });
+    };
+
+    const scrollToBottomReliable = function () {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        requestAnimationFrame(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
+        setTimeout(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            logChatState('after-timeout-80');
+        }, 80);
+        setTimeout(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            logChatState('after-timeout-300');
+        }, 300);
+    };
+
+    const attachMediaLoadDebug = function () {
+        const mediaNodes = chatContainer.querySelectorAll('img, iframe');
+        mediaNodes.forEach((node) => {
+            if (node.dataset.debugBound === '1') {
+                return;
+            }
+            node.dataset.debugBound = '1';
+            node.addEventListener('load', function () {
+                const distanceToBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
+                if (distanceToBottom < 260) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+                logChatState('media-loaded');
+            });
+        });
+    };
+
+    // Arranca mostrando los ultimos mensajes.
+    scrollToBottomReliable();
+    attachMediaLoadDebug();
+    logChatState('initial');
 
     const baseUrl = new URL(window.location.href);
     const pollUrl = new URL(baseUrl.toString());
@@ -180,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const html = await response.text();
             chatContainer.innerHTML = html;
+            attachMediaLoadDebug();
 
             const inner = chatContainer.querySelector('#chat-messages-inner');
             if (countEl && inner && inner.dataset.count) {
@@ -192,6 +244,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (shouldStickBottom) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
+
+            logChatState('after-refresh');
         } catch (error) {
             // Silencioso: el siguiente ciclo volvera a intentar.
         }

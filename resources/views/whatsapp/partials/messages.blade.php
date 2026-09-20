@@ -1,4 +1,10 @@
-<div id="chat-messages-inner" data-count="{{ $messages->count() }}" class="space-y-3">
+<div
+    id="chat-messages-inner"
+    data-count="{{ $messages->count() }}"
+    data-first-id="{{ optional($messages->first())->id }}"
+    data-last-id="{{ optional($messages->last())->id }}"
+    class="space-y-3"
+>
     @forelse($messages as $message)
         @php
             $isStatus = $message->message_type === 'status';
@@ -33,14 +39,14 @@
         @endphp
 
         @if($isStatus)
-            <div class="flex justify-center">
+            <div class="flex justify-center" data-message-id="{{ $message->id }}" data-message-type="{{ $message->message_type }}" data-direction="{{ $message->direction }}">
                 <div class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold {{ $statusTone }} shadow-sm backdrop-blur-sm">
                     <span class="uppercase tracking-[0.2em]">{{ $message->status ?? $message->body ?? 'status' }}</span>
                     <span class="text-[11px] opacity-80">{{ $timestamp }}</span>
                 </div>
             </div>
         @else
-            <div class="flex {{ $message->direction === 'outbound' ? 'justify-end' : 'justify-start' }}">
+            <div class="flex {{ $message->direction === 'outbound' ? 'justify-end' : 'justify-start' }}" data-message-id="{{ $message->id }}" data-message-type="{{ $message->message_type }}" data-direction="{{ $message->direction }}">
                 <div class="max-w-[88%] sm:max-w-[78%] rounded-[18px] px-4 py-3 shadow-sm border {{ $isDocument ? 'bg-amber-50 text-amber-950 border-amber-200' : ($message->direction === 'outbound' ? 'bg-[#d9fdd3] text-gray-900 border-[#d9fdd3]' : 'bg-white text-gray-900 border-gray-200') }}">
                     <div class="flex items-center justify-between gap-3 mb-2">
                         <span class="text-[11px] font-semibold uppercase tracking-[0.18em] {{ $isDocument ? 'text-amber-700' : ($message->direction === 'outbound' ? 'text-[#0b7f5f]' : 'text-gray-400') }}">
