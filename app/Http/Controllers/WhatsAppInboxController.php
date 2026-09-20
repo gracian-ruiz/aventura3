@@ -61,7 +61,14 @@ class WhatsAppInboxController extends Controller
             $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
             $lastActivityTimestamp = optional($latest->received_at ?? $latest->sent_at ?? $latest->created_at)?->timestamp ?? 0;
             $conversationPhone = (string) ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? '')));
-            $unreadCount = $group->filter(fn (WhatsAppMessage $message) => $message->direction === 'inbound' && !$message->is_read)->count();
+            $unreadCount = $group->filter(function (WhatsAppMessage $message): bool {
+                if ($message->direction !== 'inbound') {
+                    return false;
+                }
+
+                // Robustez: si read_at esta vacio, se considera no leido incluso si is_read viene mal seteado.
+                return !$message->is_read || $message->read_at === null;
+            })->count();
 
             return [
                 'phone' => $conversationPhone,
@@ -123,7 +130,10 @@ class WhatsAppInboxController extends Controller
                     $query->where('from_phone', $normalizedPhone)
                         ->orWhereRaw('RIGHT(COALESCE(from_phone, ""), 9) = ?', [$last9]);
                 })
-                ->where('is_read', false)
+                ->where(function ($query) {
+                    $query->where('is_read', false)
+                        ->orWhereNull('read_at');
+                })
                 ->update([
                     'is_read' => true,
                     'read_at' => now(),
