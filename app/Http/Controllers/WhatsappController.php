@@ -97,7 +97,8 @@ class WhatsAppController extends Controller
                     [
                         'link' => $presupuestoPdfPublicoUrl,
                         'filename' => "presupuesto_{$presupuestoId}.pdf",
-                    ]
+                    ],
+                    $presupuestoPdfPublicoUrl
                 );
             } catch (\Throwable $exception) {
                 $metaError = $this->extractMetaErrorFromException($exception);
@@ -133,7 +134,8 @@ class WhatsAppController extends Controller
         string $telefono,
         int|string $presupuestoId,
         array $bodyParams = [],
-        ?array $headerDocument = null
+        ?array $headerDocument = null,
+        ?string $documentPublicUrl = null
     ): void
     {
         try {
@@ -170,7 +172,11 @@ class WhatsAppController extends Controller
                 'message_type' => 'template',
                 'body' => 'Plantilla presupuesto_reparacion enviada por WhatsApp',
                 'status' => 'sent',
-                'payload' => $response,
+                'payload' => array_merge($response, [
+                    'document_public_url' => $documentPublicUrl,
+                    'document_filename' => "presupuesto_{$presupuestoId}.pdf",
+                    'document_kind' => 'pdf',
+                ]),
                 'sent_at' => now(),
             ]);
 

@@ -221,22 +221,26 @@ class WhatsAppInboxController extends Controller
 
     public function media(WhatsAppMessage $message)
     {
-        if ($message->message_type !== 'image') {
+        if (!in_array($message->message_type, ['image', 'document'], true)) {
             abort(404);
         }
 
         $payload = is_array($message->payload) ? $message->payload : [];
-        $mediaId = (string) data_get($payload, 'image.id');
+        $mediaId = (string) data_get($payload, 'image.id') ?: (string) data_get($payload, 'document.id');
+        $mimeTypeFromPayload = (string) data_get($payload, 'image.mime_type', '') ?: (string) data_get($payload, 'document.mime_type', '');
 
-        // Para imagenes enviadas desde el panel servimos el archivo local directamente.
+        // Para archivos enviados desde el panel servimos el archivo local directamente.
         $localPath = (string) data_get($payload, 'local_image_path', '');
+        if ($localPath === '') {
+            $localPath = (string) data_get($payload, 'local_document_path', '');
+        }
         if ($mediaId === '' && $localPath !== '') {
             if (!Storage::exists($localPath)) {
                 abort(404);
             }
 
             $absolutePath = storage_path('app/' . ltrim($localPath, '/'));
-            $mimeType = Storage::mimeType($localPath) ?: 'image/jpeg';
+            $mimeType = Storage::mimeType($localPath) ?: ($message->message_type === 'document' ? 'application/pdf' : 'image/jpeg');
 
             if (!is_file($absolutePath)) {
                 abort(404);
@@ -249,6 +253,11 @@ class WhatsAppInboxController extends Controller
         }
 
         if ($mediaId === '') {
+            $publicUrl = (string) data_get($payload, 'document_public_url', '');
+            if ($publicUrl !== '') {
+                return redirect()->away($publicUrl);
+            }
+
             abort(404);
         }
 
@@ -265,7 +274,7 @@ class WhatsAppInboxController extends Controller
                 ->json();
 
             $downloadUrl = (string) ($meta['url'] ?? '');
-            $mimeType = (string) ($meta['mime_type'] ?? 'image/jpeg');
+            $mimeType = (string) ($meta['mime_type'] ?? ($mimeTypeFromPayload !== '' ? $mimeTypeFromPayload : 'image/jpeg'));
 
             if ($downloadUrl === '') {
                 abort(404);
