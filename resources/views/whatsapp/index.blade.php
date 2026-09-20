@@ -16,7 +16,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 font-semibold text-gray-800">Conversaciones (sin leer primero)</div>
+            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 font-semibold text-gray-800">Conversaciones</div>
             <div class="divide-y divide-gray-100 max-h-[70vh] overflow-y-auto">
                 @forelse($conversations as $conversation)
                     @php($phone = $conversation['phone'] ?? '')
@@ -28,16 +28,11 @@
                                 </div>
                                 <div class="text-sm text-gray-500">{{ $phone }}</div>
                             </div>
-                            <div class="flex flex-col items-end gap-1">
-                                <span class="text-xs rounded-full bg-green-100 text-green-700 px-2 py-1 whitespace-nowrap">
-                                    {{ $conversation['count'] }} mensajes
+                            @if(!empty($conversation['unread_count']))
+                                <span class="text-xs rounded-full bg-emerald-600 text-white px-2 py-1 whitespace-nowrap">
+                                    {{ $conversation['unread_count'] }}
                                 </span>
-                                @if(!empty($conversation['unread_count']))
-                                    <span class="text-xs rounded-full bg-emerald-600 text-white px-2 py-1 whitespace-nowrap">
-                                        {{ $conversation['unread_count'] }} sin leer
-                                    </span>
-                                @endif
-                            </div>
+                            @endif
                         </div>
                         <p class="mt-2 text-sm text-gray-600 line-clamp-2">
                             {{ $conversation['last_message']->body ?? 'Sin contenido' }}
