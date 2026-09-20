@@ -34,7 +34,8 @@
                 'failed' => 'bg-red-100 text-red-700 border-red-200',
                 default => 'bg-gray-100 text-gray-700 border-gray-200',
             };
-            $imageUrl = $isImage ? route('whatsapp.media', ['message' => $message->id]) : null;
+            $hasImageMedia = (bool) data_get($message->payload, 'image.id') || (bool) data_get($message->payload, 'local_image_path');
+            $imageUrl = ($isImage && $hasImageMedia) ? route('whatsapp.media', ['message' => $message->id]) : null;
             $caption = $isImage ? preg_replace('/^\[imagen\]\s*/i', '', (string) ($message->body ?? '')) : null;
         @endphp
 
@@ -65,10 +66,14 @@
                         </div>
                     @endif
 
-                    @if($isImage)
+                    @if($isImage && $imageUrl)
                         <a href="{{ $imageUrl }}" target="_blank" rel="noopener noreferrer" class="block mb-2">
                             <img src="{{ $imageUrl }}" alt="Imagen de WhatsApp" class="rounded-xl max-h-72 w-auto border border-black/10 object-contain bg-white">
                         </a>
+                    @elseif($isImage)
+                        <div class="mb-2 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+                            Imagen no disponible
+                        </div>
                     @endif
 
                     @if(!$isImage || ($caption !== null && trim($caption) !== ''))

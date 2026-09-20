@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-[calc(100vh-5rem)] bg-[#dbe9df] px-3 py-3 sm:px-4 lg:px-6">
-    <div class="mx-auto flex min-h-[calc(100vh-7rem)] max-w-7xl overflow-hidden rounded-[28px] border border-black/5 bg-[#f0f2f5] shadow-[0_18px_70px_rgba(16,24,40,0.12)]" style="background-image: radial-gradient(circle at top left, rgba(255,255,255,.65), transparent 32%), radial-gradient(circle at top right, rgba(255,255,255,.45), transparent 18%);">
+<div class="h-[calc(100vh-5rem)] bg-[#dbe9df] px-3 py-3 sm:px-4 lg:px-6">
+    <div class="mx-auto flex h-[calc(100vh-7rem)] max-w-7xl overflow-hidden rounded-[28px] border border-black/5 bg-[#f0f2f5] shadow-[0_18px_70px_rgba(16,24,40,0.12)]" style="background-image: radial-gradient(circle at top left, rgba(255,255,255,.65), transparent 32%), radial-gradient(circle at top right, rgba(255,255,255,.45), transparent 18%);">
         <aside class="hidden lg:flex w-[340px] shrink-0 flex-col border-r border-black/5 bg-white/90 backdrop-blur-sm">
             <div class="border-b border-black/5 px-5 py-4">
                 <a href="{{ route('whatsapp.index') }}" class="text-sm font-semibold text-green-700 hover:text-green-900">← Volver a WhatsApp</a>
@@ -51,7 +51,7 @@
             </div>
         </aside>
 
-        <section class="flex min-w-0 flex-1 flex-col bg-[#efeae2]" style="background-image: radial-gradient(circle at 20px 20px, rgba(255,255,255,.32) 0, rgba(255,255,255,.32) 2px, transparent 2px), radial-gradient(circle at 60px 60px, rgba(255,255,255,.18) 0, rgba(255,255,255,.18) 1px, transparent 1px); background-size: 80px 80px;">
+        <section class="flex min-w-0 min-h-0 flex-1 flex-col bg-[#efeae2]" style="background-image: radial-gradient(circle at 20px 20px, rgba(255,255,255,.32) 0, rgba(255,255,255,.32) 2px, transparent 2px), radial-gradient(circle at 60px 60px, rgba(255,255,255,.18) 0, rgba(255,255,255,.18) 1px, transparent 1px); background-size: 80px 80px;">
             <div class="flex items-center justify-between gap-4 border-b border-black/5 bg-white/92 px-4 py-3 backdrop-blur-sm sm:px-5">
                 <div class="flex min-w-0 items-center gap-3">
                     <div class="flex h-11 w-11 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">{{ strtoupper(substr($conversationTitle, 0, 2)) }}</div>
@@ -80,7 +80,7 @@
                     </form>
                 </div>
 
-                <div id="chat-messages" class="flex-1 overflow-y-auto px-3 py-4 sm:px-5 sm:py-5">
+                <div id="chat-messages" class="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-5 sm:py-5">
                     @include('whatsapp.partials.messages', ['messages' => $messages])
                 </div>
 
