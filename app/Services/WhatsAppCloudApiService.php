@@ -192,6 +192,75 @@ class WhatsAppCloudApiService
         }
     }
 
+    public function sendImageMessageFromFile(string $to, ?string $caption, string $filePath, ?string $filename = null): array
+    {
+        $phoneNumberId = (string) config('services.whatsapp.phone_number_id');
+        $accessToken = (string) config('services.whatsapp.access_token');
+
+        if ($phoneNumberId === '' || $accessToken === '') {
+            throw new RuntimeException('Faltan credenciales de WhatsApp Cloud API para enviar imagenes.');
+        }
+
+        if (!is_file($filePath)) {
+            throw new RuntimeException('No existe la imagen a enviar por WhatsApp: ' . $filePath);
+        }
+
+        $normalizedTo = $this->normalizePhoneNumber($to);
+        $resolvedFilename = $filename ?: basename($filePath);
+        $mimeType = mime_content_type($filePath) ?: 'image/jpeg';
+
+        Log::info('WhatsApp Cloud API: subiendo imagen a Meta', [
+            'version' => self::LOG_VERSION,
+            'to' => $normalizedTo,
+            'phone_number_id' => $phoneNumberId,
+            'file_path' => $filePath,
+            'filename' => $resolvedFilename,
+            'mime_type' => $mimeType,
+        ]);
+
+        try {
+            $mediaResponse = Http::withToken($accessToken)
+                ->attach('file', fopen($filePath, 'r'), $resolvedFilename)
+                ->post($this->mediaUploadUrl($phoneNumberId), [
+                    'messaging_product' => 'whatsapp',
+                    'type' => $mimeType,
+                ])
+                ->throw()
+                ->json();
+
+            $mediaId = (string) ($mediaResponse['id'] ?? '');
+
+            if ($mediaId === '') {
+                throw new RuntimeException('Meta no devolvio un media_id al subir la imagen.');
+            }
+
+            return Http::withToken($accessToken)
+                ->acceptJson()
+                ->post($this->messagesUrl($phoneNumberId), [
+                    'messaging_product' => 'whatsapp',
+                    'recipient_type' => 'individual',
+                    'to' => $normalizedTo,
+                    'type' => 'image',
+                    'image' => array_filter([
+                        'id' => $mediaId,
+                        'caption' => $caption,
+                    ], static fn ($value) => $value !== null && $value !== ''),
+                ])
+                ->throw()
+                ->json();
+        } catch (Throwable $exception) {
+            Log::error('WhatsApp Cloud API: fallo al enviar imagen desde archivo', [
+                'to' => $normalizedTo,
+                'phone_number_id' => $phoneNumberId,
+                'file_path' => $filePath,
+                'error' => $exception->getMessage(),
+                'meta_error' => $this->extractMetaError($exception),
+            ]);
+
+            throw $exception;
+        }
+    }
+
     public function sendTemplateMessage(
         string $to,
         string $templateName,

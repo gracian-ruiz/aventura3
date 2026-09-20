@@ -118,23 +118,43 @@ class WhatsAppInboxController extends Controller
         $this->ensureMessagesTableExists();
 
         $data = $request->validate([
-            'body' => ['required', 'string', 'max:4096'],
+            'body' => ['nullable', 'string', 'max:4096', 'required_without:image'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120', 'required_without:body'],
         ]);
 
         $normalizedPhone = $this->normalizePhone($phone);
+        $body = trim((string) ($data['body'] ?? ''));
+        $isImage = $request->hasFile('image');
 
         Log::info('WhatsApp inbox: intento de envio desde chat', [
             'to' => $normalizedPhone,
-            'body_length' => mb_strlen($data['body']),
-            'body_preview' => mb_substr($data['body'], 0, 120),
+            'body_length' => mb_strlen($body),
+            'body_preview' => mb_substr($body, 0, 120),
+            'has_image' => $isImage,
             'user_id' => auth()->id(),
         ]);
 
         try {
-            $response = $this->whatsAppCloudApiService->sendTextMessage($normalizedPhone, $data['body']);
+            $messageType = 'text';
+            $storedBody = $body;
+
+            if ($isImage) {
+                $image = $request->file('image');
+                $response = $this->whatsAppCloudApiService->sendImageMessageFromFile(
+                    $normalizedPhone,
+                    $body !== '' ? $body : null,
+                    $image->getRealPath(),
+                    $image->getClientOriginalName()
+                );
+                $messageType = 'image';
+                $storedBody = $body !== '' ? '[imagen] ' . $body : '[imagen]';
+            } else {
+                $response = $this->whatsAppCloudApiService->sendTextMessage($normalizedPhone, $body);
+            }
 
             Log::info('WhatsApp inbox: respuesta de Meta al envio desde chat', [
                 'to' => $normalizedPhone,
+                'message_type' => $messageType,
                 'response' => $response,
             ]);
         } catch (\Throwable $exception) {
@@ -168,8 +188,8 @@ class WhatsAppInboxController extends Controller
             'from_phone' => config('services.whatsapp.phone_number_id'),
             'to_phone' => $normalizedPhone,
             'direction' => 'outbound',
-            'message_type' => 'text',
-            'body' => $data['body'],
+            'message_type' => $messageType,
+            'body' => $storedBody,
             'status' => 'sent',
             'payload' => $response,
             'sent_at' => now(),

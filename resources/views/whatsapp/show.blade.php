@@ -108,15 +108,29 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" class="mt-4 space-y-4">
+            <form method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" class="mt-4 space-y-4">
                 @csrf
-                <textarea name="body" rows="8" required
+                <textarea name="body" rows="7"
                     class="w-full rounded-2xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                    placeholder="Escribe tu respuesta...">{{ old('body') }}</textarea>
+                    placeholder="Escribe tu respuesta (opcional si adjuntas imagen)...">{{ old('body') }}</textarea>
+
+                <div>
+                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Imagen (opcional)</label>
+                    <input id="image" name="image" type="file" accept="image/jpeg,image/jpg,image/png,image/webp"
+                        class="block w-full text-sm text-gray-700 file:mr-3 file:rounded-xl file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-200">
+                    <p class="mt-1 text-xs text-gray-500">Formatos: JPG, PNG, WEBP. Tamaño máximo: 5MB.</p>
+                </div>
+
+                @error('body')
+                    <p class="text-xs text-red-600">{{ $message }}</p>
+                @enderror
+                @error('image')
+                    <p class="text-xs text-red-600">{{ $message }}</p>
+                @enderror
 
                 <button type="submit"
                     class="w-full inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-3 font-semibold text-white hover:bg-green-700 transition-colors shadow-sm">
-                    Enviar mensaje
+                    Enviar mensaje / imagen
                 </button>
             </form>
 
