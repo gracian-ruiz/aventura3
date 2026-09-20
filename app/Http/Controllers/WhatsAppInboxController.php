@@ -60,8 +60,8 @@ class WhatsAppInboxController extends Controller
             $latestInbound = $group->first(fn (WhatsAppMessage $message) => $message->direction === 'inbound') ?? $latest;
             $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
             $lastActivityTimestamp = optional($latest->received_at ?? $latest->sent_at ?? $latest->created_at)?->timestamp ?? 0;
-            $conversationPhone = $latest->direction === 'inbound' ? (string) ($latest->from_phone ?? '') : (string) ($latest->to_phone ?? '');
-            $unreadCount = (int) ($unreadByPhone[$conversationPhone] ?? 0);
+            $conversationPhone = (string) ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? '')));
+            $unreadCount = $group->filter(fn (WhatsAppMessage $message) => $message->direction === 'inbound' && !$message->is_read)->count();
 
             return [
                 'phone' => $conversationPhone,
@@ -92,13 +92,17 @@ class WhatsAppInboxController extends Controller
         $this->ensureMessagesTableExists();
 
         $normalizedPhone = $this->normalizePhone($phone);
+        $conversationKey = $this->conversationKey($normalizedPhone);
+        $last9 = substr($conversationKey, -9);
         $messageSearch = trim((string) $request->input('q', ''));
 
         $query = WhatsAppMessage::query()
             ->with(['user', 'bike', 'appointment'])
-            ->where(function ($query) use ($normalizedPhone) {
+            ->where(function ($query) use ($normalizedPhone, $last9) {
                 $query->where('from_phone', $normalizedPhone)
-                    ->orWhere('to_phone', $normalizedPhone);
+                    ->orWhere('to_phone', $normalizedPhone)
+                    ->orWhereRaw('RIGHT(COALESCE(from_phone, ""), 9) = ?', [$last9])
+                    ->orWhereRaw('RIGHT(COALESCE(to_phone, ""), 9) = ?', [$last9]);
             })
             ->orderByRaw('COALESCE(received_at, sent_at, created_at) desc')
             ->orderBy('id', 'desc');
@@ -115,7 +119,10 @@ class WhatsAppInboxController extends Controller
         if (!$request->boolean('partial')) {
             WhatsAppMessage::query()
                 ->where('direction', 'inbound')
-                ->where('from_phone', $normalizedPhone)
+                ->where(function ($query) use ($normalizedPhone, $last9) {
+                    $query->where('from_phone', $normalizedPhone)
+                        ->orWhereRaw('RIGHT(COALESCE(from_phone, ""), 9) = ?', [$last9]);
+                })
                 ->where('is_read', false)
                 ->update([
                     'is_read' => true,
@@ -426,7 +433,15 @@ class WhatsAppInboxController extends Controller
 
     private function conversationKey(string $phone): string
     {
-        return self::normalizePhone($phone);
+        $normalized = self::normalizePhone($phone);
+
+        if ($normalized === '') {
+            return '';
+        }
+
+        $last9 = substr($normalized, -9);
+
+        return $last9 !== false && $last9 !== '' ? $last9 : $normalized;
     }
 
     public static function normalizePhone(string $phone): string
