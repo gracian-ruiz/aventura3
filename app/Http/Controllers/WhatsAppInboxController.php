@@ -46,24 +46,12 @@ class WhatsAppInboxController extends Controller
 
         $conversations = $messages->groupBy(function (WhatsAppMessage $message) {
             return $this->conversationKey($message->direction === 'inbound' ? ($message->from_phone ?? '') : ($message->to_phone ?? ''));
-        })->map(function ($group, $conversationKey) use ($request) {
+        })->map(function ($group) {
             $latest = $group->first();
             $latestInbound = $group->first(fn (WhatsAppMessage $message) => $message->direction === 'inbound') ?? $latest;
             $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
             $lastActivityTimestamp = optional($latest->received_at ?? $latest->sent_at ?? $latest->created_at)?->timestamp ?? 0;
-
-            $seenAtRaw = (string) $request->session()->get('whatsapp_last_seen.' . $conversationKey, '');
-            $seenAtTimestamp = $seenAtRaw !== '' ? (strtotime($seenAtRaw) ?: 0) : 0;
-
-            $unreadCount = $group->filter(function (WhatsAppMessage $message) use ($seenAtTimestamp) {
-                if ($message->direction !== 'inbound') {
-                    return false;
-                }
-
-                $messageTimestamp = optional($message->received_at ?? $message->sent_at ?? $message->created_at)?->timestamp ?? 0;
-
-                return $messageTimestamp > $seenAtTimestamp;
-            })->count();
+            $unreadCount = $group->filter(fn (WhatsAppMessage $message) => $message->direction === 'inbound' && !$message->is_read)->count();
 
             return [
                 'phone' => $latest->direction === 'inbound' ? $latest->from_phone : $latest->to_phone,
@@ -113,10 +101,20 @@ class WhatsAppInboxController extends Controller
             });
         }
 
-        $messages = $query->get();
+        // Al abrir la conversación completa, marca entrantes como leídos en base de datos.
+        if (!$request->boolean('partial')) {
+            WhatsAppMessage::query()
+                ->where('direction', 'inbound')
+                ->where('from_phone', $normalizedPhone)
+                ->where('is_read', false)
+                ->update([
+                    'is_read' => true,
+                    'read_at' => now(),
+                    'updated_at' => now(),
+                ]);
+        }
 
-        // Al abrir la conversación, se marca como vista para que no siga como "sin leer".
-        $request->session()->put('whatsapp_last_seen.' . $normalizedPhone, now()->toDateTimeString());
+        $messages = $query->get();
 
         $conversationUser = $messages->firstWhere('user_id', '!=', null)?->user;
         if (!$conversationUser) {
@@ -237,6 +235,8 @@ class WhatsAppInboxController extends Controller
             'message_type' => $messageType,
             'body' => $storedBody,
             'status' => 'sent',
+            'is_read' => true,
+            'read_at' => now(),
             'payload' => $storedPayload,
             'sent_at' => now(),
         ]);
@@ -385,6 +385,8 @@ class WhatsAppInboxController extends Controller
             'message_type' => $message['type'] ?? 'text',
             'body' => data_get($message, 'text.body'),
             'status' => $message['status'] ?? 'received',
+            'is_read' => false,
+            'read_at' => null,
             'payload' => $message,
             'received_at' => now(),
         ]);
@@ -405,6 +407,8 @@ class WhatsAppInboxController extends Controller
             'message_type' => 'status',
             'body' => $status['status'] ?? null,
             'status' => $status['status'] ?? null,
+            'is_read' => true,
+            'read_at' => now(),
             'payload' => $status,
             'sent_at' => now(),
         ]);
@@ -443,6 +447,8 @@ class WhatsAppInboxController extends Controller
             $table->string('message_type', 30)->default('text');
             $table->text('body')->nullable();
             $table->string('status', 30)->nullable();
+            $table->boolean('is_read')->default(false)->index();
+            $table->timestamp('read_at')->nullable();
             $table->json('payload')->nullable();
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('received_at')->nullable();

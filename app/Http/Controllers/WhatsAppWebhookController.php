@@ -122,6 +122,8 @@ class WhatsAppWebhookController extends Controller
                                 'message_type' => $message['type'] ?? 'text',
                                 'body' => $bodyPreview,
                                 'status' => $message['status'] ?? 'received',
+                                'is_read' => false,
+                                'read_at' => null,
                                 'payload' => json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                                 'received_at' => now(),
                                 'created_at' => now(),
@@ -165,6 +167,8 @@ class WhatsAppWebhookController extends Controller
                                 'message_type' => 'status',
                                 'body' => $status['status'] ?? null,
                                 'status' => $status['status'] ?? null,
+                                'is_read' => true,
+                                'read_at' => now(),
                                 'payload' => json_encode($status, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                                 'sent_at' => now(),
                                 'created_at' => now(),
@@ -242,6 +246,8 @@ class WhatsAppWebhookController extends Controller
             $table->string('message_type', 30)->default('text');
             $table->text('body')->nullable();
             $table->string('status', 30)->nullable();
+            $table->boolean('is_read')->default(false)->index();
+            $table->timestamp('read_at')->nullable();
             $table->json('payload')->nullable();
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('received_at')->nullable();

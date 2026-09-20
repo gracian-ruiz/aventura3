@@ -22,6 +22,8 @@ class WhatsAppMessage extends Model
         'message_type',
         'body',
         'status',
+        'is_read',
+        'read_at',
         'payload',
         'sent_at',
         'received_at',
@@ -29,6 +31,8 @@ class WhatsAppMessage extends Model
 
     protected $casts = [
         'payload' => 'array',
+        'is_read' => 'boolean',
+        'read_at' => 'datetime',
         'sent_at' => 'datetime',
         'received_at' => 'datetime',
     ];

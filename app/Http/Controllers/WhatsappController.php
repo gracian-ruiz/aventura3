@@ -172,6 +172,8 @@ class WhatsAppController extends Controller
                 'message_type' => 'template',
                 'body' => 'Plantilla presupuesto_reparacion enviada por WhatsApp',
                 'status' => 'sent',
+                'is_read' => true,
+                'read_at' => now(),
                 'payload' => array_merge($response, [
                     'document_public_url' => $documentPublicUrl,
                     'document_filename' => "presupuesto_{$presupuestoId}.pdf",
@@ -267,6 +269,8 @@ class WhatsAppController extends Controller
                 'message_type' => 'document',
                 'body' => 'PDF de presupuesto enviado por WhatsApp',
                 'status' => 'sent',
+                'is_read' => true,
+                'read_at' => now(),
                 'payload' => $response,
                 'sent_at' => now(),
             ]);

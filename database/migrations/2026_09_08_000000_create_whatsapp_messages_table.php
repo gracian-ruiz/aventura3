@@ -19,6 +19,8 @@ return new class extends Migration {
             $table->string('message_type', 30)->default('text');
             $table->text('body')->nullable();
             $table->string('status', 30)->nullable();
+            $table->boolean('is_read')->default(false)->index();
+            $table->timestamp('read_at')->nullable();
             $table->json('payload')->nullable();
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('received_at')->nullable();
