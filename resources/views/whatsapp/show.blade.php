@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="h-[calc(100vh-5rem)] bg-[#dbe9df] px-3 py-3 sm:px-4 lg:px-6">
-    <div class="mx-auto flex h-[calc(100vh-7rem)] max-w-7xl overflow-hidden rounded-[28px] border border-black/5 bg-[#f0f2f5] shadow-[0_18px_70px_rgba(16,24,40,0.12)]" style="background-image: radial-gradient(circle at top left, rgba(255,255,255,.65), transparent 32%), radial-gradient(circle at top right, rgba(255,255,255,.45), transparent 18%);">
-        <aside class="hidden lg:flex w-[340px] shrink-0 flex-col border-r border-black/5 bg-white/90 backdrop-blur-sm">
+<div class="bg-[#dbe9df] px-3 py-3 sm:px-4 lg:px-6" style="height: calc(100vh - 5rem); overflow: hidden;">
+    <div class="mx-auto flex max-w-7xl overflow-hidden rounded-[28px] border border-black/5 bg-[#f0f2f5] shadow-[0_18px_70px_rgba(16,24,40,0.12)]" style="height: calc(100vh - 7rem); background-image: radial-gradient(circle at top left, rgba(255,255,255,.65), transparent 32%), radial-gradient(circle at top right, rgba(255,255,255,.45), transparent 18%);">
+        <aside class="hidden lg:flex w-[340px] shrink-0 min-h-0 flex-col border-r border-black/5 bg-white/90 backdrop-blur-sm">
             <div class="border-b border-black/5 px-5 py-4">
                 <a href="{{ route('whatsapp.index') }}" class="text-sm font-semibold text-green-700 hover:text-green-900">← Volver a WhatsApp</a>
                 <div class="mt-3 flex items-center gap-3">
@@ -51,7 +51,7 @@
             </div>
         </aside>
 
-        <section class="flex min-w-0 min-h-0 flex-1 flex-col bg-[#efeae2]" style="background-image: radial-gradient(circle at 20px 20px, rgba(255,255,255,.32) 0, rgba(255,255,255,.32) 2px, transparent 2px), radial-gradient(circle at 60px 60px, rgba(255,255,255,.18) 0, rgba(255,255,255,.18) 1px, transparent 1px); background-size: 80px 80px;">
+        <section class="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden bg-[#efeae2]" style="background-image: radial-gradient(circle at 20px 20px, rgba(255,255,255,.32) 0, rgba(255,255,255,.32) 2px, transparent 2px), radial-gradient(circle at 60px 60px, rgba(255,255,255,.18) 0, rgba(255,255,255,.18) 1px, transparent 1px); background-size: 80px 80px;">
             <div class="flex items-center justify-between gap-4 border-b border-black/5 bg-white/92 px-4 py-3 backdrop-blur-sm sm:px-5">
                 <div class="flex min-w-0 items-center gap-3">
                     <div class="flex h-11 w-11 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">{{ strtoupper(substr($conversationTitle, 0, 2)) }}</div>
@@ -164,17 +164,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    const scrollToBottomReliable = function () {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+    const scrollToTopReliable = function () {
+        chatContainer.scrollTop = 0;
         requestAnimationFrame(() => {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            chatContainer.scrollTop = 0;
         });
         setTimeout(() => {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            chatContainer.scrollTop = 0;
             logChatState('after-timeout-80');
         }, 80);
         setTimeout(() => {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            chatContainer.scrollTop = 0;
             logChatState('after-timeout-300');
         }, 300);
     };
@@ -187,17 +187,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             node.dataset.debugBound = '1';
             node.addEventListener('load', function () {
-                const distanceToBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
-                if (distanceToBottom < 260) {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                const distanceToTop = chatContainer.scrollTop;
+                if (distanceToTop < 260) {
+                    chatContainer.scrollTop = 0;
                 }
                 logChatState('media-loaded');
             });
         });
     };
 
-    // Arranca mostrando los ultimos mensajes.
-    scrollToBottomReliable();
+    // Arranca mostrando los mensajes mas nuevos (arriba).
+    scrollToTopReliable();
     attachMediaLoadDebug();
     logChatState('initial');
 
@@ -215,8 +215,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const distanceToBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
-        const shouldStickBottom = distanceToBottom < 120;
+        const distanceToTop = chatContainer.scrollTop;
+        const shouldStickTop = distanceToTop < 120;
 
         try {
             const response = await fetch(pollUrl.toString(), {
@@ -241,8 +241,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 countSidebarEl.textContent = inner.dataset.count;
             }
 
-            if (shouldStickBottom) {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+            if (shouldStickTop) {
+                chatContainer.scrollTop = 0;
             }
 
             logChatState('after-refresh');

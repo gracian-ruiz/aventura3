@@ -17,6 +17,9 @@
             $showDocument = $isDocument || $isPdfTemplate;
             $timestamp = optional($message->received_at ?? $message->sent_at)->format('d/m/Y H:i');
             $directionLabel = $message->direction === 'outbound' ? 'Taller' : 'Cliente';
+            $hasDocumentMedia = (bool) data_get($message->payload, 'document.id')
+                || (bool) data_get($message->payload, 'local_document_path')
+                || (bool) data_get($message->payload, 'document_public_url');
             $documentUrl = $showDocument
                 ? (
                     $isPdfTemplate
@@ -57,12 +60,16 @@
                             {{ $timestamp }}
                         </span>
                     </div>
-                    @if($showDocument)
+                    @if($showDocument && ($isPdfTemplate || $hasDocumentMedia))
                         <a href="{{ $documentUrl }}" target="_blank" rel="noopener noreferrer" class="mb-2 inline-flex items-center rounded-full bg-amber-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-800 hover:bg-amber-300">
                             PDF enviado: {{ $documentFilename }}
                         </a>
                         <div class="mt-2 overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-inner">
                             <iframe src="{{ $documentUrl }}" class="h-72 w-full" title="Vista previa PDF"></iframe>
+                        </div>
+                    @elseif($showDocument)
+                        <div class="mb-2 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+                            PDF no disponible
                         </div>
                     @endif
 
