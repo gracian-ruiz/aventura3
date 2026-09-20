@@ -4,10 +4,21 @@
             $isStatus = $message->message_type === 'status';
             $isDocument = $message->message_type === 'document';
             $isImage = $message->message_type === 'image';
+            $isPdfTemplate = $message->message_type === 'template' && (
+                data_get($message->payload, 'document_kind') === 'pdf'
+                || data_get($message->payload, 'document_public_url')
+            );
+            $showDocument = $isDocument || $isPdfTemplate;
             $timestamp = optional($message->received_at ?? $message->sent_at)->format('d/m/Y H:i');
             $directionLabel = $message->direction === 'outbound' ? 'Taller' : 'Cliente';
-            $documentUrl = $isDocument ? route('whatsapp.media', ['message' => $message->id]) : null;
-            $documentFilename = $isDocument
+            $documentUrl = $showDocument
+                ? (
+                    $isPdfTemplate
+                        ? (string) data_get($message->payload, 'document_public_url', '')
+                        : route('whatsapp.media', ['message' => $message->id])
+                )
+                : null;
+            $documentFilename = $showDocument
                 ? (string) (data_get($message->payload, 'document_filename') ?: data_get($message->payload, 'document.filename') ?: 'documento.pdf')
                 : null;
             $statusTone = match ($message->status ?? $message->body) {
@@ -39,7 +50,7 @@
                             {{ $timestamp }}
                         </span>
                     </div>
-                    @if($isDocument)
+                    @if($showDocument)
                         <a href="{{ $documentUrl }}" target="_blank" rel="noopener noreferrer" class="mb-2 inline-flex items-center rounded-full bg-amber-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-800 hover:bg-amber-300">
                             PDF enviado: {{ $documentFilename }}
                         </a>
