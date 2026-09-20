@@ -147,8 +147,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    // Arranca con scroll arriba para mostrar primero los mensajes más nuevos.
-    chatContainer.scrollTop = 0;
+    // Arranca con scroll al final para mostrar los ultimos mensajes como WhatsApp.
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 
     const baseUrl = new URL(window.location.href);
     const pollUrl = new URL(baseUrl.toString());
@@ -164,8 +164,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const distanceToTop = chatContainer.scrollTop;
-        const shouldStickTop = distanceToTop < 120;
+        const distanceToBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
+        const shouldStickBottom = distanceToBottom < 120;
 
         try {
             const response = await fetch(pollUrl.toString(), {
@@ -189,8 +189,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 countSidebarEl.textContent = inner.dataset.count;
             }
 
-            if (shouldStickTop) {
-                chatContainer.scrollTop = 0;
+            if (shouldStickBottom) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
             }
         } catch (error) {
             // Silencioso: el siguiente ciclo volvera a intentar.
