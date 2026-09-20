@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Schema\Blueprint;
 
 class WhatsAppInboxController extends Controller
@@ -227,10 +228,24 @@ class WhatsAppInboxController extends Controller
         $payload = is_array($message->payload) ? $message->payload : [];
         $mediaId = (string) data_get($payload, 'image.id');
 
-        // Para imagenes enviadas desde el panel usamos una URL local guardada en payload.
-        $localUrl = (string) data_get($payload, 'local_image_url', '');
-        if ($mediaId === '' && $localUrl !== '') {
-            return redirect()->away($localUrl);
+        // Para imagenes enviadas desde el panel servimos el archivo local directamente.
+        $localPath = (string) data_get($payload, 'local_image_path', '');
+        if ($mediaId === '' && $localPath !== '') {
+            if (!Storage::exists($localPath)) {
+                abort(404);
+            }
+
+            $absolutePath = storage_path('app/' . ltrim($localPath, '/'));
+            $mimeType = Storage::mimeType($localPath) ?: 'image/jpeg';
+
+            if (!is_file($absolutePath)) {
+                abort(404);
+            }
+
+            return response()->file($absolutePath, [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'private, max-age=300',
+            ]);
         }
 
         if ($mediaId === '') {
