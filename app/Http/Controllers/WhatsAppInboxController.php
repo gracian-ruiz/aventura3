@@ -48,6 +48,8 @@ class WhatsAppInboxController extends Controller
             return $this->conversationKey($message->direction === 'inbound' ? ($message->from_phone ?? '') : ($message->to_phone ?? ''));
         })->map(function ($group) {
             $latest = $group->first();
+            $latestInbound = $group->first(fn (WhatsAppMessage $message) => $message->direction === 'inbound') ?? $latest;
+            $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
 
             return [
                 'phone' => $latest->direction === 'inbound' ? $latest->from_phone : $latest->to_phone,
@@ -55,9 +57,11 @@ class WhatsAppInboxController extends Controller
                 'bike' => $latest->bike,
                 'appointment' => $latest->appointment,
                 'last_message' => $latest,
+                'last_inbound_message' => $latestInbound,
+                'sort_timestamp' => $sortTimestamp,
                 'count' => $group->count(),
             ];
-        })->values();
+        })->sortByDesc('sort_timestamp')->values();
 
         return view('whatsapp.index', compact('conversations', 'search'));
     }
