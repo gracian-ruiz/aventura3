@@ -46,10 +46,24 @@ class WhatsAppInboxController extends Controller
 
         $conversations = $messages->groupBy(function (WhatsAppMessage $message) {
             return $this->conversationKey($message->direction === 'inbound' ? ($message->from_phone ?? '') : ($message->to_phone ?? ''));
-        })->map(function ($group) {
+        })->map(function ($group, $conversationKey) use ($request) {
             $latest = $group->first();
             $latestInbound = $group->first(fn (WhatsAppMessage $message) => $message->direction === 'inbound') ?? $latest;
             $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
+            $lastActivityTimestamp = optional($latest->received_at ?? $latest->sent_at ?? $latest->created_at)?->timestamp ?? 0;
+
+            $seenAtRaw = (string) $request->session()->get('whatsapp_last_seen.' . $conversationKey, '');
+            $seenAtTimestamp = $seenAtRaw !== '' ? (strtotime($seenAtRaw) ?: 0) : 0;
+
+            $unreadCount = $group->filter(function (WhatsAppMessage $message) use ($seenAtTimestamp) {
+                if ($message->direction !== 'inbound') {
+                    return false;
+                }
+
+                $messageTimestamp = optional($message->received_at ?? $message->sent_at ?? $message->created_at)?->timestamp ?? 0;
+
+                return $messageTimestamp > $seenAtTimestamp;
+            })->count();
 
             return [
                 'phone' => $latest->direction === 'inbound' ? $latest->from_phone : $latest->to_phone,
@@ -59,9 +73,18 @@ class WhatsAppInboxController extends Controller
                 'last_message' => $latest,
                 'last_inbound_message' => $latestInbound,
                 'sort_timestamp' => $sortTimestamp,
+                'last_activity_timestamp' => $lastActivityTimestamp,
+                'unread_count' => $unreadCount,
+                'has_unread' => $unreadCount > 0,
                 'count' => $group->count(),
             ];
-        })->sortByDesc('sort_timestamp')->values();
+        })->sort(function (array $a, array $b) {
+            if ($a['has_unread'] !== $b['has_unread']) {
+                return $a['has_unread'] ? -1 : 1;
+            }
+
+            return $b['last_activity_timestamp'] <=> $a['last_activity_timestamp'];
+        })->values();
 
         return view('whatsapp.index', compact('conversations', 'search'));
     }
@@ -91,6 +114,9 @@ class WhatsAppInboxController extends Controller
         }
 
         $messages = $query->get();
+
+        // Al abrir la conversación, se marca como vista para que no siga como "sin leer".
+        $request->session()->put('whatsapp_last_seen.' . $normalizedPhone, now()->toDateTimeString());
 
         $conversationUser = $messages->firstWhere('user_id', '!=', null)?->user;
         if (!$conversationUser) {
