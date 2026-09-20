@@ -41,8 +41,17 @@ class WhatsAppInboxController extends Controller
                 });
             })
             ->orderByRaw('COALESCE(received_at, sent_at, created_at) desc')
-            ->limit(300)
             ->get();
+
+        $unreadByPhone = WhatsAppMessage::query()
+            ->selectRaw('from_phone, COUNT(*) as unread_count')
+            ->where('direction', 'inbound')
+            ->where(function ($query) {
+                $query->where('is_read', false)
+                    ->orWhereNull('is_read');
+            })
+            ->groupBy('from_phone')
+            ->pluck('unread_count', 'from_phone');
 
         $conversations = $messages->groupBy(function (WhatsAppMessage $message) {
             return $this->conversationKey($message->direction === 'inbound' ? ($message->from_phone ?? '') : ($message->to_phone ?? ''));
@@ -51,10 +60,11 @@ class WhatsAppInboxController extends Controller
             $latestInbound = $group->first(fn (WhatsAppMessage $message) => $message->direction === 'inbound') ?? $latest;
             $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
             $lastActivityTimestamp = optional($latest->received_at ?? $latest->sent_at ?? $latest->created_at)?->timestamp ?? 0;
-            $unreadCount = $group->filter(fn (WhatsAppMessage $message) => $message->direction === 'inbound' && !$message->is_read)->count();
+            $conversationPhone = $latest->direction === 'inbound' ? (string) ($latest->from_phone ?? '') : (string) ($latest->to_phone ?? '');
+            $unreadCount = (int) ($unreadByPhone[$conversationPhone] ?? 0);
 
             return [
-                'phone' => $latest->direction === 'inbound' ? $latest->from_phone : $latest->to_phone,
+                'phone' => $conversationPhone,
                 'user' => $latest->user,
                 'bike' => $latest->bike,
                 'appointment' => $latest->appointment,
