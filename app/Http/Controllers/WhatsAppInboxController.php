@@ -9,6 +9,7 @@ use App\Models\Appointment;
 use App\Services\WhatsAppCloudApiService;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -102,6 +103,10 @@ class WhatsAppInboxController extends Controller
 
         $conversationTitle = $conversationUser?->name ?: $normalizedPhone;
 
+        if ($request->boolean('partial')) {
+            return view('whatsapp.partials.messages', compact('messages'));
+        }
+
         return view('whatsapp.show', compact(
             'messages',
             'normalizedPhone',
@@ -137,9 +142,13 @@ class WhatsAppInboxController extends Controller
         try {
             $messageType = 'text';
             $storedBody = $body;
+            $storedPayload = [];
 
             if ($isImage) {
                 $image = $request->file('image');
+                $storedImagePath = $image->store('public/whatsapp_outbound');
+                $storedImageUrl = asset('storage/' . ltrim(str_replace('public/', '', $storedImagePath), '/'));
+
                 $response = $this->whatsAppCloudApiService->sendImageMessageFromFile(
                     $normalizedPhone,
                     $body !== '' ? $body : null,
@@ -148,8 +157,13 @@ class WhatsAppInboxController extends Controller
                 );
                 $messageType = 'image';
                 $storedBody = $body !== '' ? '[imagen] ' . $body : '[imagen]';
+                $storedPayload = array_merge($response, [
+                    'local_image_url' => $storedImageUrl,
+                    'local_image_path' => $storedImagePath,
+                ]);
             } else {
                 $response = $this->whatsAppCloudApiService->sendTextMessage($normalizedPhone, $body);
+                $storedPayload = $response;
             }
 
             Log::info('WhatsApp inbox: respuesta de Meta al envio desde chat', [
@@ -191,7 +205,7 @@ class WhatsAppInboxController extends Controller
             'message_type' => $messageType,
             'body' => $storedBody,
             'status' => 'sent',
-            'payload' => $response,
+            'payload' => $storedPayload,
             'sent_at' => now(),
         ]);
 
@@ -202,6 +216,63 @@ class WhatsAppInboxController extends Controller
         ]);
 
         return back()->with('success', 'Respuesta enviada correctamente.');
+    }
+
+    public function media(WhatsAppMessage $message)
+    {
+        if ($message->message_type !== 'image') {
+            abort(404);
+        }
+
+        $payload = is_array($message->payload) ? $message->payload : [];
+        $mediaId = (string) data_get($payload, 'image.id');
+
+        // Para imagenes enviadas desde el panel usamos una URL local guardada en payload.
+        $localUrl = (string) data_get($payload, 'local_image_url', '');
+        if ($mediaId === '' && $localUrl !== '') {
+            return redirect()->away($localUrl);
+        }
+
+        if ($mediaId === '') {
+            abort(404);
+        }
+
+        $accessToken = (string) config('services.whatsapp.access_token');
+        if ($accessToken === '') {
+            abort(503);
+        }
+
+        try {
+            $meta = Http::withToken($accessToken)
+                ->acceptJson()
+                ->get("https://graph.facebook.com/v23.0/{$mediaId}")
+                ->throw()
+                ->json();
+
+            $downloadUrl = (string) ($meta['url'] ?? '');
+            $mimeType = (string) ($meta['mime_type'] ?? 'image/jpeg');
+
+            if ($downloadUrl === '') {
+                abort(404);
+            }
+
+            $binary = Http::withToken($accessToken)
+                ->get($downloadUrl)
+                ->throw();
+
+            return response($binary->body(), 200, [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'private, max-age=300',
+            ]);
+        } catch (\Throwable $exception) {
+            Log::warning('WhatsApp inbox: no se pudo recuperar media de Meta', [
+                'message_id' => $message->id,
+                'media_id' => $mediaId,
+                'error' => $exception->getMessage(),
+            ]);
+
+            abort(404);
+        }
     }
 
     private function resolveUserByPhone(string $normalizedPhone): ?User

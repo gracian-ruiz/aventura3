@@ -24,7 +24,7 @@
             <div class="px-5 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 via-white to-slate-50 flex items-center justify-between gap-4">
                 <div>
                     <div class="font-semibold text-gray-900">Mensajes</div>
-                    <div class="text-xs text-gray-500">{{ $messages->count() }} registros en la conversación</div>
+                    <div class="text-xs text-gray-500"><span id="chat-message-count">{{ $messages->count() }}</span> registros en la conversación</div>
                 </div>
                 <div class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
                     WhatsApp
@@ -43,52 +43,8 @@
                 </form>
             </div>
 
-            <div class="p-4 sm:p-5 space-y-4 max-h-[70vh] overflow-y-auto bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_14%,#f8fafc_100%)]">
-                @forelse($messages as $message)
-                    @php
-                        $isStatus = $message->message_type === 'status';
-                        $isDocument = $message->message_type === 'document';
-                        $timestamp = optional($message->received_at ?? $message->sent_at)->format('d/m/Y H:i');
-                        $directionLabel = $message->direction === 'outbound' ? 'Taller' : 'Cliente';
-                        $statusTone = match ($message->status ?? $message->body) {
-                            'sent' => 'bg-slate-100 text-slate-700 border-slate-200',
-                            'delivered' => 'bg-blue-100 text-blue-700 border-blue-200',
-                            'read' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                            'failed' => 'bg-red-100 text-red-700 border-red-200',
-                            default => 'bg-gray-100 text-gray-700 border-gray-200',
-                        };
-                    @endphp
-
-                    @if($isStatus)
-                        <div class="flex justify-center">
-                            <div class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold {{ $statusTone }} shadow-sm">
-                                <span class="uppercase tracking-[0.2em]">{{ $message->status ?? $message->body ?? 'status' }}</span>
-                                <span class="text-[11px] opacity-80">{{ $timestamp }}</span>
-                            </div>
-                        </div>
-                    @else
-                        <div class="flex {{ $message->direction === 'outbound' ? 'justify-end' : 'justify-start' }}">
-                            <div class="max-w-[88%] sm:max-w-[78%] rounded-[22px] px-4 py-3 shadow-sm border {{ $isDocument ? 'bg-amber-50 text-amber-950 border-amber-200' : ($message->direction === 'outbound' ? 'bg-green-600 text-white border-green-500' : 'bg-white text-gray-900 border-gray-200') }}">
-                                <div class="flex items-center justify-between gap-3 mb-2">
-                                    <span class="text-[11px] font-semibold uppercase tracking-[0.18em] {{ $isDocument ? 'text-amber-700' : ($message->direction === 'outbound' ? 'text-green-100' : 'text-gray-400') }}">
-                                        {{ $directionLabel }}
-                                    </span>
-                                    <span class="text-[11px] {{ $isDocument ? 'text-amber-700' : ($message->direction === 'outbound' ? 'text-green-100/90' : 'text-gray-400') }}">
-                                        {{ $timestamp }}
-                                    </span>
-                                </div>
-                                @if($isDocument)
-                                    <div class="mb-2 inline-flex items-center rounded-full bg-amber-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-800">
-                                        PDF enviado
-                                    </div>
-                                @endif
-                                <div class="text-sm leading-6 whitespace-pre-line">{{ $message->body ?? 'Sin contenido' }}</div>
-                            </div>
-                        </div>
-                    @endif
-                @empty
-                    <div class="text-sm text-gray-500 bg-white border border-dashed border-gray-300 rounded-2xl p-6 text-center">No hay mensajes para este número todavía.</div>
-                @endforelse
+            <div id="chat-messages" class="p-4 sm:p-5 max-h-[70vh] overflow-y-auto bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_14%,#f8fafc_100%)]">
+                @include('whatsapp.partials.messages', ['messages' => $messages])
             </div>
         </div>
 
@@ -143,4 +99,65 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const chatContainer = document.getElementById('chat-messages');
+    const countEl = document.getElementById('chat-message-count');
+    const bodyField = document.querySelector('textarea[name="body"]');
+    const imageField = document.querySelector('input[name="image"]');
+    if (!chatContainer) {
+        return;
+    }
+
+    // Arranca con scroll al final del hilo.
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    const baseUrl = new URL(window.location.href);
+    const pollUrl = new URL(baseUrl.toString());
+    pollUrl.searchParams.set('partial', '1');
+
+    const refreshMessages = async function () {
+        if (document.hidden) {
+            return;
+        }
+
+        // Evita saltos mientras se escribe o se prepara una imagen para enviar.
+        if ((bodyField && document.activeElement === bodyField) || (imageField && imageField.files && imageField.files.length > 0)) {
+            return;
+        }
+
+        const distanceToBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
+        const shouldStickBottom = distanceToBottom < 120;
+
+        try {
+            const response = await fetch(pollUrl.toString(), {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const html = await response.text();
+            chatContainer.innerHTML = html;
+
+            const inner = chatContainer.querySelector('#chat-messages-inner');
+            if (countEl && inner && inner.dataset.count) {
+                countEl.textContent = inner.dataset.count;
+            }
+
+            if (shouldStickBottom) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        } catch (error) {
+            // Silencioso: el siguiente ciclo volvera a intentar.
+        }
+    };
+
+    setInterval(refreshMessages, 7000);
+});
+</script>
 @endsection
