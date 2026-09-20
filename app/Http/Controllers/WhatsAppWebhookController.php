@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Bike;
 use App\Models\User;
+use App\Models\WhatsAppMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -111,7 +112,7 @@ class WhatsAppWebhookController extends Controller
                         Log::info("Mensaje de WhatsApp de {$from} ({$type}): " . ($bodyPreview ?? ''));
 
                         try {
-                            DB::table('whatsapp_messages')->insert([
+                            WhatsAppMessage::create([
                                 'user_id' => $this->findUserIdByPhone((string) $from),
                                 'bike_id' => $this->findBikeIdByPhone((string) $from),
                                 'appointment_id' => $this->findAppointmentIdByPhone((string) $from),
@@ -124,10 +125,8 @@ class WhatsAppWebhookController extends Controller
                                 'status' => $message['status'] ?? 'received',
                                 'is_read' => false,
                                 'read_at' => null,
-                                'payload' => json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                                'payload' => $message,
                                 'received_at' => now(),
-                                'created_at' => now(),
-                                'updated_at' => now(),
                             ]);
                         } catch (\Throwable $exception) {
                             Log::warning('WhatsApp webhook no pudo guardar el mensaje entrante', [
@@ -156,7 +155,7 @@ class WhatsAppWebhookController extends Controller
                         }
 
                         try {
-                            DB::table('whatsapp_messages')->insert([
+                            WhatsAppMessage::create([
                                 'user_id' => $this->findUserIdByPhone((string) data_get($status, 'recipient_id', '')),
                                 'bike_id' => $this->findBikeIdByPhone((string) data_get($status, 'recipient_id', '')),
                                 'appointment_id' => $this->findAppointmentIdByPhone((string) data_get($status, 'recipient_id', '')),
@@ -169,10 +168,8 @@ class WhatsAppWebhookController extends Controller
                                 'status' => $status['status'] ?? null,
                                 'is_read' => true,
                                 'read_at' => now(),
-                                'payload' => json_encode($status, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                                'payload' => $status,
                                 'sent_at' => now(),
-                                'created_at' => now(),
-                                'updated_at' => now(),
                             ]);
                         } catch (\Throwable $exception) {
                             Log::warning('WhatsApp webhook no pudo guardar el estado', [

@@ -37,6 +37,27 @@ class WhatsAppMessage extends Model
         'received_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $message): void {
+            $direction = (string) ($message->direction ?? '');
+
+            if ($direction === 'inbound') {
+                $message->is_read = false;
+                $message->read_at = null;
+                return;
+            }
+
+            if ($direction === 'outbound' && $message->is_read === null) {
+                $message->is_read = true;
+            }
+
+            if ($direction === 'outbound' && $message->is_read === true && $message->read_at === null) {
+                $message->read_at = now();
+            }
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
