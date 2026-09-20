@@ -79,7 +79,7 @@ class WhatsAppInboxController extends Controller
                 $query->where('from_phone', $normalizedPhone)
                     ->orWhere('to_phone', $normalizedPhone);
             })
-            ->orderByRaw('COALESCE(received_at, sent_at, created_at) asc');
+            ->orderByRaw('COALESCE(received_at, sent_at, created_at) desc');
 
         if ($messageSearch !== '') {
             $query->where(function ($subQuery) use ($messageSearch) {
