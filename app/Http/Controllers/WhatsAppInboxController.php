@@ -43,32 +43,27 @@ class WhatsAppInboxController extends Controller
             ->orderByRaw('COALESCE(received_at, sent_at, created_at) desc')
             ->get();
 
-        $unreadByPhone = WhatsAppMessage::query()
-            ->selectRaw('from_phone, COUNT(*) as unread_count')
+        $unreadByConversationKey = WhatsAppMessage::query()
+            ->selectRaw('RIGHT(COALESCE(from_phone, ""), 9) as conversation_key, COUNT(*) as unread_count')
             ->where('direction', 'inbound')
             ->where(function ($query) {
                 $query->where('is_read', false)
-                    ->orWhereNull('is_read');
+                    ->orWhereNull('is_read')
+                    ->orWhereNull('read_at');
             })
-            ->groupBy('from_phone')
-            ->pluck('unread_count', 'from_phone');
+            ->groupBy('conversation_key')
+            ->pluck('unread_count', 'conversation_key');
 
         $conversations = $messages->groupBy(function (WhatsAppMessage $message) {
             return $this->conversationKey($message->direction === 'inbound' ? ($message->from_phone ?? '') : ($message->to_phone ?? ''));
-        })->map(function ($group) {
+        })->map(function ($group) use ($unreadByConversationKey) {
             $latest = $group->first();
             $latestInbound = $group->first(fn (WhatsAppMessage $message) => $message->direction === 'inbound') ?? $latest;
             $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
             $lastActivityTimestamp = optional($latest->received_at ?? $latest->sent_at ?? $latest->created_at)?->timestamp ?? 0;
             $conversationPhone = (string) ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? '')));
-            $unreadCount = $group->filter(function (WhatsAppMessage $message): bool {
-                if ($message->direction !== 'inbound') {
-                    return false;
-                }
-
-                // Robustez: si read_at esta vacio, se considera no leido incluso si is_read viene mal seteado.
-                return !$message->is_read || $message->read_at === null;
-            })->count();
+            $conversationKey = $this->conversationKey($conversationPhone);
+            $unreadCount = (int) ($unreadByConversationKey[$conversationKey] ?? 0);
 
             return [
                 'phone' => $conversationPhone,
