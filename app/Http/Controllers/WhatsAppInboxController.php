@@ -123,19 +123,6 @@ class WhatsAppInboxController extends Controller
 
         $normalizedPhone = $this->normalizePhone($phone);
 
-        $user = $this->resolveUserByPhone($normalizedPhone);
-
-        if (!$this->whatsappTestGateAllows($normalizedPhone, $user?->email)) {
-            Log::warning('WhatsApp inbox: envio bloqueado por filtro de pruebas', [
-                'to' => $normalizedPhone,
-                'resolved_user_id' => $user?->id,
-                'resolved_email' => $user?->email,
-                'resolved_phone' => $user?->telefono,
-            ]);
-
-            return back()->with('error', 'Envio bloqueado: solo se permite el cliente de pruebas autorizado.');
-        }
-
         Log::info('WhatsApp inbox: intento de envio desde chat', [
             'to' => $normalizedPhone,
             'body_length' => mb_strlen($data['body']),
@@ -195,48 +182,6 @@ class WhatsAppInboxController extends Controller
         ]);
 
         return back()->with('success', 'Respuesta enviada correctamente.');
-    }
-
-    private function whatsappTestGateAllows(string $normalizedPhone, ?string $email): bool
-    {
-        $allowedEmails = $this->allowedEmails();
-        $allowedPhone = self::normalizePhone((string) config('services.whatsapp.notice_phone_gate'));
-
-        if (empty($allowedEmails) || $allowedPhone === '') {
-            return false;
-        }
-
-        if (!$this->phoneMatches($normalizedPhone, $allowedPhone)) {
-            return false;
-        }
-
-        // Si no se ha podido vincular usuario, permitimos por teléfono exacto de pruebas.
-        if (!is_string($email) || trim($email) === '') {
-            return true;
-        }
-
-        return in_array(strtolower(trim($email)), $allowedEmails, true);
-    }
-
-    private function allowedEmails(): array
-    {
-        $list = (string) config('services.whatsapp.notice_email_gate_list', '');
-        $single = (string) config('services.whatsapp.notice_email_gate', '');
-        $hardcoded = [
-            'gracianmiguel1995@gmail.com',
-            'graciancristales@hotmail.com',
-        ];
-
-        $emails = array_filter(array_map(
-            static fn (string $value): string => strtolower(trim($value)),
-            array_merge(
-                $list !== '' ? explode(',', $list) : [],
-                $single !== '' ? [$single] : [],
-                $hardcoded
-            )
-        ));
-
-        return array_values(array_unique($emails));
     }
 
     private function resolveUserByPhone(string $normalizedPhone): ?User
