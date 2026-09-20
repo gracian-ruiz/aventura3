@@ -13,6 +13,26 @@ use Illuminate\Database\Schema\Blueprint;
 
 class WhatsAppWebhookController extends Controller
 {
+    private function extractInboundBody(array $message): ?string
+    {
+        $type = (string) ($message['type'] ?? '');
+
+        return match ($type) {
+            'text' => data_get($message, 'text.body'),
+            'image' => '[imagen] ' . (string) (data_get($message, 'image.caption') ?? ''),
+            'video' => '[video] ' . (string) (data_get($message, 'video.caption') ?? ''),
+            'document' => '[documento] ' . (string) (data_get($message, 'document.filename') ?? ''),
+            'audio' => '[audio]',
+            'voice' => '[nota de voz]',
+            'sticker' => '[sticker]',
+            'location' => '[ubicacion]',
+            'contacts' => '[contacto compartido]',
+            'button' => '[boton] ' . (string) (data_get($message, 'button.text') ?? ''),
+            'interactive' => '[interactivo]',
+            default => '[' . ($type !== '' ? $type : 'mensaje') . ']',
+        };
+    }
+
     private function normalizeWebhookErrors(mixed $errors): array
     {
         if (!is_array($errors)) {
@@ -87,33 +107,32 @@ class WhatsAppWebhookController extends Controller
                         $from = $message['from'] ?? null; // número del remitente
                         $type = $message['type'] ?? null;
 
-                        if ($type === 'text') {
-                            $text = $message['text']['body'] ?? '';
-                            Log::info("Mensaje de WhatsApp de {$from}: {$text}");
+                        $bodyPreview = $this->extractInboundBody($message);
+                        Log::info("Mensaje de WhatsApp de {$from} ({$type}): " . ($bodyPreview ?? ''));
 
-                            try {
-                                DB::table('whatsapp_messages')->insert([
-                                    'user_id' => $this->findUserIdByPhone((string) $from),
-                                    'bike_id' => $this->findBikeIdByPhone((string) $from),
-                                    'appointment_id' => $this->findAppointmentIdByPhone((string) $from),
-                                    'wa_id' => $message['id'] ?? null,
-                                    'from_phone' => WhatsAppInboxController::normalizePhone($message['from'] ?? ''),
-                                    'to_phone' => WhatsAppInboxController::normalizePhone((string) data_get($value, 'metadata.display_phone_number')),
-                                    'direction' => 'inbound',
-                                    'message_type' => $message['type'] ?? 'text',
-                                    'body' => $message['text']['body'] ?? null,
-                                    'status' => $message['status'] ?? 'received',
-                                    'payload' => json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                                    'received_at' => now(),
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
-                                ]);
-                            } catch (\Throwable $exception) {
-                                Log::warning('WhatsApp webhook no pudo guardar el mensaje entrante', [
-                                    'from' => $from,
-                                    'error' => $exception->getMessage(),
-                                ]);
-                            }
+                        try {
+                            DB::table('whatsapp_messages')->insert([
+                                'user_id' => $this->findUserIdByPhone((string) $from),
+                                'bike_id' => $this->findBikeIdByPhone((string) $from),
+                                'appointment_id' => $this->findAppointmentIdByPhone((string) $from),
+                                'wa_id' => $message['id'] ?? null,
+                                'from_phone' => WhatsAppInboxController::normalizePhone($message['from'] ?? ''),
+                                'to_phone' => WhatsAppInboxController::normalizePhone((string) data_get($value, 'metadata.display_phone_number')),
+                                'direction' => 'inbound',
+                                'message_type' => $message['type'] ?? 'text',
+                                'body' => $bodyPreview,
+                                'status' => $message['status'] ?? 'received',
+                                'payload' => json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                                'received_at' => now(),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        } catch (\Throwable $exception) {
+                            Log::warning('WhatsApp webhook no pudo guardar el mensaje entrante', [
+                                'from' => $from,
+                                'type' => $type,
+                                'error' => $exception->getMessage(),
+                            ]);
                         }
                     }
 
