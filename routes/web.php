@@ -211,6 +211,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('presupuesto.enviar');
 
     Route::get('/whatsapp', [WhatsAppInboxController::class, 'index'])->name('whatsapp.index');
+    Route::get('/whatsapp/unread-status', [WhatsAppInboxController::class, 'unreadStatus'])->name('whatsapp.unread-status');
     Route::get('/whatsapp/{phone}', [WhatsAppInboxController::class, 'show'])->name('whatsapp.show');
     Route::post('/whatsapp/{phone}', [WhatsAppInboxController::class, 'reply'])->name('whatsapp.reply');
     Route::get('/whatsapp/media/{message}', [WhatsAppInboxController::class, 'media'])->name('whatsapp.media');

@@ -19,7 +19,9 @@
                     <a href="{{ route('whatsapp.index') }}" class="app-nav-item inline-flex items-center gap-2 {{ request()->routeIs('whatsapp.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">
                         <span>WhatsApp</span>
                         @if(!empty($hasUnreadWhatsApp))
-                            <span class="inline-block h-2.5 w-2.5 rounded-full bg-red-500" title="Hay mensajes sin leer"></span>
+                            <span data-whatsapp-unread-dot class="inline-block h-2.5 w-2.5 rounded-full bg-red-500" title="Hay mensajes sin leer"></span>
+                        @else
+                            <span data-whatsapp-unread-dot class="hidden inline-block h-2.5 w-2.5 rounded-full bg-red-500" title="Hay mensajes sin leer"></span>
                         @endif
                     </a>
                     <a href="{{ route('bikes.index') }}" class="app-nav-item {{ request()->routeIs('bikes.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Bicicletas</a>
@@ -97,7 +99,12 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('mecanico.index')" :active="request()->routeIs('mecanico.*')">Orden de taller Asignado</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('whatsapp.index')" :active="request()->routeIs('whatsapp.*')">
-                    WhatsApp @if(!empty($hasUnreadWhatsApp))<span class="ml-1 font-semibold text-red-600">(nuevo)</span>@endif
+                    WhatsApp
+                    @if(!empty($hasUnreadWhatsApp))
+                        <span data-whatsapp-unread-text class="ml-1 font-semibold text-red-600">(nuevo)</span>
+                    @else
+                        <span data-whatsapp-unread-text class="ml-1 font-semibold text-red-600 hidden">(nuevo)</span>
+                    @endif
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.*')">Revisiones</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('calendario-citas')" :active="request()->routeIs('calendario-citas')">Calendario Manual</x-responsive-nav-link>
@@ -130,3 +137,53 @@
         </div>
     </div>
 </nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dots = document.querySelectorAll('[data-whatsapp-unread-dot]');
+    const texts = document.querySelectorAll('[data-whatsapp-unread-text]');
+
+    if (!dots.length && !texts.length) {
+        return;
+    }
+
+    const endpoint = "{{ route('whatsapp.unread-status') }}";
+
+    const applyState = function (hasUnread) {
+        dots.forEach((node) => {
+            node.classList.toggle('hidden', !hasUnread);
+        });
+
+        texts.forEach((node) => {
+            node.classList.toggle('hidden', !hasUnread);
+        });
+    };
+
+    const refreshUnreadStatus = async function () {
+        try {
+            const url = new URL(endpoint, window.location.origin);
+            url.searchParams.set('_t', Date.now().toString());
+
+            const response = await fetch(url.toString(), {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                cache: 'no-store',
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+            applyState(!!data.has_unread);
+        } catch (error) {
+            // silencio: se reintenta en el siguiente ciclo
+        }
+    };
+
+    refreshUnreadStatus();
+    setInterval(refreshUnreadStatus, 5000);
+});
+</script>

@@ -89,6 +89,25 @@ class WhatsAppInboxController extends Controller
         return view('whatsapp.index', compact('conversations', 'search'));
     }
 
+    public function unreadStatus()
+    {
+        $this->ensureMessagesTableExists();
+
+        $unreadCount = WhatsAppMessage::query()
+            ->where('direction', 'inbound')
+            ->where(function ($query) {
+                $query->where('is_read', false)
+                    ->orWhereNull('is_read')
+                    ->orWhereNull('read_at');
+            })
+            ->count();
+
+        return response()->json([
+            'has_unread' => $unreadCount > 0,
+            'unread_count' => $unreadCount,
+        ]);
+    }
+
     public function show(Request $request, string $phone)
     {
         $this->ensureMessagesTableExists();

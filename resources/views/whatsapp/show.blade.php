@@ -202,8 +202,8 @@ document.addEventListener('DOMContentLoaded', function () {
     logChatState('initial');
 
     const baseUrl = new URL(window.location.href);
-    const pollUrl = new URL(baseUrl.toString());
-    pollUrl.searchParams.set('partial', '1');
+    const pollBaseUrl = new URL(baseUrl.toString());
+    pollBaseUrl.searchParams.set('partial', '1');
 
     const refreshMessages = async function () {
         if (document.hidden) {
@@ -219,10 +219,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const shouldStickTop = distanceToTop < 120;
 
         try {
-            const response = await fetch(pollUrl.toString(), {
+            const requestUrl = new URL(pollBaseUrl.toString());
+            requestUrl.searchParams.set('_t', Date.now().toString());
+
+            const response = await fetch(requestUrl.toString(), {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                 },
+                cache: 'no-store',
             });
 
             if (!response.ok) {
@@ -251,7 +255,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    setInterval(refreshMessages, 7000);
+    setInterval(refreshMessages, 4000);
 });
 </script>
 @endsection
