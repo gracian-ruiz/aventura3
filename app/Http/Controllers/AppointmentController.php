@@ -810,7 +810,8 @@ class AppointmentController extends Controller
                 'bikes.nombre as bike_nombre',
                 'users.id as user_id',
                 'users.name as user_name',
-                'users.email as user_email'
+                'users.email as user_email',
+                'users.telefono as user_telefono'
             )
             ->get();
 

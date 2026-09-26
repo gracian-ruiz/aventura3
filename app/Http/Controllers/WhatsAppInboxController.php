@@ -173,6 +173,7 @@ class WhatsAppInboxController extends Controller
         }
 
         $conversationTitle = $conversationUser?->name ?: $normalizedPhone;
+        $starterTemplates = $this->conversationStarterTemplates();
 
         if ($request->boolean('partial')) {
             return view('whatsapp.partials.messages', compact('messages'));
@@ -185,8 +186,156 @@ class WhatsAppInboxController extends Controller
             'conversationUser',
             'conversationBike',
             'conversationAppointment',
-            'conversationTitle'
+            'conversationTitle',
+            'starterTemplates'
         ));
+    }
+
+    public function sendStarterTemplate(Request $request, string $phone)
+    {
+        $this->ensureMessagesTableExists();
+
+        $data = $request->validate([
+            'template_key' => ['required', 'string', 'max:120'],
+            'issue_area' => ['nullable', 'string', 'max:190'],
+            'customer_reply_request' => ['nullable', 'string', 'max:250'],
+            'template_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+        ]);
+
+        $template = collect($this->conversationStarterTemplates())
+            ->firstWhere('key', (string) $data['template_key']);
+
+        if (!$template) {
+            return back()->with('error', 'Plantilla no valida para iniciar conversacion.');
+        }
+
+        $normalizedPhone = $this->normalizePhone($phone);
+        $conversationUser = $this->resolveUserByPhone($normalizedPhone);
+        $customerName = trim((string) ($conversationUser?->name ?? 'cliente'));
+
+        $bodyParams = [];
+        if (!empty($template['uses_customer_name'])) {
+            $bodyParams[] = $customerName;
+        }
+
+        $issueArea = trim((string) ($data['issue_area'] ?? ''));
+        $customerReplyRequest = trim((string) ($data['customer_reply_request'] ?? ''));
+
+        if (!empty($template['uses_issue_area'])) {
+            if ($issueArea === '') {
+                return back()->withInput()->with('error', 'Debes indicar en que parte de la bicicleta se detecto el problema.');
+            }
+
+            $bodyParams[] = $issueArea;
+        }
+
+        if (!empty($template['uses_customer_reply_request'])) {
+            if ($customerReplyRequest === '') {
+                return back()->withInput()->with('error', 'Debes indicar que respuesta esperas del cliente.');
+            }
+
+            $bodyParams[] = $customerReplyRequest;
+        }
+
+        $headerImage = null;
+        $templateImagePayload = [];
+        $hasTemplateImage = $request->hasFile('template_image');
+
+        if (!empty($template['requires_header_image']) && !$hasTemplateImage) {
+            return back()->withInput()->with('error', 'Esta plantilla requiere imagen. Adjunta una para poder enviarla.');
+        }
+
+        if ($hasTemplateImage && empty($template['allows_header_image'])) {
+            return back()->withInput()->with('error', 'La plantilla seleccionada no admite imagen en cabecera.');
+        }
+
+        if ($hasTemplateImage) {
+            $templateImage = $request->file('template_image');
+            $storedImagePath = $templateImage->store('public/whatsapp_template_headers');
+            $storedImageUrl = asset('storage/' . ltrim(str_replace('public/', '', $storedImagePath), '/'));
+
+            $uploadedMedia = $this->whatsAppCloudApiService->uploadImageMediaFromFile(
+                $templateImage->getRealPath(),
+                $templateImage->getClientOriginalName()
+            );
+
+            $headerImage = [
+                'id' => (string) ($uploadedMedia['media_id'] ?? ''),
+            ];
+
+            $templateImagePayload = [
+                'template_header_image' => [
+                    'local_image_url' => $storedImageUrl,
+                    'local_image_path' => $storedImagePath,
+                    'mime_type' => (string) ($uploadedMedia['mime_type'] ?? ''),
+                    'filename' => (string) ($uploadedMedia['filename'] ?? ''),
+                    'media_id' => (string) ($uploadedMedia['media_id'] ?? ''),
+                ],
+            ];
+        }
+
+        try {
+            $response = $this->whatsAppCloudApiService->sendTemplateMessage(
+                $normalizedPhone,
+                (string) ($template['template_name'] ?? ''),
+                (string) ($template['language'] ?? 'es'),
+                $bodyParams,
+                null,
+                null,
+                $headerImage
+            );
+        } catch (\Throwable $exception) {
+            $metaError = [];
+
+            if ($exception instanceof RequestException && $exception->response !== null) {
+                $error = $exception->response->json('error');
+                $metaError = is_array($error)
+                    ? [
+                        'http_status' => $exception->response->status(),
+                        'message' => $error['message'] ?? null,
+                        'type' => $error['type'] ?? null,
+                        'code' => $error['code'] ?? null,
+                        'error_subcode' => $error['error_subcode'] ?? null,
+                        'details' => data_get($error, 'error_data.details'),
+                        'fbtrace_id' => $error['fbtrace_id'] ?? null,
+                    ]
+                    : ['http_status' => $exception->response->status()];
+            }
+
+            Log::error('WhatsApp inbox: fallo al enviar plantilla de inicio', [
+                'phone' => $normalizedPhone,
+                'template_key' => $template['key'] ?? null,
+                'template_name' => $template['template_name'] ?? null,
+                'error' => $exception->getMessage(),
+                'meta_error' => $metaError,
+            ]);
+
+            return back()->with('error', 'No se pudo enviar la plantilla. Revisa nombre/aprobacion de la plantilla en Meta.');
+        }
+
+        WhatsAppMessage::create([
+            'user_id' => $conversationUser?->id,
+            'bike_id' => Bike::query()->where('user_id', $conversationUser?->id)->latest('id')->value('id'),
+            'appointment_id' => null,
+            'wa_id' => data_get($response, 'messages.0.id'),
+            'from_phone' => (string) config('services.whatsapp.phone_number_id'),
+            'to_phone' => $normalizedPhone,
+            'direction' => 'outbound',
+            'message_type' => 'template',
+            'body' => (string) ($template['label'] ?? 'Plantilla de inicio enviada'),
+            'status' => 'sent',
+            'is_read' => true,
+            'read_at' => now(),
+            'payload' => array_merge($response, [
+                'template_key' => (string) ($template['key'] ?? ''),
+                'template_name' => (string) ($template['template_name'] ?? ''),
+                'template_language' => (string) ($template['language'] ?? 'es'),
+                'template_body_params' => $bodyParams,
+            ], $templateImagePayload),
+            'sent_at' => now(),
+        ]);
+
+        return back()->with('success', 'Plantilla enviada correctamente.');
     }
 
     public function reply(Request $request, string $phone)
@@ -476,6 +625,42 @@ class WhatsAppInboxController extends Controller
     private function ensureMessagesTableExists(): void
     {
         self::ensureMessagesTableExistsStatic();
+    }
+
+    private function conversationStarterTemplates(): array
+    {
+        $templates = config('services.whatsapp.conversation_templates', []);
+
+        if (!is_array($templates)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(static function ($template): ?array {
+            if (!is_array($template)) {
+                return null;
+            }
+
+            $key = trim((string) ($template['key'] ?? ''));
+            $label = trim((string) ($template['label'] ?? ''));
+            $templateName = trim((string) ($template['template_name'] ?? ''));
+            $language = trim((string) ($template['language'] ?? 'es'));
+
+            if ($key === '' || $label === '' || $templateName === '') {
+                return null;
+            }
+
+            return [
+                'key' => $key,
+                'label' => $label,
+                'template_name' => $templateName,
+                'language' => $language,
+                'uses_customer_name' => (bool) ($template['uses_customer_name'] ?? true),
+                'uses_issue_area' => (bool) ($template['uses_issue_area'] ?? false),
+                'uses_customer_reply_request' => (bool) ($template['uses_customer_reply_request'] ?? false),
+                'allows_header_image' => (bool) ($template['allows_header_image'] ?? false),
+                'requires_header_image' => (bool) ($template['requires_header_image'] ?? false),
+            ];
+        }, $templates)));
     }
 
     private static function ensureMessagesTableExistsStatic(): void

@@ -3,6 +3,10 @@
 @section('content')
 <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
     <h1 class="text-2xl font-bold text-center mb-8">Reparación de Cita - {{ $appointment->bike->nombre }}</h1>
+    @php
+        $customerPhoneSource = (string) (($data->first()->user_telefono ?? '') ?: optional(optional($appointment->bike)->user)->telefono);
+        $customerPhone = preg_replace('/\D+/', '', $customerPhoneSource);
+    @endphp
 
     <form action="{{ route('appointments.updateReparacion', array_merge(['appointment' => $appointment->id, 'return_url' => ($returnUrl ?? request('return_url'))], $indexContext ?? [])) }}" method="POST">
         @csrf
@@ -84,6 +88,94 @@
         </div>
     </form>
     <br><br>
+    <div class="mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 sm:p-5">
+        <div class="text-sm font-semibold uppercase tracking-[0.14em] text-blue-700">WhatsApp: problema detectado</div>
+        <p class="mt-1 text-sm text-blue-900/80">Tienes dos plantillas separadas: una con imagen y otra sin imagen.</p>
+
+        @if (session('success'))
+            <div class="mt-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{{ session('success') }}</div>
+        @endif
+
+        @if (session('error'))
+            <div class="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{{ session('error') }}</div>
+        @endif
+
+        @if (!empty($customerPhone))
+            <form method="POST" action="{{ route('whatsapp.template', ['phone' => $customerPhone]) }}" enctype="multipart/form-data" class="mt-3 rounded-xl border border-blue-200 bg-white p-3">
+                @csrf
+                <input type="hidden" name="template_key" value="conversacion_problema_taller">
+
+                <div class="text-xs font-semibold uppercase tracking-[0.08em] text-blue-700">Plantilla con imagen</div>
+                <p class="mt-1 rounded-lg bg-blue-100/70 px-2 py-2 text-xs text-blue-900">Mensaje tipo plantilla: "Hola [NOMBRE_CLIENTE], hemos detectado un problema en tu bicicleta en [ZONA_PROBLEMA]. Te paso la imagen para que lo veas y nos digas [RESPUESTA_ESPERADA], dinos si seguimos adelante."</p>
+
+                <div class="grid gap-2 sm:grid-cols-2">
+                    <input
+                        type="text"
+                        name="issue_area"
+                        value="{{ old('issue_area') }}"
+                        class="w-full rounded-xl border-blue-200 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Problema detectado en... (ej: freno delantero)"
+                    >
+
+                    <input
+                        type="text"
+                        name="customer_reply_request"
+                        value="{{ old('customer_reply_request') }}"
+                        class="w-full rounded-xl border-blue-200 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Que nos diga... (ej: si autoriza cambiar la pieza)"
+                    >
+                </div>
+
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <label class="inline-flex cursor-pointer items-center justify-center rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
+                        <input name="template_image" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                        Adjuntar imagen
+                    </label>
+
+                    <button type="submit" class="inline-flex items-center rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
+                        Enviar plantilla con imagen
+                    </button>
+                </div>
+            </form>
+
+            <form method="POST" action="{{ route('whatsapp.template', ['phone' => $customerPhone]) }}" class="mt-3 rounded-xl border border-blue-200 bg-white p-3">
+                @csrf
+                <input type="hidden" name="template_key" value="conversacion_problema_taller_sin_imagen">
+
+                <div class="text-xs font-semibold uppercase tracking-[0.08em] text-blue-700">Plantilla sin imagen</div>
+                <p class="mt-1 rounded-lg bg-blue-100/70 px-2 py-2 text-xs text-blue-900">Mensaje tipo plantilla: "Hola [NOMBRE_CLIENTE], hemos detectado un problema en tu bicicleta en [ZONA_PROBLEMA]. Y habra que [RESPUESTA_ESPERADA], dinos si seguimos adelante."</p>
+
+                <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                    <input
+                        type="text"
+                        name="issue_area"
+                        value="{{ old('issue_area') }}"
+                        class="w-full rounded-xl border-blue-200 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Problema detectado en... (ej: freno delantero)"
+                    >
+
+                    <input
+                        type="text"
+                        name="customer_reply_request"
+                        value="{{ old('customer_reply_request') }}"
+                        class="w-full rounded-xl border-blue-200 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Que nos diga... (ej: si autoriza cambiar la pieza)"
+                    >
+                </div>
+
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <button type="submit" class="inline-flex items-center rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
+                        Enviar plantilla sin imagen
+                    </button>
+                </div>
+            </form>
+        @else
+            <div class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                El cliente no tiene teléfono registrado. Añádelo para poder enviar la plantilla.
+            </div>
+        @endif
+    </div>
+    <br>
     <!-- Botones -->
     <div class="mt-4 d-flex justify-content-center gap-3">
         <a href="{{ route('presupuestos.pdf', $appointment->id) }}" class="app-btn app-btn-pdf px-6 mr-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400">

@@ -267,7 +267,8 @@ class WhatsAppCloudApiService
         string $languageCode = 'es',
         array $bodyParams = [],
         ?array $headerDocument = null,
-        ?array $buttonComponent = null
+        ?array $buttonComponent = null,
+        ?array $headerImage = null
     ): array
     {
         $phoneNumberId = (string) config('services.whatsapp.phone_number_id');
@@ -291,6 +292,7 @@ class WhatsAppCloudApiService
             'language' => $languageCode,
             'body_params_count' => count($bodyParams),
             'has_header_document' => is_array($headerDocument),
+            'has_header_image' => is_array($headerImage),
             'has_button_component' => is_array($buttonComponent),
         ]);
 
@@ -317,6 +319,27 @@ class WhatsAppCloudApiService
                                 'link' => $link,
                                 'filename' => $filename,
                             ],
+                        ],
+                    ],
+                ];
+            }
+        }
+
+        if (is_array($headerImage)) {
+            $id = trim((string) ($headerImage['id'] ?? ''));
+            $link = trim((string) ($headerImage['link'] ?? ''));
+
+            if ($id !== '' || $link !== '') {
+                $imagePayload = $id !== ''
+                    ? ['id' => $id]
+                    : ['link' => $link];
+
+                $components[] = [
+                    'type' => 'header',
+                    'parameters' => [
+                        [
+                            'type' => 'image',
+                            'image' => $imagePayload,
                         ],
                     ],
                 ];
@@ -375,6 +398,63 @@ class WhatsAppCloudApiService
         $resolvedPhoneNumberId = $phoneNumberId ?: (string) config('services.whatsapp.phone_number_id');
 
         return sprintf('https://graph.facebook.com/v23.0/%s/media', $resolvedPhoneNumberId);
+    }
+
+    public function uploadImageMediaFromFile(string $filePath, ?string $filename = null): array
+    {
+        $phoneNumberId = (string) config('services.whatsapp.phone_number_id');
+        $accessToken = (string) config('services.whatsapp.access_token');
+
+        if ($phoneNumberId === '' || $accessToken === '') {
+            throw new RuntimeException('Faltan credenciales de WhatsApp Cloud API para subir imagenes.');
+        }
+
+        if (!is_file($filePath)) {
+            throw new RuntimeException('No existe la imagen a subir a Meta: ' . $filePath);
+        }
+
+        $resolvedFilename = $filename ?: basename($filePath);
+        $mimeType = mime_content_type($filePath) ?: 'image/jpeg';
+
+        Log::info('WhatsApp Cloud API: subiendo imagen para plantilla', [
+            'version' => self::LOG_VERSION,
+            'phone_number_id' => $phoneNumberId,
+            'file_path' => $filePath,
+            'filename' => $resolvedFilename,
+            'mime_type' => $mimeType,
+        ]);
+
+        try {
+            $mediaResponse = Http::withToken($accessToken)
+                ->attach('file', fopen($filePath, 'r'), $resolvedFilename)
+                ->post($this->mediaUploadUrl($phoneNumberId), [
+                    'messaging_product' => 'whatsapp',
+                    'type' => $mimeType,
+                ])
+                ->throw()
+                ->json();
+
+            $mediaId = (string) ($mediaResponse['id'] ?? '');
+
+            if ($mediaId === '') {
+                throw new RuntimeException('Meta no devolvio un media_id al subir la imagen para plantilla.');
+            }
+
+            return [
+                'media_id' => $mediaId,
+                'mime_type' => $mimeType,
+                'filename' => $resolvedFilename,
+            ];
+        } catch (Throwable $exception) {
+            Log::error('WhatsApp Cloud API: fallo al subir imagen para plantilla', [
+                'phone_number_id' => $phoneNumberId,
+                'file_path' => $filePath,
+                'error' => $exception->getMessage(),
+                'meta_error' => $this->extractMetaError($exception),
+            ]);
+
+            throw $exception;
+        }
     }
 
     private function extractMetaError(Throwable $exception): array

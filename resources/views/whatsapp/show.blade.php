@@ -97,6 +97,71 @@
                         </div>
                     @endif
 
+                    @if(!empty($starterTemplates))
+                        <div class="mb-3 rounded-2xl border border-blue-100 bg-blue-50/70 px-3 py-3 sm:px-4">
+                            <div class="text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">Iniciar conversacion con plantilla</div>
+                            <p class="mt-1 text-xs text-blue-900/75">Estos botones envian plantillas aprobadas en Meta para abrir conversacion.</p>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                @foreach($starterTemplates as $starterTemplate)
+                                    @if(!empty($starterTemplate['uses_issue_area']) || !empty($starterTemplate['uses_customer_reply_request']))
+                                        <form method="POST" action="{{ route('whatsapp.template', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" class="w-full rounded-xl border border-blue-200 bg-white p-3 sm:p-4">
+                                            @csrf
+                                            <input type="hidden" name="template_key" value="{{ $starterTemplate['key'] }}">
+
+                                            <div class="text-xs font-semibold uppercase tracking-[0.08em] text-blue-700">{{ $starterTemplate['label'] }}</div>
+                                            @if(($starterTemplate['key'] ?? '') === 'conversacion_problema_taller_sin_imagen')
+                                                <p class="mt-1 text-xs text-blue-900/80">Plantilla sin imagen para avisar al cliente del problema detectado.</p>
+                                                <p class="mt-2 rounded-lg bg-blue-100/70 px-2 py-2 text-xs text-blue-900">Mensaje tipo plantilla: "Hola [NOMBRE_CLIENTE], hemos detectado un problema en tu bicicleta en [ZONA_PROBLEMA]. Y habra que [RESPUESTA_ESPERADA], dinos si seguimos adelante."</p>
+                                            @else
+                                                <p class="mt-1 text-xs text-blue-900/80">Plantilla con imagen para avisar al cliente del problema detectado.</p>
+                                                <p class="mt-2 rounded-lg bg-blue-100/70 px-2 py-2 text-xs text-blue-900">Mensaje tipo plantilla: "Hola [NOMBRE_CLIENTE], hemos detectado un problema en tu bicicleta en [ZONA_PROBLEMA]. Te paso la imagen para que lo veas y nos digas [RESPUESTA_ESPERADA], dinos si seguimos adelante."</p>
+                                            @endif
+
+                                            <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                                                <input
+                                                    type="text"
+                                                    name="issue_area"
+                                                    value="{{ old('issue_area') }}"
+                                                    class="w-full rounded-xl border-blue-200 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    placeholder='Problema detectado en... (ej: freno delantero)'
+                                                >
+
+                                                <input
+                                                    type="text"
+                                                    name="customer_reply_request"
+                                                    value="{{ old('customer_reply_request') }}"
+                                                    class="w-full rounded-xl border-blue-200 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    placeholder='Que nos diga... (ej: si autoriza cambiar la pieza)'
+                                                >
+                                            </div>
+
+                                            <div class="mt-2 flex flex-wrap items-center gap-2">
+                                                @if(!empty($starterTemplate['allows_header_image']))
+                                                    <label class="inline-flex cursor-pointer items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
+                                                        <input name="template_image" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                                                        Adjuntar imagen para plantilla
+                                                    </label>
+                                                @endif
+
+                                                <button type="submit" class="inline-flex items-center rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
+                                                    Enviar plantilla
+                                                </button>
+                                            </div>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('whatsapp.template', ['phone' => $normalizedPhone]) }}">
+                                            @csrf
+                                            <input type="hidden" name="template_key" value="{{ $starterTemplate['key'] }}">
+                                            <button type="submit" class="inline-flex items-center rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
+                                                {{ $starterTemplate['label'] }}
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" class="rounded-[28px] border border-black/5 bg-white px-3 py-3 shadow-sm sm:px-4">
                         @csrf
 
