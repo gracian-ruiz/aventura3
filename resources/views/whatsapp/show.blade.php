@@ -97,10 +97,44 @@
                         </div>
                     @endif
 
+                    <form method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" class="rounded-[28px] border border-black/5 bg-white px-3 py-3 shadow-sm sm:px-4">
+                        @csrf
+
+                        <div class="flex flex-col gap-3 lg:flex-row lg:items-end">
+                            <div class="flex-1 min-w-0">
+                                <textarea name="body" rows="3"
+                                    class="w-full resize-none rounded-2xl border-gray-300 bg-[#f7f8fa] shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    placeholder="Escribe un mensaje o adjunta una imagen/PDF...">{{ old('body') }}</textarea>
+                                @error('body')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <label class="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                                    <input id="image" name="image" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                                    Imagen
+                                </label>
+                                @error('image')
+                                    <p class="text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+
+                                <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-[#00a884] px-5 py-3 font-semibold text-white hover:bg-[#0b8f72] transition-colors shadow-sm">
+                                    Enviar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex items-center justify-between gap-3 text-xs text-gray-500">
+                            <span>Texto, imagen o presupuesto PDF desde el chat.</span>
+                            <span class="hidden sm:inline">Formato imagen: JPG, PNG, WEBP · 5MB</span>
+                        </div>
+                    </form>
+
                     @if(!empty($starterTemplates))
-                        <div class="mb-3 rounded-2xl border border-blue-100 bg-blue-50/70 px-3 py-3 sm:px-4">
-                            <div class="text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">Iniciar conversacion con plantilla</div>
-                            <p class="mt-1 text-xs text-blue-900/75">Estos botones envian plantillas aprobadas en Meta para abrir conversacion.</p>
+                        <details class="mt-3 rounded-2xl border border-blue-100 bg-blue-50/70 px-3 py-3 sm:px-4">
+                            <summary class="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">Plantillas para iniciar conversacion</summary>
+                            <p class="mt-2 text-xs text-blue-900/75">Estas opciones aparecen abajo para no tapar el envio normal de mensajes.</p>
                             <div class="mt-3 flex flex-wrap gap-2">
                                 @foreach($starterTemplates as $starterTemplate)
                                     @if(!empty($starterTemplate['uses_issue_area']) || !empty($starterTemplate['uses_customer_reply_request']))
@@ -159,42 +193,8 @@
                                     @endif
                                 @endforeach
                             </div>
-                        </div>
+                        </details>
                     @endif
-
-                    <form method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" class="rounded-[28px] border border-black/5 bg-white px-3 py-3 shadow-sm sm:px-4">
-                        @csrf
-
-                        <div class="flex flex-col gap-3 lg:flex-row lg:items-end">
-                            <div class="flex-1 min-w-0">
-                                <textarea name="body" rows="3"
-                                    class="w-full resize-none rounded-2xl border-gray-300 bg-[#f7f8fa] shadow-sm focus:border-green-500 focus:ring-green-500"
-                                    placeholder="Escribe un mensaje o adjunta una imagen/PDF...">{{ old('body') }}</textarea>
-                                @error('body')
-                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <label class="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                                    <input id="image" name="image" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
-                                    Imagen
-                                </label>
-                                @error('image')
-                                    <p class="text-xs text-red-600">{{ $message }}</p>
-                                @enderror
-
-                                <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-[#00a884] px-5 py-3 font-semibold text-white hover:bg-[#0b8f72] transition-colors shadow-sm">
-                                    Enviar
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 flex items-center justify-between gap-3 text-xs text-gray-500">
-                            <span>Texto, imagen o presupuesto PDF desde el chat.</span>
-                            <span class="hidden sm:inline">Formato imagen: JPG, PNG, WEBP · 5MB</span>
-                        </div>
-                    </form>
                 </div>
             </div>
         </section>
