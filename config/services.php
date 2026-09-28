@@ -60,7 +60,7 @@ return [
             [
                 'key' => 'conversacion_problema_taller_sin_imagen',
                 'label' => 'Problema detectado en taller (sin imagen)',
-                'template_name' => env('WHATSAPP_TEMPLATE_CONVERSACION_PROBLEMA_TALLER_SIN_IMAGEN', 'conversacion_problema_taller_sin_imagen'),
+                'template_name' => env('WHATSAPP_TEMPLATE_CONVERSACION_PROBLEMA_TALLER_SIN_IMAGEN', 'conversacion_problema_talle_sin_imagen'),
                 'language' => env('WHATSAPP_TEMPLATE_CONVERSACION_PROBLEMA_TALLER_SIN_IMAGEN_LANG', env('WHATSAPP_TEMPLATE_CONVERSACION_PROBLEMA_TALLER_LANG', 'es')),
                 'uses_customer_name' => true,
                 'uses_issue_area' => true,
