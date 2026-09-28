@@ -103,7 +103,7 @@
         @if (!empty($customerPhone))
             <form method="POST" action="{{ route('whatsapp.template', ['phone' => $customerPhone]) }}" enctype="multipart/form-data" class="mt-3 rounded-xl border border-blue-200 bg-white p-3">
                 @csrf
-                <input type="hidden" name="template_key" value="conversacion_problema_taller">
+                <input type="hidden" name="template_key" value="comversacion_problema_taller">
 
                 <div class="text-xs font-semibold uppercase tracking-[0.08em] text-blue-700">Plantilla con imagen</div>
                 <p class="mt-1 rounded-lg bg-blue-100/70 px-2 py-2 text-xs text-blue-900">Mensaje tipo plantilla: "Hola [NOMBRE_CLIENTE], hemos detectado un problema en tu bicicleta en [ZONA_PROBLEMA]. Te paso la imagen para que lo veas y nos digas [RESPUESTA_ESPERADA], dinos si seguimos adelante."</p>
