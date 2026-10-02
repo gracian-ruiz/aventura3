@@ -51,15 +51,16 @@
                 @forelse($alquileres as $alquiler)
                 @php
                     $estado = strtolower(trim((string) $alquiler->estado));
+                    $rowColor = match (true) {
+                        (int) $alquiler->fallo === 1 => '#fcd34d',
+                        (int) $alquiler->web === 1 && $estado === 'reservado' => '#93c5fd',
+                        $estado === 'reservado' => '#fca5a5',
+                        $estado === 'activo' => '#4ade80',
+                        $estado === 'finalizado' => '#e5e7eb',
+                        default => '#ffffff',
+                    };
                 @endphp
-                <tr class="
-                @if($alquiler->fallo === 1) bg-yellow-300
-                @elseif($alquiler->web === 1 && $estado === 'reservado') bg-blue-300
-                @elseif($estado === 'reservado') bg-red-300
-                @elseif($estado === 'activo') bg-green-400
-                @elseif($estado === 'finalizado') bg-gray-100
-                @else bg-white
-                @endif hover:bg-opacity-80">
+                <tr style="background-color: {{ $rowColor }};" class="hover:bg-opacity-80">
             
                 
                 <td class="py-2 px-4">{{ $alquiler->id }}</td>
