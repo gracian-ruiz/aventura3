@@ -619,7 +619,17 @@ class WhatsAppInboxController extends Controller
 
     public static function normalizePhone(string $phone): string
     {
-        return preg_replace('/\D+/', '', $phone) ?? '';
+        $normalized = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if (strlen($normalized) === 9) {
+            return '34' . $normalized;
+        }
+
+        if (str_starts_with($normalized, '0034')) {
+            return '34' . substr($normalized, 4);
+        }
+
+        return $normalized;
     }
 
     private function ensureMessagesTableExists(): void

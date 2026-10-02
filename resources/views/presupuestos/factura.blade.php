@@ -72,7 +72,19 @@
     </a>
     <a href="{{ route('presupuestos.pdf', $presupuesto->id) }}" class="app-btn app-btn-pdf">
         <i class="fas fa-file-pdf"></i> Descargar PDF
-    </a>            
+    </a>
+</div>
+
+@if(empty($normalizedPhone))
+    <div class="alert alert-warning mt-4">
+        El cliente no tiene telefono valido para WhatsApp.
+    </div>
+@endif
+
+<div class="alert alert-light border mt-4">
+    <strong>Cliente:</strong> {{ $presupuesto->usuario_nombre }}<br>
+    <strong>Telefono WhatsApp:</strong> {{ $normalizedPhone ?: 'No disponible' }}<br>
+    <strong>Bicicleta del presupuesto:</strong> {{ trim(($presupuesto->bicicleta_marca ?? '') . ' ' . ($presupuesto->bicicleta_nombre ?? '')) }}
 </div>
 
 <br>
@@ -87,6 +99,63 @@
     </div>
     <!-- Botón copiar -->
 </div>
+
+@if(!empty($normalizedPhone))
+    <div class="mt-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <h4 class="app-title mb-0">Chat de WhatsApp del cliente</h4>
+        </div>
+
+        <div class="rounded border bg-white overflow-hidden" style="width:100%;">
+            <div class="px-3 py-2" style="background:#e7f7ee; border-bottom:1px solid #d1f0df;">
+                <div style="font-weight:700; color:#166534;">{{ $presupuesto->usuario_nombre }}</div>
+                <div style="font-size:12px; color:#4b5563;">{{ $normalizedPhone }} · {{ trim(($presupuesto->bicicleta_marca ?? '') . ' ' . ($presupuesto->bicicleta_nombre ?? '')) }}</div>
+            </div>
+
+            <div class="p-3" style="background:#f0f2f5; border-bottom:1px solid #e5e7eb;">
+                <div class="rounded border bg-white p-3" style="height:42vh; min-height:380px; overflow-y:auto; width:100%;">
+                    @include('whatsapp.partials.messages', ['messages' => $embeddedMessages])
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" style="padding:14px; background:#fff;">
+                @csrf
+                <label for="factura-chat-body" style="display:block; font-weight:600; margin-bottom:6px;">Mensaje</label>
+                <textarea id="factura-chat-body" name="body" rows="3" placeholder="Escribe un mensaje para este cliente..." style="width:100%; border:1px solid #d1d5db; border-radius:10px; padding:10px; resize:vertical;"></textarea>
+
+                <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin-top:10px;">
+                    <div style="flex:1 1 260px; min-width:220px;">
+                        <label for="factura-chat-image" style="display:block; font-weight:600; margin-bottom:6px;">Imagen</label>
+                        <input id="factura-chat-image" type="file" name="image" accept="image/jpeg,image/jpg,image/png,image/webp" style="width:100%;">
+                    </div>
+                    <div style="flex:0 0 auto;">
+                        <button type="submit" class="app-btn bg-green-600 text-white hover:bg-green-700">
+                            Enviar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-2 text-muted" style="font-size: 12px;">Puedes enviar texto o imagen (max 5MB).</div>
+            </form>
+        </div>
+
+        <div class="mt-4">
+            <form method="POST" action="{{ route('whatsapp.template', ['phone' => $normalizedPhone]) }}" class="d-inline-block mb-3">
+                @csrf
+                <input type="hidden" name="template_key" value="saludo">
+                <button type="submit" class="app-btn bg-blue-600 text-white hover:bg-blue-700">
+                    <i class="fab fa-whatsapp"></i> Saludos
+                </button>
+            </form>
+
+            <div>
+                <a href="{{ route('presupuesto.enviar', ['clienteId' => $presupuesto->usuario_id, 'presupuestoId' => $presupuesto->id]) }}" class="app-btn bg-green-600 text-white hover:bg-green-700">
+                <i class="fab fa-whatsapp"></i> Enviar presupuesto por WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+@endif
 
 <!-- Script para copiar -->
 <script>

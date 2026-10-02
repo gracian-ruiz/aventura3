@@ -47,6 +47,13 @@ return [
                 'uses_customer_name' => true,
             ],
             [
+                'key' => 'saludo',
+                'label' => 'Saludos',
+                'template_name' => env('WHATSAPP_TEMPLATE_SALUDO', 'saludo'),
+                'language' => env('WHATSAPP_TEMPLATE_SALUDO_LANG', 'es'),
+                'uses_customer_name' => true,
+            ],
+            [
                 'key' => 'comversacion_problema_taller',
                 'label' => 'Problema detectado en taller (con imagen)',
                 'template_name' => env('WHATSAPP_TEMPLATE_CONVERSACION_PROBLEMA_TALLER', env('WHATSAPP_TEMPLATE_NUEVO_PROBLEMA', 'comversacion_problema_taller')),

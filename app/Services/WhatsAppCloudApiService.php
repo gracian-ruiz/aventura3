@@ -484,6 +484,18 @@ class WhatsAppCloudApiService
 
     private function normalizePhoneNumber(string $phoneNumber): string
     {
-        return preg_replace('/\D+/', '', $phoneNumber) ?? '';
+        $normalized = preg_replace('/\D+/', '', $phoneNumber) ?? '';
+
+        // Si llega un movil nacional de 9 digitos, asumimos Espana y anteponemos 34.
+        if (strlen($normalized) === 9) {
+            return '34' . $normalized;
+        }
+
+        // Si llega con prefijo internacional 0034..., lo normalizamos a 34...
+        if (str_starts_with($normalized, '0034')) {
+            return '34' . substr($normalized, 4);
+        }
+
+        return $normalized;
     }
 }

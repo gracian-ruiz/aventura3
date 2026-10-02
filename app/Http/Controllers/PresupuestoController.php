@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Component;
 use App\Models\AppointmentComponent;
 use App\Models\Bike;
+use App\Models\WhatsAppMessage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -233,9 +234,11 @@ public function index(Request $request)
                 'appointments.*',
                 'bikes.id as bicicleta_id',
                 'bikes.nombre as bicicleta_nombre',
+                'bikes.marca as bicicleta_marca',
                 'users.id as usuario_id',
                 'users.name as usuario_nombre',
-                'users.email as usuario_email'
+                'users.email as usuario_email',
+                'users.telefono as usuario_telefono'
             )
             ->first();
 
@@ -266,7 +269,31 @@ public function index(Request $request)
 
         $indexContext = $this->buildIndexContextFromRequest($request);
 
-        return view('presupuestos.factura', compact('presupuesto', 'items', 'iva', 'mensaje', 'indexContext'));
+        $normalizedPhone = preg_replace('/\D+/', '', (string) ($presupuesto->usuario_telefono ?? '')) ?? '';
+        if (strlen($normalizedPhone) === 9) {
+            $normalizedPhone = '34' . $normalizedPhone;
+        }
+        if (str_starts_with($normalizedPhone, '0034')) {
+            $normalizedPhone = '34' . substr($normalizedPhone, 4);
+        }
+
+        $embeddedMessages = collect();
+        if ($normalizedPhone !== '' && Schema::hasTable('whatsapp_messages')) {
+            $last9 = substr($normalizedPhone, -9);
+
+            $embeddedMessages = WhatsAppMessage::query()
+                ->where(function ($query) use ($normalizedPhone, $last9) {
+                    $query->where('from_phone', $normalizedPhone)
+                        ->orWhere('to_phone', $normalizedPhone)
+                        ->orWhereRaw('RIGHT(COALESCE(from_phone, ""), 9) = ?', [$last9])
+                        ->orWhereRaw('RIGHT(COALESCE(to_phone, ""), 9) = ?', [$last9]);
+                })
+                ->orderByRaw('COALESCE(received_at, sent_at, created_at) desc')
+                ->orderBy('id', 'desc')
+                ->get();
+        }
+
+        return view('presupuestos.factura', compact('presupuesto', 'items', 'iva', 'mensaje', 'indexContext', 'normalizedPhone', 'embeddedMessages'));
     }
 
 
