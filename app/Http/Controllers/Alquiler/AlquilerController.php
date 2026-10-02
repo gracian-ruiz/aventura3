@@ -22,7 +22,7 @@ class AlquilerController extends Controller
         Alquiler::where('notificacion', true)->update(['notificacion' => false]);
 
         $query = Alquiler::with('usuario')
-            ->whereIn('estado', ['Activo', 'Reservado']);
+            ->whereRaw('LOWER(TRIM(estado)) IN (?, ?)', ['activo', 'reservado']);
 
         if ($request->filled('search')) {
             $searchTerm = $request->input('search');
@@ -36,8 +36,8 @@ class AlquilerController extends Controller
             ->orderByDesc('fallo')
             ->orderByRaw("
                 CASE 
-                    WHEN estado = 'Activo' THEN 0
-                    WHEN estado = 'Reservado' THEN 1
+                    WHEN LOWER(TRIM(estado)) = 'activo' THEN 0
+                    WHEN LOWER(TRIM(estado)) = 'reservado' THEN 1
                     ELSE 2
                 END
             ");

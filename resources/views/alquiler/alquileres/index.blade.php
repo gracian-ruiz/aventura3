@@ -49,12 +49,15 @@
             </thead>
             <tbody class="divide-y divide-gray-300">
                 @forelse($alquileres as $alquiler)
+                @php
+                    $estado = strtolower(trim((string) $alquiler->estado));
+                @endphp
                 <tr class="
                 @if($alquiler->fallo === 1) bg-yellow-300
-                @elseif($alquiler->web === 1 && $alquiler->estado === 'reservado') bg-blue-300
-                @elseif($alquiler->estado === 'reservado') bg-red-300
-                @elseif($alquiler->estado === 'activo') bg-green-400
-                @elseif($alquiler->estado === 'finalizado') bg-gray-100
+                @elseif($alquiler->web === 1 && $estado === 'reservado') bg-blue-300
+                @elseif($estado === 'reservado') bg-red-300
+                @elseif($estado === 'activo') bg-green-400
+                @elseif($estado === 'finalizado') bg-gray-100
                 @else bg-white
                 @endif hover:bg-opacity-80">
             
@@ -63,7 +66,7 @@
                 <td class="py-2 px-4">{{ $alquiler->usuario->nombre ?? '—' }}</td>
                 <td class="py-2 px-4">{{ $alquiler->fecha_inicio }}</td>
                 <td class="py-2 px-4">{{ $alquiler->fecha_fin }}</td>
-                <td class="py-2 px-4 capitalize">{{ $alquiler->estado }}</td>
+                <td class="py-2 px-4 capitalize">{{ $estado }}</td>
                 <td class="py-2 px-4">
                     @if($alquiler->web === 1)
                         <span class="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">Web</span>
