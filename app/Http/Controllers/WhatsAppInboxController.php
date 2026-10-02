@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Bike;
 use App\Models\Appointment;
 use App\Services\WhatsAppCloudApiService;
+use Carbon\Carbon;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -174,6 +175,7 @@ class WhatsAppInboxController extends Controller
 
         $conversationTitle = $conversationUser?->name ?: $normalizedPhone;
         $starterTemplates = $this->conversationStarterTemplates();
+        $conversationWindow = $this->resolveConversationWindow($normalizedPhone);
 
         if ($request->boolean('partial')) {
             return view('whatsapp.partials.messages', compact('messages'));
@@ -187,7 +189,8 @@ class WhatsAppInboxController extends Controller
             'conversationBike',
             'conversationAppointment',
             'conversationTitle',
-            'starterTemplates'
+            'starterTemplates',
+            'conversationWindow'
         ));
     }
 
@@ -350,6 +353,23 @@ class WhatsAppInboxController extends Controller
         $normalizedPhone = $this->normalizePhone($phone);
         $body = trim((string) ($data['body'] ?? ''));
         $isImage = $request->hasFile('image');
+        $isAjaxRequest = $request->expectsJson()
+            || $request->ajax()
+            || strtolower((string) $request->header('X-Requested-With')) === 'xmlhttprequest';
+
+        $conversationWindow = $this->resolveConversationWindow($normalizedPhone);
+        if (empty($conversationWindow['is_open'])) {
+            $closedMessage = 'No se puede enviar mensaje normal: la ventana de 24 horas esta cerrada. Envia una plantilla para reabrir la conversacion.';
+
+            if ($isAjaxRequest) {
+                return response()->json([
+                    'message' => $closedMessage,
+                    'conversation_window' => $conversationWindow,
+                ], 422);
+            }
+
+            return back()->with('error', $closedMessage);
+        }
 
         Log::info('WhatsApp inbox: intento de envio desde chat', [
             'to' => $normalizedPhone,
@@ -415,6 +435,13 @@ class WhatsAppInboxController extends Controller
                 'meta_error' => $metaError,
             ]);
 
+            if ($isAjaxRequest) {
+                return response()->json([
+                    'message' => 'No se ha podido enviar la respuesta. Revisa las credenciales o la ventana de 24 horas.',
+                    'meta_error' => $metaError,
+                ], 422);
+            }
+
             return back()->with('error', 'No se ha podido enviar la respuesta. Revisa las credenciales o la ventana de 24 horas.');
         }
 
@@ -436,6 +463,14 @@ class WhatsAppInboxController extends Controller
             'status' => 'sent',
             'user_id' => auth()->id(),
         ]);
+
+        if ($isAjaxRequest) {
+            return response()->json([
+                'status' => 'ok',
+                'message' => 'Respuesta enviada correctamente.',
+                'conversation_window' => $this->resolveConversationWindow($normalizedPhone),
+            ]);
+        }
 
         return back()->with('success', 'Respuesta enviada correctamente.');
     }
@@ -615,6 +650,58 @@ class WhatsAppInboxController extends Controller
         $last9 = substr($normalized, -9);
 
         return $last9 !== false && $last9 !== '' ? $last9 : $normalized;
+    }
+
+    private function resolveConversationWindow(string $normalizedPhone): array
+    {
+        if ($normalizedPhone === '') {
+            return [
+                'is_open' => false,
+                'reason' => 'no_phone',
+                'last_inbound_at' => null,
+                'expires_at' => null,
+                'seconds_remaining' => 0,
+            ];
+        }
+
+        $last9 = substr($normalizedPhone, -9);
+
+        $lastInbound = WhatsAppMessage::query()
+            ->where('direction', 'inbound')
+            ->where(function ($query) use ($normalizedPhone, $last9) {
+                $query->where('from_phone', $normalizedPhone)
+                    ->orWhereRaw('RIGHT(COALESCE(from_phone, ""), 9) = ?', [$last9]);
+            })
+            ->orderByRaw('COALESCE(received_at, created_at) desc')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$lastInbound) {
+            return [
+                'is_open' => false,
+                'reason' => 'no_inbound',
+                'last_inbound_at' => null,
+                'expires_at' => null,
+                'seconds_remaining' => 0,
+            ];
+        }
+
+        $lastInboundAt = $lastInbound->received_at ?? $lastInbound->created_at;
+        if (!$lastInboundAt instanceof Carbon) {
+            $lastInboundAt = Carbon::parse((string) $lastInboundAt);
+        }
+
+        $expiresAt = $lastInboundAt->copy()->addDay();
+        $now = now();
+        $isOpen = $now->lt($expiresAt);
+
+        return [
+            'is_open' => $isOpen,
+            'reason' => $isOpen ? 'open' : 'expired',
+            'last_inbound_at' => $lastInboundAt,
+            'expires_at' => $expiresAt,
+            'seconds_remaining' => max(0, $now->diffInSeconds($expiresAt, false)),
+        ];
     }
 
     public static function normalizePhone(string $phone): string

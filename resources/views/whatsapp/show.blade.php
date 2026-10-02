@@ -58,6 +58,13 @@
                     <div class="min-w-0">
                         <div class="truncate text-base font-semibold text-gray-900">{{ $conversationTitle }}</div>
                         <div class="truncate text-xs text-gray-500">{{ $normalizedPhone }} · <span id="chat-message-count">{{ $messages->count() }}</span> mensajes</div>
+                        <div class="mt-1 text-[11px] {{ !empty($conversationWindow['is_open']) ? 'text-emerald-700' : 'text-amber-700' }}">
+                            @if(!empty($conversationWindow['is_open']))
+                                Ventana 24h abierta hasta {{ optional($conversationWindow['expires_at'] ?? null)?->format('d/m H:i') }}
+                            @else
+                                Ventana 24h cerrada @if(!empty($conversationWindow['expires_at']))(cerro {{ optional($conversationWindow['expires_at'])?->format('d/m H:i') }})@endif
+                            @endif
+                        </div>
                     </div>
                 </div>
 
@@ -100,11 +107,18 @@
                     <form method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" class="rounded-[28px] border border-black/5 bg-white px-3 py-3 shadow-sm sm:px-4">
                         @csrf
 
+                        @if(empty($conversationWindow['is_open']))
+                            <div class="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                                La ventana de 24 horas esta cerrada. Para escribir al cliente debes enviar una plantilla.
+                            </div>
+                        @endif
+
                         <div class="flex flex-col gap-3 lg:flex-row lg:items-end">
                             <div class="flex-1 min-w-0">
                                 <textarea name="body" rows="3"
                                     class="w-full resize-none rounded-2xl border-gray-300 bg-[#f7f8fa] shadow-sm focus:border-green-500 focus:ring-green-500"
-                                    placeholder="Escribe un mensaje o adjunta una imagen/PDF...">{{ old('body') }}</textarea>
+                                    placeholder="Escribe un mensaje o adjunta una imagen/PDF..."
+                                    {{ empty($conversationWindow['is_open']) ? 'disabled' : '' }}>{{ old('body') }}</textarea>
                                 @error('body')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
@@ -112,14 +126,14 @@
 
                             <div class="flex items-center gap-2">
                                 <label class="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                                    <input id="image" name="image" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                                    <input id="image" name="image" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" {{ empty($conversationWindow['is_open']) ? 'disabled' : '' }}>
                                     Imagen
                                 </label>
                                 @error('image')
                                     <p class="text-xs text-red-600">{{ $message }}</p>
                                 @enderror
 
-                                <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-[#00a884] px-5 py-3 font-semibold text-white hover:bg-[#0b8f72] transition-colors shadow-sm">
+                                <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-[#00a884] px-5 py-3 font-semibold text-white hover:bg-[#0b8f72] transition-colors shadow-sm" {{ empty($conversationWindow['is_open']) ? 'disabled' : '' }}>
                                     Enviar
                                 </button>
                             </div>

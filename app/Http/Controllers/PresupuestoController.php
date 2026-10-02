@@ -293,7 +293,61 @@ public function index(Request $request)
                 ->get();
         }
 
-        return view('presupuestos.factura', compact('presupuesto', 'items', 'iva', 'mensaje', 'indexContext', 'normalizedPhone', 'embeddedMessages'));
+        $conversationWindow = $this->resolveConversationWindow($normalizedPhone);
+
+        return view('presupuestos.factura', compact('presupuesto', 'items', 'iva', 'mensaje', 'indexContext', 'normalizedPhone', 'embeddedMessages', 'conversationWindow'));
+    }
+
+    private function resolveConversationWindow(string $normalizedPhone): array
+    {
+        if ($normalizedPhone === '') {
+            return [
+                'is_open' => false,
+                'reason' => 'no_phone',
+                'last_inbound_at' => null,
+                'expires_at' => null,
+                'seconds_remaining' => 0,
+            ];
+        }
+
+        $last9 = substr($normalizedPhone, -9);
+
+        $lastInbound = WhatsAppMessage::query()
+            ->where('direction', 'inbound')
+            ->where(function ($query) use ($normalizedPhone, $last9) {
+                $query->where('from_phone', $normalizedPhone)
+                    ->orWhereRaw('RIGHT(COALESCE(from_phone, ""), 9) = ?', [$last9]);
+            })
+            ->orderByRaw('COALESCE(received_at, created_at) desc')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$lastInbound) {
+            return [
+                'is_open' => false,
+                'reason' => 'no_inbound',
+                'last_inbound_at' => null,
+                'expires_at' => null,
+                'seconds_remaining' => 0,
+            ];
+        }
+
+        $lastInboundAt = $lastInbound->received_at ?? $lastInbound->created_at;
+        if (!$lastInboundAt instanceof Carbon) {
+            $lastInboundAt = Carbon::parse((string) $lastInboundAt);
+        }
+
+        $expiresAt = $lastInboundAt->copy()->addDay();
+        $now = now();
+        $isOpen = $now->lt($expiresAt);
+
+        return [
+            'is_open' => $isOpen,
+            'reason' => $isOpen ? 'open' : 'expired',
+            'last_inbound_at' => $lastInboundAt,
+            'expires_at' => $expiresAt,
+            'seconds_remaining' => max(0, $now->diffInSeconds($expiresAt, false)),
+        ];
     }
 
 

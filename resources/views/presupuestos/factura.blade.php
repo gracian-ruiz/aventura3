@@ -110,6 +110,13 @@
             <div class="px-3 py-2" style="background:#e7f7ee; border-bottom:1px solid #d1f0df;">
                 <div style="font-weight:700; color:#166534;">{{ $presupuesto->usuario_nombre }}</div>
                 <div style="font-size:12px; color:#4b5563;">{{ $normalizedPhone }} · {{ trim(($presupuesto->bicicleta_marca ?? '') . ' ' . ($presupuesto->bicicleta_nombre ?? '')) }}</div>
+                <div style="font-size:12px; margin-top:4px; color: {{ !empty($conversationWindow['is_open']) ? '#166534' : '#92400e' }}; font-weight:600;">
+                    @if(!empty($conversationWindow['is_open']))
+                        Ventana 24h abierta hasta {{ optional($conversationWindow['expires_at'] ?? null)?->format('d/m H:i') }}
+                    @else
+                        Ventana 24h cerrada @if(!empty($conversationWindow['expires_at']))(cerro {{ optional($conversationWindow['expires_at'])?->format('d/m H:i') }})@endif
+                    @endif
+                </div>
             </div>
 
             <div class="p-3" style="background:#f0f2f5; border-bottom:1px solid #e5e7eb;">
@@ -118,24 +125,30 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" style="padding:14px; background:#fff;">
+            <form id="factura-chat-send-form" method="POST" action="{{ route('whatsapp.reply', ['phone' => $normalizedPhone]) }}" enctype="multipart/form-data" style="padding:14px; background:#fff;">
                 @csrf
+                @if(empty($conversationWindow['is_open']))
+                    <div class="alert alert-warning" style="font-size:12px; margin-bottom:10px;">
+                        La ventana de 24 horas esta cerrada. Para volver a abrir la conversacion debes enviar una plantilla.
+                    </div>
+                @endif
                 <label for="factura-chat-body" style="display:block; font-weight:600; margin-bottom:6px;">Mensaje</label>
-                <textarea id="factura-chat-body" name="body" rows="3" placeholder="Escribe un mensaje para este cliente..." style="width:100%; border:1px solid #d1d5db; border-radius:10px; padding:10px; resize:vertical;"></textarea>
+                <textarea id="factura-chat-body" name="body" rows="3" placeholder="Escribe un mensaje para este cliente..." style="width:100%; border:1px solid #d1d5db; border-radius:10px; padding:10px; resize:vertical;" {{ empty($conversationWindow['is_open']) ? 'disabled' : '' }}></textarea>
 
                 <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin-top:10px;">
                     <div style="flex:1 1 260px; min-width:220px;">
                         <label for="factura-chat-image" style="display:block; font-weight:600; margin-bottom:6px;">Imagen</label>
-                        <input id="factura-chat-image" type="file" name="image" accept="image/jpeg,image/jpg,image/png,image/webp" style="width:100%;">
+                        <input id="factura-chat-image" type="file" name="image" accept="image/jpeg,image/jpg,image/png,image/webp" style="width:100%;" {{ empty($conversationWindow['is_open']) ? 'disabled' : '' }}>
                     </div>
                     <div style="flex:0 0 auto;">
-                        <button type="submit" class="app-btn bg-green-600 text-white hover:bg-green-700">
+                        <button id="factura-chat-send-button" type="submit" class="app-btn bg-green-600 text-white hover:bg-green-700" {{ empty($conversationWindow['is_open']) ? 'disabled' : '' }}>
                             Enviar
                         </button>
                     </div>
                 </div>
 
                 <div class="mt-2 text-muted" style="font-size: 12px;">Puedes enviar texto o imagen (max 5MB).</div>
+                <div id="factura-chat-send-status" class="mt-1" style="font-size:12px; color:#6b7280;"></div>
             </form>
         </div>
 
@@ -174,6 +187,11 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         const chatBox = document.getElementById('factura-chat-messages');
+        const sendForm = document.getElementById('factura-chat-send-form');
+        const sendButton = document.getElementById('factura-chat-send-button');
+        const sendStatus = document.getElementById('factura-chat-send-status');
+        const bodyField = document.getElementById('factura-chat-body');
+        const imageField = document.getElementById('factura-chat-image');
         if (!chatBox) {
             return;
         }
@@ -251,6 +269,80 @@
         });
 
         setInterval(refreshMessages, 1500);
+
+        if (!sendForm) {
+            return;
+        }
+
+        let sendInFlight = false;
+
+        sendForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            if (sendInFlight) {
+                return;
+            }
+
+            sendInFlight = true;
+            if (sendButton) {
+                sendButton.disabled = true;
+                sendButton.textContent = 'Enviando...';
+            }
+            if (sendStatus) {
+                sendStatus.textContent = 'Enviando mensaje...';
+                sendStatus.style.color = '#6b7280';
+            }
+
+            try {
+                const formData = new FormData(sendForm);
+                const response = await fetch(sendForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                if (!response.ok) {
+                    let errorMessage = 'No se pudo enviar el mensaje.';
+                    try {
+                        const payload = await response.json();
+                        if (payload && payload.message) {
+                            errorMessage = payload.message;
+                        }
+                    } catch (parseError) {
+                        // no-op
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                if (bodyField) {
+                    bodyField.value = '';
+                }
+                if (imageField) {
+                    imageField.value = '';
+                }
+
+                if (sendStatus) {
+                    sendStatus.textContent = 'Mensaje enviado.';
+                    sendStatus.style.color = '#166534';
+                }
+
+                await refreshMessages();
+            } catch (error) {
+                if (sendStatus) {
+                    sendStatus.textContent = error && error.message ? error.message : 'No se pudo enviar el mensaje.';
+                    sendStatus.style.color = '#b91c1c';
+                }
+            } finally {
+                sendInFlight = false;
+                if (sendButton) {
+                    sendButton.disabled = false;
+                    sendButton.textContent = 'Enviar';
+                }
+            }
+        });
     });
 </script>
 
