@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Bike;
+use App\Models\WhatsAppMessage;
 use Illuminate\Http\Request;
 use App\Models\Component;
 use Carbon\Carbon;
@@ -815,10 +816,83 @@ class AppointmentController extends Controller
             )
             ->get();
 
+        $phoneSource = (string) (($data->first()->user_telefono ?? '') ?: optional(optional($appointment->bike)->user)->telefono);
+        $normalizedPhone = WhatsAppInboxController::normalizePhone($phoneSource);
+
+        $embeddedMessages = collect();
+        if ($normalizedPhone !== '' && Schema::hasTable('whatsapp_messages')) {
+            $last9 = substr($normalizedPhone, -9);
+
+            $embeddedMessages = WhatsAppMessage::query()
+                ->where(function ($query) use ($normalizedPhone, $last9) {
+                    $query->where('from_phone', $normalizedPhone)
+                        ->orWhere('to_phone', $normalizedPhone)
+                        ->orWhereRaw('RIGHT(COALESCE(from_phone, ""), 9) = ?', [$last9])
+                        ->orWhereRaw('RIGHT(COALESCE(to_phone, ""), 9) = ?', [$last9]);
+                })
+                ->orderByRaw('COALESCE(received_at, sent_at, created_at) desc')
+                ->orderBy('id', 'desc')
+                ->get();
+        }
+
+        $conversationWindow = $this->resolveConversationWindow($normalizedPhone);
+
         $indexContext = $this->buildIndexContextFromRequest($request);
         $returnUrl = $this->getReturnUrl($request);
 
-        return view('appointments.reparacion', compact('appointment', 'data', 'indexContext', 'returnUrl'));
+        return view('appointments.reparacion', compact('appointment', 'data', 'indexContext', 'returnUrl', 'normalizedPhone', 'embeddedMessages', 'conversationWindow'));
+    }
+
+    private function resolveConversationWindow(string $normalizedPhone): array
+    {
+        if ($normalizedPhone === '') {
+            return [
+                'is_open' => false,
+                'reason' => 'no_phone',
+                'last_inbound_at' => null,
+                'expires_at' => null,
+                'seconds_remaining' => 0,
+            ];
+        }
+
+        $last9 = substr($normalizedPhone, -9);
+
+        $lastInbound = WhatsAppMessage::query()
+            ->where('direction', 'inbound')
+            ->where(function ($query) use ($normalizedPhone, $last9) {
+                $query->where('from_phone', $normalizedPhone)
+                    ->orWhereRaw('RIGHT(COALESCE(from_phone, ""), 9) = ?', [$last9]);
+            })
+            ->orderByRaw('COALESCE(received_at, created_at) desc')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$lastInbound) {
+            return [
+                'is_open' => false,
+                'reason' => 'no_inbound',
+                'last_inbound_at' => null,
+                'expires_at' => null,
+                'seconds_remaining' => 0,
+            ];
+        }
+
+        $lastInboundAt = $lastInbound->received_at ?? $lastInbound->created_at;
+        if (!$lastInboundAt instanceof Carbon) {
+            $lastInboundAt = Carbon::parse((string) $lastInboundAt);
+        }
+
+        $expiresAt = $lastInboundAt->copy()->addDay();
+        $now = now();
+        $isOpen = $now->lt($expiresAt);
+
+        return [
+            'is_open' => $isOpen,
+            'reason' => $isOpen ? 'open' : 'expired',
+            'last_inbound_at' => $lastInboundAt,
+            'expires_at' => $expiresAt,
+            'seconds_remaining' => max(0, $now->diffInSeconds($expiresAt, false)),
+        ];
     }
 
 
