@@ -206,8 +206,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const chatContainer = document.getElementById('chat-messages');
     const countEl = document.getElementById('chat-message-count');
     const countSidebarEl = document.getElementById('chat-message-count-sidebar');
-    const bodyField = document.querySelector('textarea[name="body"]');
-    const imageField = document.querySelector('input[name="image"]');
     if (!chatContainer) {
         return;
     }
@@ -270,15 +268,30 @@ document.addEventListener('DOMContentLoaded', function () {
     const pollBaseUrl = new URL(baseUrl.toString());
     pollBaseUrl.searchParams.set('partial', '1');
 
+    let refreshInFlight = false;
+    let lastRenderedSignature = '';
+
+    const getSignature = function (root) {
+        const inner = root.querySelector('#chat-messages-inner');
+        if (!inner) {
+            return '';
+        }
+
+        const count = inner.dataset.count ?? '';
+        const firstId = inner.dataset.firstId ?? '';
+        const lastId = inner.dataset.lastId ?? '';
+
+        return [count, firstId, lastId].join('|');
+    };
+
+    lastRenderedSignature = getSignature(chatContainer);
+
     const refreshMessages = async function () {
-        if (document.hidden) {
+        if (document.hidden || refreshInFlight) {
             return;
         }
 
-        // Evita saltos mientras se escribe o se prepara una imagen para enviar.
-        if ((bodyField && document.activeElement === bodyField) || (imageField && imageField.files && imageField.files.length > 0)) {
-            return;
-        }
+        refreshInFlight = true;
 
         const distanceToTop = chatContainer.scrollTop;
         const shouldStickTop = distanceToTop < 120;
@@ -295,11 +308,22 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (!response.ok) {
+                refreshInFlight = false;
                 return;
             }
 
             const html = await response.text();
+            const parserHost = document.createElement('div');
+            parserHost.innerHTML = html;
+
+            const incomingSignature = getSignature(parserHost);
+            if (incomingSignature === lastRenderedSignature) {
+                refreshInFlight = false;
+                return;
+            }
+
             chatContainer.innerHTML = html;
+            lastRenderedSignature = incomingSignature;
             attachMediaLoadDebug();
 
             const inner = chatContainer.querySelector('#chat-messages-inner');
@@ -317,10 +341,19 @@ document.addEventListener('DOMContentLoaded', function () {
             logChatState('after-refresh');
         } catch (error) {
             // Silencioso: el siguiente ciclo volvera a intentar.
+        } finally {
+            refreshInFlight = false;
         }
     };
 
-    setInterval(refreshMessages, 4000);
+    refreshMessages();
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) {
+            refreshMessages();
+        }
+    });
+
+    setInterval(refreshMessages, 1500);
 });
 </script>
 @endsection

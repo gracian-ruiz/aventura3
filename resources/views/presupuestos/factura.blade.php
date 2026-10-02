@@ -113,7 +113,7 @@
             </div>
 
             <div class="p-3" style="background:#f0f2f5; border-bottom:1px solid #e5e7eb;">
-                <div class="rounded border bg-white p-3" style="height:42vh; min-height:380px; overflow-y:auto; width:100%;">
+                <div id="factura-chat-messages" class="rounded border bg-white p-3" style="height:42vh; min-height:380px; overflow-y:auto; width:100%;" data-partial-url="{{ route('whatsapp.show', ['phone' => $normalizedPhone, 'partial' => 1]) }}">
                     @include('whatsapp.partials.messages', ['messages' => $embeddedMessages])
                 </div>
             </div>
@@ -171,6 +171,87 @@
                 alert('No se pudo copiar el mensaje ❌');
             });
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const chatBox = document.getElementById('factura-chat-messages');
+        if (!chatBox) {
+            return;
+        }
+
+        const partialUrl = chatBox.dataset.partialUrl;
+        if (!partialUrl) {
+            return;
+        }
+
+        let refreshInFlight = false;
+        let lastRenderedSignature = '';
+
+        const getSignature = function (root) {
+            const inner = root.querySelector('#chat-messages-inner');
+            if (!inner) {
+                return '';
+            }
+
+            const count = inner.dataset.count ?? '';
+            const firstId = inner.dataset.firstId ?? '';
+            const lastId = inner.dataset.lastId ?? '';
+
+            return [count, firstId, lastId].join('|');
+        };
+
+        lastRenderedSignature = getSignature(chatBox);
+
+        const refreshMessages = async function () {
+            if (document.hidden || refreshInFlight) {
+                return;
+            }
+
+            refreshInFlight = true;
+
+            try {
+                const url = new URL(partialUrl, window.location.origin);
+                url.searchParams.set('_t', Date.now().toString());
+
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    cache: 'no-store',
+                });
+
+                if (!response.ok) {
+                    refreshInFlight = false;
+                    return;
+                }
+
+                const html = await response.text();
+                const parserHost = document.createElement('div');
+                parserHost.innerHTML = html;
+                const incomingSignature = getSignature(parserHost);
+
+                if (incomingSignature === lastRenderedSignature) {
+                    refreshInFlight = false;
+                    return;
+                }
+
+                chatBox.innerHTML = html;
+                lastRenderedSignature = incomingSignature;
+            } catch (error) {
+                // silencioso para reintentar en el siguiente ciclo
+            } finally {
+                refreshInFlight = false;
+            }
+        };
+
+        refreshMessages();
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) {
+                refreshMessages();
+            }
+        });
+
+        setInterval(refreshMessages, 1500);
+    });
 </script>
 
 
