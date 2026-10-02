@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use App\Services\WhatsAppCloudApiService;
+use RuntimeException;
+use Throwable;
 
 class MecanicoController extends Controller
 {
@@ -243,10 +245,20 @@ public function index(Request $request)
 
             DB::commit();
 
-            $this->enviarAvisoWhatsAppCompletado($appointment);
+            try {
+                $this->enviarAvisoWhatsAppCompletado($appointment);
 
-            return $this->redirectToMecanicoIndex($request)
-                ->with('success', '✅ Cita completada y revisiones generadas correctamente.');
+                return $this->redirectToMecanicoIndex($request)
+                    ->with('success', '✅ Cita completada y aviso por WhatsApp enviado (plantilla aviso_tienda).');
+            } catch (Throwable $whatsAppException) {
+                Log::warning('[MecanicoController] Cita completada pero fallo aviso WhatsApp', [
+                    'appointment_id' => $appointment->id,
+                    'error' => $whatsAppException->getMessage(),
+                ]);
+
+                return $this->redirectToMecanicoIndex($request)
+                    ->with('error', '✅ Cita completada, pero no se pudo enviar WhatsApp con la plantilla aviso_tienda.');
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('[MecanicoController] Error en complete', [
@@ -259,11 +271,83 @@ public function index(Request $request)
 
     private function enviarAvisoWhatsAppCompletado(Appointment $appointment): void
     {
-        Log::info('[MecanicoController] Aviso WhatsApp desactivado temporalmente al completar orden', [
-            'appointment_id' => $appointment->id,
-        ]);
+        $appointment->loadMissing('bike.user');
 
-        return;
+        $user = $appointment->bike?->user;
+        $phone = trim((string) ($user?->telefono ?? ''));
+
+        if ($phone === '') {
+            throw new RuntimeException('Cliente sin telefono para enviar aviso_tienda.');
+        }
+
+        $template = $this->resolveConversationTemplateByKey('aviso_tienda');
+        if ($template === null) {
+            throw new RuntimeException('No existe la configuracion de plantilla aviso_tienda.');
+        }
+
+        $bodyParams = [];
+        if (!empty($template['uses_customer_name'])) {
+            $bodyParams[] = trim((string) ($user?->name ?? 'cliente'));
+        }
+
+        $response = $this->whatsAppCloudApiService->sendTemplateMessage(
+            $phone,
+            (string) ($template['template_name'] ?? 'aviso_tienda'),
+            (string) ($template['language'] ?? 'es'),
+            $bodyParams
+        );
+
+        if (Schema::hasTable('whatsapp_messages')) {
+            WhatsAppMessage::create([
+                'user_id' => $appointment->user_id,
+                'bike_id' => $appointment->bike_id,
+                'appointment_id' => $appointment->id,
+                'wa_id' => data_get($response, 'messages.0.id'),
+                'from_phone' => (string) config('services.whatsapp.phone_number_id'),
+                'to_phone' => WhatsAppInboxController::normalizePhone((string) $phone),
+                'direction' => 'outbound',
+                'message_type' => 'template',
+                'body' => 'Plantilla aviso_tienda enviada por finalizacion de cita',
+                'status' => 'sent',
+                'is_read' => true,
+                'read_at' => now(),
+                'payload' => array_merge($response, [
+                    'template_key' => 'aviso_tienda',
+                    'template_name' => (string) ($template['template_name'] ?? 'aviso_tienda'),
+                    'template_language' => (string) ($template['language'] ?? 'es'),
+                    'template_body_params' => $bodyParams,
+                    'source' => 'mecanico.complete',
+                ]),
+                'sent_at' => now(),
+            ]);
+        }
+
+        Log::info('[MecanicoController] Aviso WhatsApp enviado al completar cita', [
+            'appointment_id' => $appointment->id,
+            'template_key' => 'aviso_tienda',
+            'to_phone' => WhatsAppInboxController::normalizePhone((string) $phone),
+        ]);
+    }
+
+    private function resolveConversationTemplateByKey(string $templateKey): ?array
+    {
+        $templates = config('services.whatsapp.conversation_templates', []);
+
+        if (!is_array($templates)) {
+            return null;
+        }
+
+        foreach ($templates as $template) {
+            if (!is_array($template)) {
+                continue;
+            }
+
+            if ((string) ($template['key'] ?? '') === $templateKey) {
+                return $template;
+            }
+        }
+
+        return null;
     }
 
     private function whatsappTestGateAllows(?string $email, ?string $telefono): bool

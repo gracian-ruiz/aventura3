@@ -82,6 +82,13 @@ return [
                 'language' => env('WHATSAPP_TEMPLATE_ENVIAR_FOTOS_PIEZA_LANG', 'es'),
                 'uses_customer_name' => true,
             ],
+            [
+                'key' => 'aviso_tienda',
+                'label' => 'Aviso para recoger bicicleta',
+                'template_name' => env('WHATSAPP_TEMPLATE_AVISO_TIENDA', 'aviso_tienda'),
+                'language' => env('WHATSAPP_TEMPLATE_AVISO_TIENDA_LANG', 'es'),
+                'uses_customer_name' => false,
+            ],
         ],
     ],
 
