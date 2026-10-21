@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Appointment;
 use App\Models\WhatsAppMessage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Client\RequestException;
@@ -54,7 +55,7 @@ class WhatsAppController extends Controller
             return response()->json(['error' => 'Presupuesto no encontrado'], 404);
         }
 
-        $presupuestoModel = \App\Models\Appointment::query()->find($presupuestoId);
+        $presupuestoModel = Appointment::query()->find($presupuestoId);
         $presupuestoUrl = $presupuestoModel?->confirmationUrl() ?? url("confirmacion/presupuesto/{$presupuestoId}?token=" . ($presupuesto->token_presupuesto ?? ''));
         $presupuestoPdfPublicoUrl = route('presupuestos.pdf.publico', [
             'presupuestoId' => $presupuestoId,
@@ -63,6 +64,12 @@ class WhatsAppController extends Controller
 
         Log::info('WhatsApp presupuesto: datos cargados', [
             'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
+            'route_presupuesto_id' => $presupuestoId,
+            'db_presupuesto_id' => $presupuesto->id ?? null,
+            'db_token_presupuesto' => $presupuesto->token_presupuesto ?? null,
+            'model_token_presupuesto' => $presupuestoModel?->token_presupuesto,
+            'generated_confirmation_url' => $presupuestoUrl,
+            'generated_pdf_public_url' => $presupuestoPdfPublicoUrl,
             'cliente_id' => $presupuesto->usuario_id ?? null,
             'cliente_nombre' => $presupuesto->usuario_nombre ?? null,
             'cliente_telefono' => $presupuesto->usuario_telefono ?? null,
