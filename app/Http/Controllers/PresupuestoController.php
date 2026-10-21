@@ -260,7 +260,8 @@ public function index(Request $request)
 
         // Construcción del link con token
         $presupuestoId = $presupuesto->id;
-        $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
+        $presupuestoModel = Appointment::query()->find($presupuestoId);
+        $presupuestoUrl = $presupuestoModel?->confirmationUrl() ?? url("confirmacion/presupuesto/{$presupuestoId}?token=" . ($presupuesto->token_presupuesto ?? ''));
 
         // Crear el mensaje para enviar al cliente
         $mensaje = "📄 ¡Hola {$presupuesto->usuario_nombre}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$presupuesto->bicicleta_nombre}'.\n\n"

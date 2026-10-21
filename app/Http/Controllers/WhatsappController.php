@@ -54,10 +54,11 @@ class WhatsAppController extends Controller
             return response()->json(['error' => 'Presupuesto no encontrado'], 404);
         }
 
-        $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$presupuesto->token_presupuesto}");
+        $presupuestoModel = \App\Models\Appointment::query()->find($presupuestoId);
+        $presupuestoUrl = $presupuestoModel?->confirmationUrl() ?? url("confirmacion/presupuesto/{$presupuestoId}?token=" . ($presupuesto->token_presupuesto ?? ''));
         $presupuestoPdfPublicoUrl = route('presupuestos.pdf.publico', [
             'presupuestoId' => $presupuestoId,
-            'token' => $presupuesto->token_presupuesto,
+            'token' => $presupuestoModel?->token_presupuesto ?? $presupuesto->token_presupuesto,
         ]);
 
         Log::info('WhatsApp presupuesto: datos cargados', [

@@ -136,6 +136,15 @@ class PresupuestoControllerTest extends TestCase
     // ─── confirmarPresupuesto (token público) ────────────────────────────────
 
     /** @test */
+    public function confirmation_url_usa_el_id_y_token_del_presupuesto_correctos()
+    {
+        $url = $this->presupuesto->confirmationUrl();
+
+        $this->assertStringContainsString("/confirmacion/presupuesto/{$this->presupuesto->id}", $url);
+        $this->assertStringContainsString("token={$this->presupuesto->token_presupuesto}", $url);
+    }
+
+    /** @test */
     public function confirmarPresupuesto_muestra_vista_con_token_valido()
     {
         $response = $this->get("/confirmacion/presupuesto/{$this->presupuesto->id}?token={$this->presupuesto->token_presupuesto}");

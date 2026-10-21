@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class Appointment extends Model
 {
@@ -45,6 +46,17 @@ class Appointment extends Model
         'web' 
     ];
 
+    public function confirmationUrl(): string
+    {
+        if (empty($this->token_presupuesto)) {
+            $this->forceFill([
+                'token_presupuesto' => Str::random(64),
+            ]);
+            $this->save();
+        }
+
+        return url("confirmacion/presupuesto/{$this->id}?token={$this->token_presupuesto}");
+    }
 
     public function bike()
     {

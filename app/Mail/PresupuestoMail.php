@@ -28,9 +28,13 @@ class PresupuestoMail extends Mailable
      */
     public function build()
     {
+        $presupuesto = $this->presupuesto instanceof \App\Models\Appointment
+            ? $this->presupuesto
+            : \App\Models\Appointment::query()->find($this->presupuesto->id);
+
         // URL de confirmación con token
-        $presupuestoId  = $this->presupuesto->id;
-        $presupuestoUrl = url("confirmacion/presupuesto/{$presupuestoId}?token={$this->presupuesto->token_presupuesto}");
+        $presupuestoId  = $presupuesto?->id ?? $this->presupuesto->id;
+        $presupuestoUrl = $presupuesto?->confirmationUrl() ?? url("confirmacion/presupuesto/{$presupuestoId}?token=" . ($this->presupuesto->token_presupuesto ?? ''));
 
         // Mensaje base (puedes ajustarlo)
         $mensaje = "📄 ¡Hola {$this->presupuesto->usuario_nombre}! Te escribo de Aventura Bike, te envío el presupuesto para arreglar tu bicicleta '{$this->presupuesto->bicicleta_nombre}'.\n\n"
