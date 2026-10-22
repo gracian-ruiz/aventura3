@@ -46,6 +46,15 @@ class Appointment extends Model
         'web' 
     ];
 
+    public static function buildConfirmationUrl(int|string $appointmentId, ?string $token): string
+    {
+        $resolvedToken = $token ?? '';
+        $baseUrl = rtrim((string) config('app.url', url('/')), '/');
+        $path = '/confirmacion/presupuesto/' . $appointmentId . '?token=' . urlencode($resolvedToken);
+
+        return $baseUrl . $path;
+    }
+
     public function confirmationUrl(): string
     {
         if (empty($this->token_presupuesto)) {
@@ -55,7 +64,7 @@ class Appointment extends Model
             $this->save();
         }
 
-        return url("confirmacion/presupuesto/{$this->id}?token={$this->token_presupuesto}");
+        return self::buildConfirmationUrl($this->id, $this->token_presupuesto);
     }
 
     public function bike()

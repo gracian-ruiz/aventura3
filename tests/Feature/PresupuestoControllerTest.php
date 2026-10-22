@@ -136,6 +136,20 @@ class PresupuestoControllerTest extends TestCase
     // ─── confirmarPresupuesto (token público) ────────────────────────────────
 
     /** @test */
+    public function build_confirmation_url_no_duplica_el_prefijo_public()
+    {
+        config()->set('app.url', 'https://taller.aventurabike.es/public');
+
+        $url = Appointment::buildConfirmationUrl(1590, 'token-prueba');
+
+        $this->assertSame(
+            'https://taller.aventurabike.es/public/confirmacion/presupuesto/1590?token=token-prueba',
+            $url
+        );
+        $this->assertStringNotContainsString('/public/https://', $url);
+    }
+
+    /** @test */
     public function confirmation_url_usa_el_id_y_token_del_presupuesto_correctos()
     {
         $url = $this->presupuesto->confirmationUrl();
