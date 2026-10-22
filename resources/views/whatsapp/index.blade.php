@@ -22,11 +22,16 @@
                     @php($phone = $conversation['phone'] ?? '')
                     <a href="{{ route('whatsapp.show', ['phone' => $phone]) }}" class="block px-4 py-4 hover:bg-green-50 transition-colors {{ !empty($conversation['has_unread']) ? 'bg-emerald-50/60' : '' }}">
                         <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="font-semibold text-gray-900">
+                            <div class="min-w-0">
+                                <div class="truncate font-semibold text-gray-900">
                                     {{ $conversation['user']->name ?? $phone }}
                                 </div>
-                                <div class="text-sm text-gray-500">{{ $phone }}</div>
+                                <div class="mt-1 text-sm text-gray-500">{{ $phone }}</div>
+                                @if(!empty($conversation['bike']) || !empty($conversation['user']))
+                                    <div class="mt-1 truncate text-[11px] text-gray-500">
+                                        {{ $conversation['bike']->nombre ?? 'Sin bicicleta' }}
+                                    </div>
+                                @endif
                             </div>
                             @if(!empty($conversation['unread_count']))
                                 <span class="text-xs rounded-full bg-emerald-600 text-white px-2 py-1 whitespace-nowrap">
