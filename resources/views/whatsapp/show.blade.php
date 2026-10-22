@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="bg-[#dbe9df] px-3 py-3 sm:px-4 lg:px-6" style="height: calc(100vh - 5rem); overflow: hidden;">
-    <div class="mx-auto flex max-w-7xl overflow-hidden rounded-[28px] border border-black/5 bg-[#f0f2f5] shadow-[0_18px_70px_rgba(16,24,40,0.12)]" style="height: calc(100vh - 7rem); background-image: radial-gradient(circle at top left, rgba(255,255,255,.65), transparent 32%), radial-gradient(circle at top right, rgba(255,255,255,.45), transparent 18%);">
+<div class="h-screen overflow-hidden bg-[#dbe9df]">
+    <div class="mx-auto flex h-full w-full overflow-hidden border border-black/5 bg-[#f0f2f5] shadow-[0_18px_70px_rgba(16,24,40,0.12)]" style="background-image: radial-gradient(circle at top left, rgba(255,255,255,.65), transparent 32%), radial-gradient(circle at top right, rgba(255,255,255,.45), transparent 18%);">
         <aside class="hidden lg:flex w-[340px] shrink-0 min-h-0 flex-col border-r border-black/5 bg-white/90 backdrop-blur-sm">
             <div class="border-b border-black/5 px-5 py-4">
                 <a href="{{ route('whatsapp.index') }}" class="text-sm font-semibold text-green-700 hover:text-green-900">← Volver a WhatsApp</a>
@@ -91,7 +91,7 @@
                     @include('whatsapp.partials.messages', ['messages' => $messages])
                 </div>
 
-                <div class="border-t border-black/5 bg-[#f0f2f5] px-3 py-3 sm:px-5 max-h-[48vh] overflow-y-auto">
+                <div class="border-t border-black/5 bg-[#f0f2f5] px-3 py-3 sm:px-5 max-h-[26vh] overflow-y-auto">
                     @if (session('success'))
                         <div class="mb-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
                             {{ session('success') }}
