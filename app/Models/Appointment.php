@@ -46,13 +46,22 @@ class Appointment extends Model
         'web' 
     ];
 
-    public static function buildConfirmationUrl(int|string $appointmentId, ?string $token): string
+    public static function buildConfirmationPath(int|string $appointmentId, ?string $token): string
     {
         $resolvedToken = $token ?? '';
-        $baseUrl = rtrim((string) config('app.url', url('/')), '/');
-        $path = '/confirmacion/presupuesto/' . $appointmentId . '?token=' . urlencode($resolvedToken);
 
-        return $baseUrl . $path;
+        return 'confirmacion/presupuesto/' . $appointmentId . '?token=' . urlencode($resolvedToken);
+    }
+
+    public static function buildConfirmationUrl(int|string $appointmentId, ?string $token): string
+    {
+        $baseUrl = rtrim((string) config('app.url', 'https://taller.aventurabike.es'), '/');
+
+        if (!str_contains($baseUrl, '/public')) {
+            $baseUrl .= '/public';
+        }
+
+        return $baseUrl . '/' . self::buildConfirmationPath($appointmentId, $token);
     }
 
     public function confirmationUrl(): string

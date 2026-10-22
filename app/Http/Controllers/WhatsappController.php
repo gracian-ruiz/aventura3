@@ -59,6 +59,7 @@ class WhatsAppController extends Controller
         $presupuestoToken = $presupuestoModel?->token_presupuesto ?? $presupuesto->token_presupuesto ?? '';
         $presupuestoUrl = $presupuestoModel?->confirmationUrl()
             ?? Appointment::buildConfirmationUrl($presupuestoId, $presupuestoToken);
+        $presupuestoUrlPath = Appointment::buildConfirmationPath($presupuestoId, $presupuestoToken);
         $presupuestoPdfPublicoUrl = route('presupuestos.pdf.publico', [
             'presupuestoId' => $presupuestoId,
             'token' => $presupuestoToken,
@@ -104,7 +105,7 @@ class WhatsAppController extends Controller
                     'parameters' => [
                         [
                             'type' => 'text',
-                            'text' => $presupuestoUrl,
+                            'text' => $presupuestoUrlPath,
                         ],
                     ],
                 ];
