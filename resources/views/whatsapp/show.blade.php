@@ -74,7 +74,7 @@
                 </div>
             </div>
 
-            <div class="flex min-h-0 flex-1 flex-col">
+            <div class="flex h-full min-h-0 flex-1 flex-col">
                 <div class="border-b border-black/5 bg-white/75 px-4 py-3 backdrop-blur-sm sm:px-5">
                     <form method="GET" action="{{ route('whatsapp.show', ['phone' => $normalizedPhone]) }}">
                         <div class="flex flex-col gap-3 sm:flex-row">
@@ -91,7 +91,7 @@
                     @include('whatsapp.partials.messages', ['messages' => $messages])
                 </div>
 
-                <div class="border-t border-black/5 bg-[#f0f2f5] px-3 py-3 sm:px-5 max-h-[26vh] overflow-y-auto">
+                <div class="mt-auto border-t border-black/5 bg-[#f0f2f5] px-3 py-3 sm:px-5">
                     @if (session('success'))
                         <div class="mb-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
                             {{ session('success') }}
