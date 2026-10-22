@@ -313,16 +313,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 
-Route::middleware('throttle:3,1')->group(function () {
-    Route::get('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'confirmarPresupuesto'])
-        ->name('presupuesto.confirmar');
+Route::get('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'confirmarPresupuesto'])
+    ->name('presupuesto.confirmar');
 
-    Route::post('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'procesarConfirmacion'])
-        ->name('presupuesto.procesar');
-});
+Route::post('/confirmacion/presupuesto/{presupuestoId}', [PresupuestoController::class, 'procesarConfirmacion'])
+    ->name('presupuesto.procesar');
 
 Route::get('/presupuestos/{presupuestoId}/pdf-publico', [PresupuestoController::class, 'descargarPDFPublico'])
-    ->middleware('throttle:10,1')
     ->name('presupuestos.pdf.publico');
 
 
