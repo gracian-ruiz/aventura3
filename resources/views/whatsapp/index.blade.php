@@ -48,11 +48,41 @@
         </div>
 
         <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex items-center justify-center min-h-[50vh]">
-            <div class="text-center max-w-md">
-                <div class="text-5xl mb-4">💬</div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Abre una conversación</h2>
-                <p class="text-sm text-gray-600">Selecciona un cliente para ver el hilo completo y responder desde el panel.</p>
-            </div>
+            @php($selectedConversation = $conversations->first())
+            @if($selectedConversation)
+                <div class="w-full max-w-xl rounded-2xl border border-gray-200 bg-gray-50 p-5 text-left shadow-sm">
+                    <div class="mb-5 flex items-center gap-3">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
+                            {{ strtoupper(substr(($selectedConversation['user']->name ?? $selectedConversation['phone'] ?? 'U'), 0, 2)) }}
+                        </div>
+                        <div>
+                            <div class="text-xl font-semibold text-gray-900">{{ $selectedConversation['user']->name ?? 'Sin usuario' }}</div>
+                            <div class="text-sm text-gray-500">{{ $selectedConversation['phone'] ?? 'Sin teléfono' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-3 py-2">
+                            <span class="text-gray-500">Número</span>
+                            <span class="font-medium text-gray-900">{{ $selectedConversation['phone'] ?? 'Sin teléfono' }}</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-3 py-2">
+                            <span class="text-gray-500">Usuario</span>
+                            <span class="font-medium text-gray-900">{{ $selectedConversation['user']->name ?? 'Sin usuario' }}</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-3 py-2">
+                            <span class="text-gray-500">Bicicleta</span>
+                            <span class="font-medium text-gray-900">{{ $selectedConversation['bike']->nombre ?? 'Sin bicicleta' }}</span>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="text-center max-w-md">
+                    <div class="text-5xl mb-4">💬</div>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">Abre una conversación</h2>
+                    <p class="text-sm text-gray-600">Selecciona un cliente para ver el hilo completo y responder desde el panel.</p>
+                </div>
+            @endif
         </div>
     </div>
 </div>
