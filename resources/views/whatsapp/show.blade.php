@@ -91,7 +91,7 @@
                     @include('whatsapp.partials.messages', ['messages' => $messages])
                 </div>
 
-                <div class="mt-auto border-t border-black/5 bg-[#f0f2f5] px-3 py-3 sm:px-5">
+                <div class="sticky bottom-0 z-10 mt-auto flex-shrink-0 border-t border-black/5 bg-[#f0f2f5] px-3 py-3 sm:px-5">
                     @if (session('success'))
                         <div class="mb-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
                             {{ session('success') }}
