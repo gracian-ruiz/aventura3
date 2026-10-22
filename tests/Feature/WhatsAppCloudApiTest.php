@@ -54,6 +54,49 @@ class WhatsAppCloudApiTest extends TestCase
     }
 
     /** @test */
+    public function una_plantilla_con_boton_url_envia_el_componente_button_a_meta()
+    {
+        config()->set('services.whatsapp.access_token', 'token-permanente');
+        config()->set('services.whatsapp.phone_number_id', '123456789');
+
+        Http::fake([
+            'https://graph.facebook.com/*' => Http::response([
+                'messages' => [
+                    ['id' => 'wamid.test'],
+                ],
+            ], 200),
+        ]);
+
+        $service = new \App\Services\WhatsAppCloudApiService();
+
+        $service->sendTemplateMessage(
+            '34637319765',
+            'presupuesto_reparacion',
+            'es',
+            ['super Admin', 'BH Quark'],
+            ['link' => 'https://example.test/pdf', 'filename' => 'presupuesto.pdf'],
+            [
+                'type' => 'button',
+                'sub_type' => 'url',
+                'index' => '0',
+                'parameters' => [
+                    ['type' => 'text', 'text' => 'https://example.test/confirmacion'],
+                ],
+            ]
+        );
+
+        Http::assertSent(function ($request) {
+            $payload = $request->data();
+
+            return $request->url() === 'https://graph.facebook.com/v23.0/123456789/messages'
+                && ($payload['template']['components'][0]['type'] ?? null) === 'header'
+                && ($payload['template']['components'][1]['type'] ?? null) === 'body'
+                && ($payload['template']['components'][2]['type'] ?? null) === 'button'
+                && ($payload['template']['components'][2]['parameters'][0]['text'] ?? null) === 'https://example.test/confirmacion';
+        });
+    }
+
+    /** @test */
     public function el_webhook_de_meta_acepta_status_failed_y_responde_ok()
     {
         $payload = [

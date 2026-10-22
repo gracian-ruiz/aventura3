@@ -95,6 +95,18 @@ class WhatsAppController extends Controller
                 $nombreCliente = trim((string) ($presupuesto->usuario_nombre ?? ''));
                 $nombreBicicleta = trim((string) ($presupuesto->bicicleta_marca ?? '') . ' ' . (string) ($presupuesto->bicicleta_nombre ?? ''));
 
+                $buttonComponent = [
+                    'type' => 'button',
+                    'sub_type' => 'url',
+                    'index' => '0',
+                    'parameters' => [
+                        [
+                            'type' => 'text',
+                            'text' => $presupuestoUrl,
+                        ],
+                    ],
+                ];
+
                 $this->enviarPlantillaWhatsApp(
                     $telefonoDestino,
                     $presupuestoId,
@@ -106,7 +118,8 @@ class WhatsAppController extends Controller
                         'link' => $presupuestoPdfPublicoUrl,
                         'filename' => "presupuesto_{$presupuestoId}.pdf",
                     ],
-                    $presupuestoPdfPublicoUrl
+                    $presupuestoPdfPublicoUrl,
+                    $buttonComponent
                 );
             } catch (\Throwable $exception) {
                 $metaError = $this->extractMetaErrorFromException($exception);
@@ -143,7 +156,8 @@ class WhatsAppController extends Controller
         int|string $presupuestoId,
         array $bodyParams = [],
         ?array $headerDocument = null,
-        ?string $documentPublicUrl = null
+        ?string $documentPublicUrl = null,
+        ?array $buttonComponent = null
     ): void
     {
         try {
@@ -152,7 +166,8 @@ class WhatsAppController extends Controller
                 self::PRESUPUESTO_TEMPLATE_NAME,
                 self::PRESUPUESTO_TEMPLATE_LANG,
                 $bodyParams,
-                $headerDocument
+                $headerDocument,
+                $buttonComponent
             );
 
             Log::info('WhatsApp presupuesto: Meta acepto la plantilla', [
