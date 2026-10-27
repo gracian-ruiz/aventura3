@@ -65,11 +65,13 @@ class WhatsAppInboxController extends Controller
             $conversationPhone = (string) ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? '')));
             $conversationKey = $this->conversationKey($conversationPhone);
             $unreadCount = (int) ($unreadByConversationKey[$conversationKey] ?? 0);
+            $conversationUser = $group->first(fn (WhatsAppMessage $message) => !empty($message->user))?->user ?? $this->resolveUserByPhone($conversationPhone);
+            $conversationBike = $group->first(fn (WhatsAppMessage $message) => !empty($message->bike))?->bike ?? ($conversationUser ? Bike::query()->where('user_id', $conversationUser->id)->latest('id')->first() : null);
 
             return [
                 'phone' => $conversationPhone,
-                'user' => $latest->user,
-                'bike' => $latest->bike,
+                'user' => $conversationUser,
+                'bike' => $conversationBike,
                 'appointment' => $latest->appointment,
                 'last_message' => $latest,
                 'last_inbound_message' => $latestInbound,
