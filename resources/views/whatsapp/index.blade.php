@@ -24,20 +24,19 @@
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="truncate font-semibold text-gray-900">
-                                    {{ $conversation['user']->name ?? $phone }}
+                                    {{ $phone }}
                                 </div>
-                                <div class="mt-1 text-sm text-gray-500">{{ $phone }}</div>
-                                <div class="mt-1 flex flex-wrap items-center gap-1 text-[11px] text-gray-500">
-                                    @if(!empty($conversation['user']) && !empty($conversation['user']->name))
-                                        <span class="truncate font-medium text-gray-600">{{ $conversation['user']->name }}</span>
-                                    @endif
-                                    @if(!empty($conversation['bike']))
+                                @if(!empty($conversation['user']) && !empty($conversation['user']->name))
+                                    <div class="mt-1 text-sm text-gray-500">{{ $conversation['user']->name }}</div>
+                                @endif
+                                @if(!empty($conversation['bike']))
+                                    <div class="mt-1 flex items-center gap-1 text-[11px] text-gray-500">
                                         @if(!empty($conversation['user']) && !empty($conversation['user']->name))
                                             <span class="text-gray-400">•</span>
                                         @endif
                                         <span class="truncate">{{ $conversation['bike']->nombre }}</span>
-                                    @endif
-                                </div>
+                                    </div>
+                                @endif
                             </div>
                             @if(!empty($conversation['unread_count']))
                                 <span class="text-xs rounded-full bg-emerald-600 text-white px-2 py-1 whitespace-nowrap">
