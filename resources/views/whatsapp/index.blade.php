@@ -26,12 +26,13 @@
                                 <div class="truncate font-semibold text-gray-900">
                                     {{ $conversation['user']->name ?? $phone }}
                                 </div>
-                                <div class="mt-1 text-sm text-gray-500">{{ $phone }}</div>
-                                @if(!empty($conversation['bike']) || !empty($conversation['user']))
-                                    <div class="mt-1 truncate text-[11px] text-gray-500">
-                                        {{ $conversation['bike']->nombre ?? 'Sin bicicleta' }}
-                                    </div>
-                                @endif
+                                <div class="mt-1 flex flex-wrap items-center gap-1 text-sm text-gray-500">
+                                    <span class="truncate">{{ $phone }}</span>
+                                    @if(!empty($conversation['bike']))
+                                        <span class="text-[11px] text-gray-400">•</span>
+                                        <span class="truncate text-[11px] text-gray-500">{{ $conversation['bike']->nombre }}</span>
+                                    @endif
+                                </div>
                             </div>
                             @if(!empty($conversation['unread_count']))
                                 <span class="text-xs rounded-full bg-emerald-600 text-white px-2 py-1 whitespace-nowrap">
