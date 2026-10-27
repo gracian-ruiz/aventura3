@@ -30,11 +30,12 @@
                                     <div class="mt-1 text-sm text-gray-500">{{ $conversation['user']->name }}</div>
                                 @endif
                                 @if(!empty($conversation['bike']))
+                                    @php($bikeLabel = trim((string) ($conversation['bike']->marca ?? '') . ' ' . (string) ($conversation['bike']->nombre ?? '')))
                                     <div class="mt-1 flex items-center gap-1 text-[11px] text-gray-500">
                                         @if(!empty($conversation['user']) && !empty($conversation['user']->name))
                                             <span class="text-gray-400">•</span>
                                         @endif
-                                        <span class="truncate">{{ $conversation['bike']->nombre }}</span>
+                                        <span class="truncate">{{ $bikeLabel !== '' ? $bikeLabel : 'Sin bicicleta' }}</span>
                                     </div>
                                 @endif
                             </div>
