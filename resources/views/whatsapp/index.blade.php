@@ -26,11 +26,16 @@
                                 <div class="truncate font-semibold text-gray-900">
                                     {{ $conversation['user']->name ?? $phone }}
                                 </div>
-                                <div class="mt-1 flex flex-wrap items-center gap-1 text-sm text-gray-500">
-                                    <span class="truncate">{{ $phone }}</span>
+                                <div class="mt-1 text-sm text-gray-500">{{ $phone }}</div>
+                                <div class="mt-1 flex flex-wrap items-center gap-1 text-[11px] text-gray-500">
+                                    @if(!empty($conversation['user']) && !empty($conversation['user']->name))
+                                        <span class="truncate font-medium text-gray-600">{{ $conversation['user']->name }}</span>
+                                    @endif
                                     @if(!empty($conversation['bike']))
-                                        <span class="text-[11px] text-gray-400">•</span>
-                                        <span class="truncate text-[11px] text-gray-500">{{ $conversation['bike']->nombre }}</span>
+                                        @if(!empty($conversation['user']) && !empty($conversation['user']->name))
+                                            <span class="text-gray-400">•</span>
+                                        @endif
+                                        <span class="truncate">{{ $conversation['bike']->nombre }}</span>
                                     @endif
                                 </div>
                             </div>
