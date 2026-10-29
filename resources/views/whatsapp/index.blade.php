@@ -20,19 +20,18 @@
             <div class="divide-y divide-gray-100 max-h-[70vh] overflow-y-auto">
                 @forelse($conversations as $conversation)
                     @php($phone = $conversation['phone'] ?? '')
+                    @php($displayName = $conversation['display_name'] ?? ($conversation['user']->name ?? ''))
                     <a href="{{ route('whatsapp.show', ['phone' => $phone]) }}" class="block px-4 py-4 hover:bg-green-50 transition-colors {{ !empty($conversation['has_unread']) ? 'bg-emerald-50/60' : '' }}">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="truncate font-semibold text-gray-900">
-                                    {{ $phone }}
+                                    {{ $displayName !== '' ? $displayName : $phone }}
                                 </div>
-                                @if(!empty($conversation['user']) && !empty($conversation['user']->name))
-                                    <div class="mt-1 text-sm text-gray-500">{{ $conversation['user']->name }}</div>
-                                @endif
+                                <div class="mt-1 text-sm text-gray-500">{{ $phone }}</div>
                                 @if(!empty($conversation['bike']))
                                     @php($bikeLabel = trim((string) ($conversation['bike']->marca ?? '') . ' ' . (string) ($conversation['bike']->nombre ?? '')))
                                     <div class="mt-1 flex items-center gap-1 text-[11px] text-gray-500">
-                                        @if(!empty($conversation['user']) && !empty($conversation['user']->name))
+                                        @if($displayName !== '')
                                             <span class="text-gray-400">•</span>
                                         @endif
                                         <span class="truncate">{{ $bikeLabel !== '' ? $bikeLabel : 'Sin bicicleta' }}</span>

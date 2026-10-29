@@ -60,24 +60,39 @@ class WhatsAppInboxController extends Controller
                 return 'user_' . $message->user_id;
             }
 
-            $rawPhone = $message->direction === 'inbound' ? ($message->from_phone ?? '') : ($message->to_phone ?? '');
+            $candidatePhone = $message->direction === 'inbound'
+                ? ($message->from_phone ?? '')
+                : ($message->to_phone ?? '');
 
-            return 'phone_' . $this->conversationKey($rawPhone);
+            $candidatePhone = self::normalizePhone((string) $candidatePhone);
+
+            if ($candidatePhone !== '') {
+                $relatedUser = $this->resolveUserByPhone($candidatePhone);
+                if ($relatedUser) {
+                    return 'user_' . $relatedUser->id;
+                }
+            }
+
+            return 'phone_' . $this->conversationKey($candidatePhone !== '' ? $candidatePhone : ($message->from_phone ?? $message->to_phone ?? ''));
         })->map(function ($group) use ($unreadByConversationKey) {
             $latest = $group->first();
             $latestInbound = $group->first(fn (WhatsAppMessage $message) => $message->direction === 'inbound') ?? $latest;
             $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
             $lastActivityTimestamp = optional($latest->received_at ?? $latest->sent_at ?? $latest->created_at)?->timestamp ?? 0;
             $conversationUser = $group->first(fn (WhatsAppMessage $message) => !empty($message->user))?->user ?? $this->resolveUserByPhone((string) ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? ''))));
-            $conversationPhone = (string) ($conversationUser?->telefono ? self::normalizePhone((string) $conversationUser->telefono) : ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? ''))));
+            $conversationPhone = $conversationUser?->telefono
+                ? self::normalizePhone((string) $conversationUser->telefono)
+                : (self::normalizePhone((string) (($latestInbound->direction === 'inbound' ? ($latestInbound->from_phone ?? '') : ($latestInbound->to_phone ?? '')))) ?: self::normalizePhone((string) ($latest->from_phone ?? $latest->to_phone ?? '')));
             $conversationKey = $this->conversationKey($conversationPhone);
             $unreadCount = (int) ($unreadByConversationKey[$conversationKey] ?? 0);
             $conversationBike = $group->first(fn (WhatsAppMessage $message) => !empty($message->bike))?->bike ?? ($conversationUser ? Bike::query()->where('user_id', $conversationUser->id)->latest('id')->first() : null);
+            $displayName = $this->resolveConversationDisplayName($conversationUser, $conversationPhone);
 
             return [
                 'phone' => $conversationPhone,
                 'user' => $conversationUser,
                 'bike' => $conversationBike,
+                'display_name' => $displayName,
                 'appointment' => $latest->appointment,
                 'last_message' => $latest,
                 'last_inbound_message' => $latestInbound,
@@ -181,7 +196,7 @@ class WhatsAppInboxController extends Controller
             $conversationAppointment = Appointment::query()->where('bike_id', $conversationBike->id)->latest('id')->first();
         }
 
-        $conversationTitle = $conversationUser?->name ?: $normalizedPhone;
+        $conversationTitle = $this->resolveConversationDisplayName($conversationUser, $normalizedPhone);
         $starterTemplates = $this->conversationStarterTemplates();
         $conversationWindow = $this->resolveConversationWindow($normalizedPhone);
 
@@ -563,9 +578,27 @@ class WhatsAppInboxController extends Controller
         }
     }
 
+    private function resolveConversationDisplayName(?User $user, string $normalizedPhone): string
+    {
+        $businessPhone = self::normalizePhone((string) config('services.whatsapp.phone_number_id', ''));
+
+        if ($businessPhone !== '' && $normalizedPhone === $businessPhone) {
+            return 'Aventurabike';
+        }
+
+        $name = trim((string) ($user?->name ?? ''));
+
+        return $name !== '' ? $name : $normalizedPhone;
+    }
+
     private function resolveUserByPhone(string $normalizedPhone): ?User
     {
         if ($normalizedPhone === '') {
+            return null;
+        }
+
+        $businessPhone = self::normalizePhone((string) config('services.whatsapp.phone_number_id', ''));
+        if ($businessPhone !== '' && $normalizedPhone === $businessPhone) {
             return null;
         }
 
