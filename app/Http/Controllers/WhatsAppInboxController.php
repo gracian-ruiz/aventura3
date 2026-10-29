@@ -56,16 +56,22 @@ class WhatsAppInboxController extends Controller
             ->pluck('unread_count', 'conversation_key');
 
         $conversations = $messages->groupBy(function (WhatsAppMessage $message) {
-            return $this->conversationKey($message->direction === 'inbound' ? ($message->from_phone ?? '') : ($message->to_phone ?? ''));
+            if (!empty($message->user_id)) {
+                return 'user_' . $message->user_id;
+            }
+
+            $rawPhone = $message->direction === 'inbound' ? ($message->from_phone ?? '') : ($message->to_phone ?? '');
+
+            return 'phone_' . $this->conversationKey($rawPhone);
         })->map(function ($group) use ($unreadByConversationKey) {
             $latest = $group->first();
             $latestInbound = $group->first(fn (WhatsAppMessage $message) => $message->direction === 'inbound') ?? $latest;
             $sortTimestamp = optional($latestInbound->received_at ?? $latestInbound->sent_at ?? $latestInbound->created_at)?->timestamp ?? 0;
             $lastActivityTimestamp = optional($latest->received_at ?? $latest->sent_at ?? $latest->created_at)?->timestamp ?? 0;
-            $conversationPhone = (string) ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? '')));
+            $conversationUser = $group->first(fn (WhatsAppMessage $message) => !empty($message->user))?->user ?? $this->resolveUserByPhone((string) ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? ''))));
+            $conversationPhone = (string) ($conversationUser?->telefono ? self::normalizePhone((string) $conversationUser->telefono) : ($latestInbound->from_phone ?? ($latest->direction === 'inbound' ? ($latest->from_phone ?? '') : ($latest->to_phone ?? ''))));
             $conversationKey = $this->conversationKey($conversationPhone);
             $unreadCount = (int) ($unreadByConversationKey[$conversationKey] ?? 0);
-            $conversationUser = $group->first(fn (WhatsAppMessage $message) => !empty($message->user))?->user ?? $this->resolveUserByPhone($conversationPhone);
             $conversationBike = $group->first(fn (WhatsAppMessage $message) => !empty($message->bike))?->bike ?? ($conversationUser ? Bike::query()->where('user_id', $conversationUser->id)->latest('id')->first() : null);
 
             return [
