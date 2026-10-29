@@ -42,14 +42,7 @@
             $caption = $isImage ? preg_replace('/^\[imagen\]\s*/i', '', (string) ($message->body ?? '')) : null;
         @endphp
 
-        @if($isStatus)
-            <div class="flex justify-center" data-message-id="{{ $message->id }}" data-message-type="{{ $message->message_type }}" data-direction="{{ $message->direction }}">
-                <div class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold {{ $statusTone }} shadow-sm backdrop-blur-sm">
-                    <span class="uppercase tracking-[0.2em]">{{ $message->status ?? $message->body ?? 'status' }}</span>
-                    <span class="text-[11px] opacity-80">{{ $timestamp }}</span>
-                </div>
-            </div>
-        @else
+        @if(!$isStatus)
             <div class="flex {{ $message->direction === 'outbound' ? 'justify-end' : 'justify-start' }}" data-message-id="{{ $message->id }}" data-message-type="{{ $message->message_type }}" data-direction="{{ $message->direction }}">
                 <div class="max-w-[88%] sm:max-w-[78%] rounded-[18px] px-4 py-3 shadow-sm border {{ $isDocument ? 'bg-amber-50 text-amber-950 border-amber-200' : ($message->direction === 'outbound' ? 'bg-[#d9fdd3] text-gray-900 border-[#d9fdd3]' : 'bg-white text-gray-900 border-gray-200') }}">
                     <div class="flex items-center justify-between gap-3 mb-2">
