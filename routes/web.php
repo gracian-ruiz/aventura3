@@ -53,6 +53,14 @@ Route::get('/', function () {
     if ($user->role === 'user' || $user->role === 'premium') {
         return redirect('/miperfil');
     }
+
+    // TALLER / MECÁNICO
+    if ($user->role === 'taller' || $user->role === 'mecanico') {
+        return redirect('/mecanico');
+    }
+
+    // Rol no contemplado: enviar a dashboard autenticado
+    return redirect('/dashboard');
 });
 
 

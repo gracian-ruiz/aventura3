@@ -10,8 +10,16 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->role === 'admin') {
-            return $next($request);
+        if (Auth::check()) {
+            $role = Auth::user()->role;
+
+            if ($role === 'admin') {
+                return $next($request);
+            }
+
+            if (in_array($role, ['taller', 'mecanico'], true) && $request->routeIs('mecanico.*')) {
+                return $next($request);
+            }
         }
 
         return redirect('/')->with('error', 'No tienes permisos para acceder.');
