@@ -23,7 +23,7 @@
     </div>
 
     <!-- Botón para Añadir Nuevo Usuario (Solo Admins) -->
-    @if(Auth::user()->role === 'admin')
+    @if(in_array(Auth::user()->role, ['admin', 'taller', 'mecanico'], true))
         <div class="flex justify-end">
             <a href="{{ route('users.create') }}" 
                class="px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 transition duration-200">
@@ -49,7 +49,7 @@
                     <th class="py-2 px-4 text-left">Teléfono</th>
                     <th class="py-2 px-4 text-left">Bicicletas</th>
                     <th class="py-2 px-4 text-left">Presupuesto</th>
-                    @if(Auth::user()->role === 'admin')
+                    @if(in_array(Auth::user()->role, ['admin', 'taller', 'mecanico'], true))
                         <th class="py-2 px-4 text-center">Acciones</th>
                     @endif
                 </tr>
@@ -79,7 +79,7 @@
                             </a>
                         </td>
                         
-                        @if(Auth::user()->role === 'admin')
+                        @if(in_array(Auth::user()->role, ['admin', 'taller', 'mecanico'], true))
                             <td class="py-2 px-4 text-center">
                                 <a href="{{ route('users.edit', $user->id) }}" class="px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">Editar</a>
 

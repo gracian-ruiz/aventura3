@@ -13,11 +13,7 @@ class AdminMiddleware
         if (Auth::check()) {
             $role = Auth::user()->role;
 
-            if ($role === 'admin') {
-                return $next($request);
-            }
-
-            if (in_array($role, ['taller', 'mecanico'], true) && $request->routeIs('mecanico.*')) {
+            if (in_array($role, ['admin', 'taller', 'mecanico'], true)) {
                 return $next($request);
             }
         }

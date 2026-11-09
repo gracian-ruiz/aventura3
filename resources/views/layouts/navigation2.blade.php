@@ -11,7 +11,7 @@
 
             <!-- Menú de Navegación (Escritorio) -->
             <div class="hidden md:flex app-nav-main flex-1 mx-4 min-w-0 items-center gap-3 overflow-x-auto whitespace-nowrap">
-                @if(Auth::user()->role === 'admin')
+                @if(in_array(Auth::user()->role, ['admin', 'taller', 'mecanico'], true))
                     <a href="{{ route('usuarios_alquiler.index') }}" class="app-nav-item {{ request()->routeIs('usuarios_alquiler.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Usuarios</a>
                     <a href="{{ route('material.index') }}" class="app-nav-item {{ request()->routeIs('material.*') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Material</a>
                     <a href="{{ route('alquileres.index') }}" class="app-nav-item {{ request()->routeIs('alquileres.*') && !request()->routeIs('alquileres.finalizado') ? 'app-nav-item-active app-nav-item-active-strong' : '' }}">Alquileres activos</a>
@@ -82,7 +82,7 @@
     <!-- Menú Desplegable (Móvil) -->
     <div :class="{ 'block': open, 'hidden': !open }" class="md:hidden bg-white border-t border-gray-200">
         <div class="py-2">
-            @if(Auth::user()->role === 'admin')
+            @if(in_array(Auth::user()->role, ['admin', 'taller', 'mecanico'], true))
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">Usuarios</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('presupuestos.index')" :active="request()->routeIs('presupuestos.index')">Presupuestos</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">Orden de taller</x-responsive-nav-link>
