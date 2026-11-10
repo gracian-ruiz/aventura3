@@ -252,10 +252,16 @@
                                  </a>
 
                                 @if (!empty($presupuesto->user_id) && !empty($presupuesto->user_telefono))
-                                    <a href="{{ route('presupuesto.enviar', ['clienteId' => $presupuesto->user_id, 'presupuestoId' => $presupuesto->id]) }}"
-                                        class="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                        Enviar WhatsApp
-                                    </a>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <a href="{{ route('presupuesto.enviar', ['clienteId' => $presupuesto->user_id, 'presupuestoId' => $presupuesto->id]) }}"
+                                            class="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                            Enviar WhatsApp
+                                        </a>
+                                        <a href="{{ route('presupuesto.reenviar', ['clienteId' => $presupuesto->user_id, 'presupuestoId' => $presupuesto->id]) }}"
+                                            class="px-3 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                                            Insistir
+                                        </a>
+                                    </div>
                                 @else
                                     <span class="px-3 py-2 bg-gray-200 text-gray-500 rounded-md cursor-not-allowed">
                                         Sin teléfono WhatsApp

@@ -161,9 +161,12 @@
                 </button>
             </form>
 
-            <div>
+            <div class="flex flex-wrap gap-2">
                 <a href="{{ route('presupuesto.enviar', ['clienteId' => $presupuesto->usuario_id, 'presupuestoId' => $presupuesto->id]) }}" class="app-btn bg-green-600 text-white hover:bg-green-700">
-                <i class="fab fa-whatsapp"></i> Enviar presupuesto por WhatsApp
+                    <i class="fab fa-whatsapp"></i> Enviar presupuesto por WhatsApp
+                </a>
+                <a href="{{ route('presupuesto.reenviar', ['clienteId' => $presupuesto->usuario_id, 'presupuestoId' => $presupuesto->id]) }}" class="app-btn bg-amber-600 text-white hover:bg-amber-700">
+                    <i class="fab fa-whatsapp"></i> Insistir cliente
                 </a>
             </div>
         </div>
