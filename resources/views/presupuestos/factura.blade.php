@@ -169,6 +169,9 @@
                     <i class="fab fa-whatsapp"></i> Insistir cliente
                 </a>
             </div>
+            <p class="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 border border-amber-200">
+                Mensaje tipo plantilla insistencia: "Hola [NOMBRE_CLIENTE], te escribimos de nuevo de Aventura Bike para confirmar si seguimos con la reparacion de tu bicicleta [BICICLETA]. Puedes aceptar el presupuesto desde el enlace o respondernos por aqui. Gracias."
+            </p>
         </div>
     </div>
 @endif

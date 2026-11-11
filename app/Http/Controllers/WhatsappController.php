@@ -15,7 +15,9 @@ use App\Services\WhatsAppCloudApiService;
 class WhatsAppController extends Controller
 {
     private const WHATSAPP_PRESUPUESTO_LOG_VERSION = 'presupuesto-whatsapp-v3-template';
+    private const PRESUPUESTO_TEMPLATE_KEY = 'presupuesto_reparacion';
     private const PRESUPUESTO_TEMPLATE_NAME = 'presupuesto_reparacion';
+    private const PRESUPUESTO_REMINDER_TEMPLATE_KEY = 'repetir_envio_presupuesto';
     private const PRESUPUESTO_REMINDER_TEMPLATE_NAME = 'repetir_envio_presupuesto';
     private const PRESUPUESTO_TEMPLATE_LANG = 'es';
 
@@ -28,7 +30,7 @@ class WhatsAppController extends Controller
         return $this->enviarPlantillaPresupuestoWhatsApp(
             $clienteId,
             $presupuestoId,
-            self::PRESUPUESTO_TEMPLATE_NAME,
+            self::PRESUPUESTO_TEMPLATE_KEY,
             true,
             '📩 Presupuesto enviado por WhatsApp.'
         );
@@ -39,7 +41,7 @@ class WhatsAppController extends Controller
         return $this->enviarPlantillaPresupuestoWhatsApp(
             $clienteId,
             $presupuestoId,
-            self::PRESUPUESTO_REMINDER_TEMPLATE_NAME,
+            self::PRESUPUESTO_REMINDER_TEMPLATE_KEY,
             false,
             '📩 Recordatorio de presupuesto enviado por WhatsApp.'
         );
@@ -48,16 +50,21 @@ class WhatsAppController extends Controller
     private function enviarPlantillaPresupuestoWhatsApp(
         int|string $clienteId,
         int|string $presupuestoId,
-        string $templateName,
+        string $templateKey,
         bool $withDocumentHeader,
         string $successMessage
     )
     {
+        $templateConfig = $this->resolveConversationTemplateByKey($templateKey);
+        $templateName = $templateConfig['template_name'];
+        $templateLanguage = $templateConfig['language'];
+
         Log::info('WhatsApp presupuesto: inicio de envio desde listado', [
             'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
             'cliente_id' => $clienteId,
             'presupuesto_id' => $presupuestoId,
             'auth_user_id' => auth()->id(),
+            'template_key' => $templateKey,
             'template' => $templateName,
         ]);
 
@@ -118,8 +125,9 @@ class WhatsAppController extends Controller
                 'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
                 'presupuesto_id' => $presupuestoId,
                 'to' => $this->normalizePhone((string) $telefonoDestino),
+                'template_key' => $templateKey,
                 'template' => $templateName,
-                'language' => self::PRESUPUESTO_TEMPLATE_LANG,
+                'language' => $templateLanguage,
                 'presupuesto_url' => $presupuestoUrl,
                 'pdf_public_url' => $presupuestoPdfPublicoUrl,
                 'with_document_header' => $withDocumentHeader,
@@ -155,6 +163,7 @@ class WhatsAppController extends Controller
                     $withDocumentHeader ? $presupuestoPdfPublicoUrl : null,
                     $buttonComponent,
                     $templateName,
+                    $templateLanguage,
                     "Plantilla {$templateName} enviada por WhatsApp"
                 );
             } catch (\Throwable $exception) {
@@ -195,6 +204,7 @@ class WhatsAppController extends Controller
         ?string $documentPublicUrl = null,
         ?array $buttonComponent = null,
         string $templateName = self::PRESUPUESTO_TEMPLATE_NAME,
+        string $templateLanguage = self::PRESUPUESTO_TEMPLATE_LANG,
         string $messageBody = 'Plantilla presupuesto_reparacion enviada por WhatsApp'
     ): void
     {
@@ -202,7 +212,7 @@ class WhatsAppController extends Controller
             $response = $this->whatsAppCloudApiService->sendTemplateMessage(
                 $telefono,
                 $templateName,
-                self::PRESUPUESTO_TEMPLATE_LANG,
+                $templateLanguage,
                 $bodyParams,
                 $headerDocument,
                 $buttonComponent
@@ -213,6 +223,7 @@ class WhatsAppController extends Controller
                 'presupuesto_id' => $presupuestoId,
                 'to' => $this->normalizePhone((string) $telefono),
                 'template' => $templateName,
+                'language' => $templateLanguage,
                 'body_params_count' => count($bodyParams),
                 'has_header_document' => is_array($headerDocument),
                 'response' => $response,
@@ -253,6 +264,7 @@ class WhatsAppController extends Controller
                 'presupuesto_id' => $presupuestoId,
                 'to' => $this->normalizePhone((string) $telefono),
                 'template' => $templateName,
+                'language' => $templateLanguage,
                 'body_params_count' => count($bodyParams),
                 'has_header_document' => is_array($headerDocument),
                 'error' => $e->getMessage(),
@@ -366,6 +378,45 @@ class WhatsAppController extends Controller
         }
 
         return $normalized;
+    }
+
+    private function resolveConversationTemplateByKey(string $templateKey): array
+    {
+        $templates = config('services.whatsapp.conversation_templates', []);
+
+        if (is_array($templates)) {
+            foreach ($templates as $template) {
+                if (!is_array($template)) {
+                    continue;
+                }
+
+                if (trim((string) ($template['key'] ?? '')) !== $templateKey) {
+                    continue;
+                }
+
+                $resolvedName = trim((string) ($template['template_name'] ?? ''));
+                $resolvedLanguage = trim((string) ($template['language'] ?? self::PRESUPUESTO_TEMPLATE_LANG));
+
+                if ($resolvedName !== '') {
+                    return [
+                        'template_name' => $resolvedName,
+                        'language' => $resolvedLanguage !== '' ? $resolvedLanguage : self::PRESUPUESTO_TEMPLATE_LANG,
+                    ];
+                }
+            }
+        }
+
+        if ($templateKey === self::PRESUPUESTO_REMINDER_TEMPLATE_KEY) {
+            return [
+                'template_name' => self::PRESUPUESTO_REMINDER_TEMPLATE_NAME,
+                'language' => self::PRESUPUESTO_TEMPLATE_LANG,
+            ];
+        }
+
+        return [
+            'template_name' => self::PRESUPUESTO_TEMPLATE_NAME,
+            'language' => self::PRESUPUESTO_TEMPLATE_LANG,
+        ];
     }
 
     private function extractMetaErrorFromException(\Throwable $exception): array

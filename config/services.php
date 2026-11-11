@@ -54,6 +54,13 @@ return [
                 'uses_customer_name' => true,
             ],
             [
+                'key' => 'repetir_envio_presupuesto',
+                'label' => 'Insistir presupuesto',
+                'template_name' => env('WHATSAPP_TEMPLATE_REPETIR_ENVIO_PRESUPUESTO', 'repetir_envio_presupuesto'),
+                'language' => env('WHATSAPP_TEMPLATE_REPETIR_ENVIO_PRESUPUESTO_LANG', 'es'),
+                'uses_customer_name' => true,
+            ],
+            [
                 'key' => 'comversacion_problema_taller',
                 'label' => 'Problema detectado en taller (con imagen)',
                 'template_name' => env('WHATSAPP_TEMPLATE_CONVERSACION_PROBLEMA_TALLER', env('WHATSAPP_TEMPLATE_NUEVO_PROBLEMA', 'comversacion_problema_taller')),
