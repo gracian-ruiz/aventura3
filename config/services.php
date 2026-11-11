@@ -52,6 +52,7 @@ return [
                 'template_name' => env('WHATSAPP_TEMPLATE_SALUDO', 'saludo'),
                 'language' => env('WHATSAPP_TEMPLATE_SALUDO_LANG', 'es'),
                 'uses_customer_name' => true,
+                'uses_bike_name' => true,
             ],
             [
                 'key' => 'repetir_envio_presupuesto',

@@ -237,11 +237,22 @@ class WhatsAppInboxController extends Controller
 
         $normalizedPhone = $this->normalizePhone($phone);
         $conversationUser = $this->resolveUserByPhone($normalizedPhone);
+        $conversationBike = $conversationUser
+            ? Bike::query()->where('user_id', $conversationUser->id)->latest('id')->first()
+            : null;
         $customerName = trim((string) ($conversationUser?->name ?? 'cliente'));
+        $bikeDisplayName = trim((string) (($conversationBike?->marca ?? '') . ' ' . ($conversationBike?->nombre ?? '')));
+        if ($bikeDisplayName === '') {
+            $bikeDisplayName = 'bicicleta';
+        }
 
         $bodyParams = [];
         if (!empty($template['uses_customer_name'])) {
             $bodyParams[] = $customerName;
+        }
+
+        if (!empty($template['uses_bike_name'])) {
+            $bodyParams[] = $bikeDisplayName;
         }
 
         $issueArea = trim((string) ($data['issue_area'] ?? ''));
@@ -341,7 +352,7 @@ class WhatsAppInboxController extends Controller
 
         WhatsAppMessage::create([
             'user_id' => $conversationUser?->id,
-            'bike_id' => Bike::query()->where('user_id', $conversationUser?->id)->latest('id')->value('id'),
+            'bike_id' => $conversationBike?->id,
             'appointment_id' => null,
             'wa_id' => data_get($response, 'messages.0.id'),
             'from_phone' => (string) config('services.whatsapp.phone_number_id'),
@@ -793,6 +804,7 @@ class WhatsAppInboxController extends Controller
                 'template_name' => $templateName,
                 'language' => $language,
                 'uses_customer_name' => (bool) ($template['uses_customer_name'] ?? true),
+                'uses_bike_name' => (bool) ($template['uses_bike_name'] ?? false),
                 'uses_issue_area' => (bool) ($template['uses_issue_area'] ?? false),
                 'uses_customer_reply_request' => (bool) ($template['uses_customer_reply_request'] ?? false),
                 'allows_header_image' => (bool) ($template['allows_header_image'] ?? false),
