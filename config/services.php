@@ -57,7 +57,7 @@ return [
                 'key' => 'repetir_envio_presupuesto',
                 'label' => 'Insistir presupuesto',
                 'template_name' => env('WHATSAPP_TEMPLATE_REPETIR_ENVIO_PRESUPUESTO', 'repetir_envio_presupuesto'),
-                'language' => env('WHATSAPP_TEMPLATE_REPETIR_ENVIO_PRESUPUESTO_LANG', 'es'),
+                'language' => env('WHATSAPP_TEMPLATE_REPETIR_ENVIO_PRESUPUESTO_LANG', 'en'),
                 'uses_customer_name' => true,
             ],
             [
