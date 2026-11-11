@@ -156,6 +156,7 @@
             <form method="POST" action="{{ route('whatsapp.template', ['phone' => $normalizedPhone]) }}" class="d-inline-block mb-3">
                 @csrf
                 <input type="hidden" name="template_key" value="saludo">
+                <input type="hidden" name="bike_id" value="{{ $presupuesto->bike_id }}">
                 <button type="submit" class="app-btn bg-blue-600 text-white hover:bg-blue-700">
                     <i class="fab fa-whatsapp"></i> Avisar problema detectado
                 </button>

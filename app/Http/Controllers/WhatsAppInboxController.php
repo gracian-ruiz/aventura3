@@ -223,6 +223,7 @@ class WhatsAppInboxController extends Controller
 
         $data = $request->validate([
             'template_key' => ['required', 'string', 'max:120'],
+            'bike_id' => ['nullable', 'integer', 'exists:bikes,id'],
             'issue_area' => ['nullable', 'string', 'max:190'],
             'customer_reply_request' => ['nullable', 'string', 'max:250'],
             'template_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
@@ -237,9 +238,21 @@ class WhatsAppInboxController extends Controller
 
         $normalizedPhone = $this->normalizePhone($phone);
         $conversationUser = $this->resolveUserByPhone($normalizedPhone);
-        $conversationBike = $conversationUser
-            ? Bike::query()->where('user_id', $conversationUser->id)->latest('id')->first()
-            : null;
+        $selectedBikeId = (int) ($data['bike_id'] ?? 0);
+        $conversationBike = null;
+
+        if ($selectedBikeId > 0) {
+            $conversationBike = Bike::query()->find($selectedBikeId);
+
+            if ($conversationUser && $conversationBike && (int) $conversationBike->user_id !== (int) $conversationUser->id) {
+                return back()->with('error', 'La bicicleta seleccionada no pertenece al cliente de la conversacion.');
+            }
+        }
+
+        if (!$conversationBike && $conversationUser) {
+            $conversationBike = Bike::query()->where('user_id', $conversationUser->id)->latest('id')->first();
+        }
+
         $customerName = trim((string) ($conversationUser?->name ?? 'cliente'));
         $bikeDisplayName = trim((string) (($conversationBike?->marca ?? '') . ' ' . ($conversationBike?->nombre ?? '')));
         if ($bikeDisplayName === '') {
