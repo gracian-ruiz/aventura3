@@ -157,7 +157,7 @@
                 @csrf
                 <input type="hidden" name="template_key" value="saludo">
                 <button type="submit" class="app-btn bg-blue-600 text-white hover:bg-blue-700">
-                    <i class="fab fa-whatsapp"></i> Saludos
+                    <i class="fab fa-whatsapp"></i> Avisar problema detectado
                 </button>
             </form>
 

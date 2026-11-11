@@ -48,7 +48,7 @@ return [
             ],
             [
                 'key' => 'saludo',
-                'label' => 'Saludos',
+                'label' => 'Avisar problema detectado',
                 'template_name' => env('WHATSAPP_TEMPLATE_SALUDO', 'saludo'),
                 'language' => env('WHATSAPP_TEMPLATE_SALUDO_LANG', 'es'),
                 'uses_customer_name' => true,
