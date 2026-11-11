@@ -133,22 +133,22 @@ class WhatsAppController extends Controller
                 'with_document_header' => $withDocumentHeader,
             ]);
 
-            try {
-                $nombreCliente = trim((string) ($presupuesto->usuario_nombre ?? ''));
-                $nombreBicicleta = trim((string) ($presupuesto->bicicleta_marca ?? '') . ' ' . (string) ($presupuesto->bicicleta_nombre ?? ''));
+            $nombreCliente = trim((string) ($presupuesto->usuario_nombre ?? ''));
+            $nombreBicicleta = trim((string) ($presupuesto->bicicleta_marca ?? '') . ' ' . (string) ($presupuesto->bicicleta_nombre ?? ''));
 
-                $buttonComponent = [
-                    'type' => 'button',
-                    'sub_type' => 'url',
-                    'index' => '0',
-                    'parameters' => [
-                        [
-                            'type' => 'text',
-                            'text' => $presupuestoUrlPath,
-                        ],
+            $buttonComponent = [
+                'type' => 'button',
+                'sub_type' => 'url',
+                'index' => '0',
+                'parameters' => [
+                    [
+                        'type' => 'text',
+                        'text' => $presupuestoUrlPath,
                     ],
-                ];
+                ],
+            ];
 
+            try {
                 $this->enviarPlantillaWhatsApp(
                     $telefonoDestino,
                     $presupuestoId,
@@ -170,8 +170,53 @@ class WhatsAppController extends Controller
                 $metaError = $this->extractMetaErrorFromException($exception);
                 $metaCode = (int) ($metaError['code'] ?? 0);
 
+                if ($metaCode === 132001 && $templateKey === self::PRESUPUESTO_REMINDER_TEMPLATE_KEY) {
+                    Log::warning('WhatsApp presupuesto: fallback de plantilla de insistencia a plantilla principal', [
+                        'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
+                        'presupuesto_id' => $presupuestoId,
+                        'failed_template_key' => $templateKey,
+                        'failed_template' => $templateName,
+                        'meta_error' => $metaError,
+                    ]);
+
+                    try {
+                        $fallbackTemplateConfig = $this->resolveConversationTemplateByKey(self::PRESUPUESTO_TEMPLATE_KEY);
+
+                        $this->enviarPlantillaWhatsApp(
+                            $telefonoDestino,
+                            $presupuestoId,
+                            [
+                                $nombreCliente,
+                                $nombreBicicleta,
+                            ],
+                            [
+                                'link' => $presupuestoPdfPublicoUrl,
+                                'filename' => "presupuesto_{$presupuestoId}.pdf",
+                            ],
+                            $presupuestoPdfPublicoUrl,
+                            $buttonComponent,
+                            $fallbackTemplateConfig['template_name'],
+                            $fallbackTemplateConfig['language'],
+                            "Plantilla {$fallbackTemplateConfig['template_name']} enviada por WhatsApp (fallback desde insistencia)"
+                        );
+
+                        return back()->with('success', '📩 Recordatorio enviado por WhatsApp con plantilla alternativa.');
+                    } catch (\Throwable $fallbackException) {
+                        Log::error('WhatsApp presupuesto: también falló el fallback de plantilla', [
+                            'version' => self::WHATSAPP_PRESUPUESTO_LOG_VERSION,
+                            'presupuesto_id' => $presupuestoId,
+                            'fallback_template_key' => self::PRESUPUESTO_TEMPLATE_KEY,
+                            'error' => $fallbackException->getMessage(),
+                        ]);
+                    }
+                }
+
                 if ($metaCode === 190) {
                     return back()->with('error', 'No se pudo enviar WhatsApp: token de Meta inválido o expirado (código 190). Actualiza WHATSAPP_ACCESS_TOKEN.');
+                }
+
+                if ($metaCode === 132001) {
+                    return back()->with('error', 'No se pudo enviar WhatsApp: la plantilla no existe o no está aprobada en ese idioma (código 132001). Revisa nombre/idioma en Meta.');
                 }
 
                 if ($metaCode === 132000) {
