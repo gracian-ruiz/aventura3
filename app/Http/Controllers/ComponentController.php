@@ -10,14 +10,18 @@ class ComponentController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->input('search'); // Obtiene el valor del buscador
-    
-        // Filtra por nombre si se ingresó un término de búsqueda
+        $search = $request->input('search');
+        $perPage = $request->input('per_page', 10);
+
+        if (!in_array((int) $perPage, [10, 50, 100, 200], true)) {
+            $perPage = 10;
+        }
+
         $components = Component::when($search, function ($query) use ($search) {
             return $query->where('nombre', 'LIKE', "%{$search}%");
-        })->paginate(10); // Puedes cambiar el número de registros por página
+        })->paginate((int) $perPage)->appends(['search' => $search, 'per_page' => $perPage]);
 
-        return view('components.index', compact('components', 'search'));
+        return view('components.index', compact('components', 'search', 'perPage'));
     }
 
     public function create()
@@ -35,7 +39,10 @@ class ComponentController extends Controller
             'hora_taller' => 'required|integer|min:0', // Asegurar que se recibe
             'precio' => 'required|numeric|min:0', // Asegurar que se recibe y es un número válido
             'orden' => 'nullable|integer|min:0', // Validar el campo 'orden' (puede ser nulo)
+            'enviar_mensaje' => 'nullable|boolean',
         ]);
+
+        $validated['enviar_mensaje'] = $request->boolean('enviar_mensaje');
     
         try {
             Component::create($validated);
@@ -62,7 +69,10 @@ class ComponentController extends Controller
             'hora_taller' => 'required|integer|min:0', // Asegurar que se recibe
             'precio' => 'required|numeric|min:0', // Asegurar que se recibe
             'orden' => 'nullable|integer|min:0', // Validar el campo 'orden' (puede ser nulo)
+            'enviar_mensaje' => 'nullable|boolean',
         ]);
+
+        $validated['enviar_mensaje'] = $request->boolean('enviar_mensaje');
     
         try {
             $component->update($validated);

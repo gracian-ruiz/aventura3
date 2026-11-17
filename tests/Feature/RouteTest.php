@@ -134,4 +134,17 @@ public function un_usuario_puede_crear_un_componente_nuevo()
     $response->assertSee('Horquilla');
 }
 
+    /** @test */
+    public function la_lista_de_componentes_puede_paginase_por_50(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+        Component::factory()->count(60)->create();
+
+        $response = $this->actingAs($user)->get('/components?per_page=50');
+
+        $response->assertStatus(200);
+        $this->assertSame(50, $response->viewData('components')->perPage());
+        $this->assertCount(50, $response->viewData('components')->items());
+    }
+
 }

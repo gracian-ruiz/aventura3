@@ -9,8 +9,12 @@ class Component extends Model // <-- Aquí debe ser el nombre correcto
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'fecha_preaviso', 'fecha_revision', 'hora_taller', 'precio','orden','descripcion'];
+    protected $fillable = ['nombre', 'fecha_preaviso', 'fecha_revision', 'hora_taller', 'precio','orden','descripcion', 'enviar_mensaje'];
     protected $table = 'components';
+
+    protected $casts = [
+        'enviar_mensaje' => 'boolean',
+    ];
 
     public function revisiones()
     {
