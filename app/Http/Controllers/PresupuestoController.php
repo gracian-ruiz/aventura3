@@ -441,7 +441,9 @@ public function index(Request $request)
             return response($pdf->output(), 200, [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . $nombreArchivo . '"',
-                'Cache-Control' => 'private, max-age=300',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
             ]);
         } catch (\Exception $e) {
             Log::error('[PresupuestoController] Error en descargarPDFPublico', [

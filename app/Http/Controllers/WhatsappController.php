@@ -100,6 +100,9 @@ class WhatsAppController extends Controller
         $presupuestoPdfPublicoUrl = route('presupuestos.pdf.publico', [
             'presupuestoId' => $presupuestoId,
             'token' => $presupuestoToken,
+            // Meta cachea los documentos enviados por URL: forzamos una URL única
+            // en cada envío para que siempre descargue el PDF actualizado.
+            'v' => now()->format('YmdHisv'),
         ]);
 
         Log::info('WhatsApp presupuesto: datos cargados', [
