@@ -524,13 +524,19 @@ class WhatsAppInboxController extends Controller
 
     public function media(WhatsAppMessage $message)
     {
-        if (!in_array($message->message_type, ['image', 'document'], true)) {
+        if (!in_array($message->message_type, ['image', 'document', 'audio', 'voice'], true)) {
             abort(404);
         }
 
         $payload = is_array($message->payload) ? $message->payload : [];
-        $mediaId = (string) data_get($payload, 'image.id') ?: (string) data_get($payload, 'document.id');
-        $mimeTypeFromPayload = (string) data_get($payload, 'image.mime_type', '') ?: (string) data_get($payload, 'document.mime_type', '');
+        $mediaId = (string) data_get($payload, 'image.id')
+            ?: (string) data_get($payload, 'document.id')
+            ?: (string) data_get($payload, 'audio.id')
+            ?: (string) data_get($payload, 'voice.id');
+        $mimeTypeFromPayload = (string) data_get($payload, 'image.mime_type', '')
+            ?: (string) data_get($payload, 'document.mime_type', '')
+            ?: (string) data_get($payload, 'audio.mime_type', '')
+            ?: (string) data_get($payload, 'voice.mime_type', '');
 
         // Para archivos enviados desde el panel servimos el archivo local directamente.
         $localPath = (string) data_get($payload, 'local_image_path', '');

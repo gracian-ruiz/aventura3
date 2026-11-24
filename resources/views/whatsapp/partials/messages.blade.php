@@ -40,6 +40,11 @@
             $hasImageMedia = (bool) data_get($message->payload, 'image.id') || (bool) data_get($message->payload, 'local_image_path');
             $imageUrl = ($isImage && $hasImageMedia) ? route('whatsapp.media', ['message' => $message->id]) : null;
             $caption = $isImage ? preg_replace('/^\[imagen\]\s*/i', '', (string) ($message->body ?? '')) : null;
+            $isAudio = in_array($message->message_type, ['audio', 'voice'], true);
+            $hasAudioMedia = (bool) data_get($message->payload, 'audio.id') || (bool) data_get($message->payload, 'voice.id');
+            $audioUrl = ($isAudio && $hasAudioMedia) ? route('whatsapp.media', ['message' => $message->id]) : null;
+            $audioMime = $isAudio ? (string) (data_get($message->payload, 'audio.mime_type') ?: data_get($message->payload, 'voice.mime_type') ?: 'audio/ogg') : null;
+            $isVoiceNote = $isAudio && ($message->message_type === 'voice' || (bool) data_get($message->payload, 'audio.voice'));
         @endphp
 
         @if(!$isStatus)
@@ -66,17 +71,24 @@
                         </div>
                     @endif
 
-                    @if($isImage && $imageUrl)
-                        <a href="{{ $imageUrl }}" target="_blank" rel="noopener noreferrer" class="block mb-2">
-                            <img src="{{ $imageUrl }}" alt="Imagen de WhatsApp" class="rounded-xl max-h-72 w-auto border border-black/10 object-contain bg-white">
-                        </a>
-                    @elseif($isImage)
+@if($isAudio && $audioUrl)
+                        <div class="mb-1">
+                            <div class="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                                {{ $isVoiceNote ? 'Nota de voz' : 'Audio' }}
+                            </div>
+                            <audio controls preload="none" class="w-64 max-w-full">
+                                <source src="{{ $audioUrl }}" type="{{ $audioMime }}">
+                                Tu navegador no puede reproducir este audio.
+                                <a href="{{ $audioUrl }}" target="_blank" rel="noopener noreferrer" class="underline">Descargar</a>
+                            </audio>
+                        </div>
+                    @elseif($isAudio)
                         <div class="mb-2 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
-                            Imagen no disponible
+                            Audio no disponible
                         </div>
                     @endif
 
-                    @if(!$isImage || ($caption !== null && trim($caption) !== ''))
+                    @if(!$isAudio && (!$isImage || ($caption !== null && trim($caption) !== '')))
                         <div class="text-sm leading-6 whitespace-pre-line">{{ $isImage ? $caption : ($message->body ?? 'Sin contenido') }}</div>
                     @endif
                 </div>

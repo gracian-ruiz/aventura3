@@ -23,7 +23,7 @@ class WhatsAppWebhookController extends Controller
             'image' => '[imagen] ' . (string) (data_get($message, 'image.caption') ?? ''),
             'video' => '[video] ' . (string) (data_get($message, 'video.caption') ?? ''),
             'document' => '[documento] ' . (string) (data_get($message, 'document.filename') ?? ''),
-            'audio' => '[audio]',
+            'audio' => data_get($message, 'audio.voice') ? '[nota de voz]' : '[audio]',
             'voice' => '[nota de voz]',
             'sticker' => '[sticker]',
             'location' => '[ubicacion]',
