@@ -145,7 +145,7 @@
                     <td style="text-align: right;">{{ number_format($material, 2, ',', '.') }}€</td>
                     <td style="text-align: right;">{{ number_format($descuentoPct, 2, ',', '.') }}% (-{{ number_format($descuentoImporte, 2, ',', '.') }}€)</td>
                     <td style="text-align: right; font-weight: bold;">{{ number_format($precioFinal, 2, ',', '.') }}€</td>
-                    <td style="font-size: 8px;">{{ $item->texto }}</td>
+                    <td style="font-size: 8px;">{!! nl2br(e($item->texto)) !!}</td>
                 </tr>
             @endforeach
         </tbody>

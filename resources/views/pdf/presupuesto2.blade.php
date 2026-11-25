@@ -97,7 +97,7 @@
                     <td class="text-success fw-bold">
                         {{ number_format($precioproducto, 2) }}€
                     </td>
-                    <td>{{ $item->texto }}</td>
+                    <td>{!! nl2br(e($item->texto)) !!}</td>
                 </tr>
             @endforeach
         </tbody>
